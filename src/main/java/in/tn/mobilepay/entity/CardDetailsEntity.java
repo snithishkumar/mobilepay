@@ -1,15 +1,52 @@
 package in.tn.mobilepay.entity;
 
-import in.tn.mobilepay.enumeration.CardType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "TermsConditions")
 public class CardDetailsEntity {
+	
+	public static final String CARD_DETAILS_ID = "cardDetailsId";
+	public static final String CARD_DATA = "cardData";
+	public static final String BANK_ID = "bankDetailsEntity";
+	public static final String CARD_TYPE = "cardType";
+	public static final String USER_ID = "userEntity";
+	public static final String IS_ACTIVE = "isActive";
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "Discount")
 	private int cardDetailsId;
-	private long cardNumber;
-	private int cvv;
-	private long expiryDate;
+
+	@Column(name = "CardData")
+	private String cardData;
+
+	@Column(name = "Id")
 	private BankDetailsEntity bankDetailsEntity;
-	private CardType cardType;
+	
+	@Column(name = "Outlet")
+	private String cardType;
+	
+	@Column(name="UserId")
+	@ManyToOne
+	@JoinColumn(name="UserId",referencedColumnName="UserId")
+	private UserEntity userEntity;
+	
+	@Column(name="IsActive")
+	private boolean isActive;
+	
+	@Column(name="CreatedDateTime")
+	private long createdDateTime;
+	
+	@Column(name="ModifiedDateTime")
+	private long modifiedDateTime;
 
 	public int getCardDetailsId() {
 		return cardDetailsId;
@@ -17,30 +54,6 @@ public class CardDetailsEntity {
 
 	public void setCardDetailsId(int cardDetailsId) {
 		this.cardDetailsId = cardDetailsId;
-	}
-
-	public long getCardNumber() {
-		return cardNumber;
-	}
-
-	public void setCardNumber(long cardNumber) {
-		this.cardNumber = cardNumber;
-	}
-
-	public int getCvv() {
-		return cvv;
-	}
-
-	public void setCvv(int cvv) {
-		this.cvv = cvv;
-	}
-
-	public long getExpiryDate() {
-		return expiryDate;
-	}
-
-	public void setExpiryDate(long expiryDate) {
-		this.expiryDate = expiryDate;
 	}
 
 	public BankDetailsEntity getBankDetailsEntity() {
@@ -51,20 +64,65 @@ public class CardDetailsEntity {
 		this.bankDetailsEntity = bankDetailsEntity;
 	}
 
-	public CardType getCardType() {
+	public String getCardType() {
 		return cardType;
 	}
 
-	public void setCardType(CardType cardType) {
+	public void setCardType(String cardType) {
 		this.cardType = cardType;
+	}
+
+	public String getCardData() {
+		return cardData;
+	}
+
+	public void setCardData(String cardData) {
+		this.cardData = cardData;
+	}
+	
+	
+
+	public UserEntity getUserEntity() {
+		return userEntity;
+	}
+
+	public void setUserEntity(UserEntity userEntity) {
+		this.userEntity = userEntity;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+	
+	
+	
+
+	public long getCreatedDateTime() {
+		return createdDateTime;
+	}
+
+	public void setCreatedDateTime(long createdDateTime) {
+		this.createdDateTime = createdDateTime;
+	}
+
+	public long getModifiedDateTime() {
+		return modifiedDateTime;
+	}
+
+	public void setModifiedDateTime(long modifiedDateTime) {
+		this.modifiedDateTime = modifiedDateTime;
 	}
 
 	@Override
 	public String toString() {
 		return "CardDetailsEntity [cardDetailsId=" + cardDetailsId
-				+ ", cardNumber=" + cardNumber + ", cvv=" + cvv
-				+ ", expiryDate=" + expiryDate + ", bankDetailsEntity="
-				+ bankDetailsEntity + ", cardType=" + cardType + "]";
+				+ ", cardData=" + cardData + ", bankDetailsEntity="
+				+ bankDetailsEntity + ", cardType=" + cardType
+				+ ", userEntity=" + userEntity + ", isActive=" + isActive + "]";
 	}
 
 }
