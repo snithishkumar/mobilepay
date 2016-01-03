@@ -1,0 +1,28 @@
+package in.tn.mobilepay.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import in.tn.mobilepay.services.PurchaseServices;
+
+@RestController
+public class PurchaseCntrl {
+	
+	@Autowired
+	private PurchaseServices purchaseServices;
+	
+	@RequestMapping(value="/mobile/getPurchaseDetails")
+	public ResponseEntity<String> getPurchaseDetails(@RequestParam int purchaseId){
+		return purchaseServices.getPurchaseDetails(purchaseId);
+	}
+	
+	@RequestMapping(value="/mobile/updatePurchaseDetails")
+	public ResponseEntity<String> updatePurchaseDetails(@RequestBody String requestData){
+		return purchaseServices.updatePurchaseDetails(requestData);
+	}
+
+}

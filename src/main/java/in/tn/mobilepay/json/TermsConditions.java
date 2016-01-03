@@ -1,5 +1,9 @@
 package in.tn.mobilepay.json;
-
+/**
+ * For Security reason card names are renamed.
+ * @author Nithish
+ *
+ */
 public class TermsConditions {
 
 	private String discount;

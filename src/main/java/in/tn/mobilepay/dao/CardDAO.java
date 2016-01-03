@@ -24,6 +24,10 @@ public class CardDAO extends BaseDAO {
 		criteria.add(Restrictions.eq(CardDetailsEntity.IS_ACTIVE, true));
 		return criteria.list();
 	}
+	
+	public void removeCardDetails(String cardGuid){
+		// --TODO
+	}
 
 	public boolean isCardPresent(UserEntity userEntity,
 			BankDetailsEntity bankDetailsEntity) {

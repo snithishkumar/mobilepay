@@ -7,6 +7,7 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,17 @@ import com.google.gson.Gson;
 @Service
 public class ServiceUtil {
 
+	@Autowired
 	private Gson gson;
 	
+	
+	public <T> T fromJson(String data,Class<T> className){
+		return gson.fromJson(data, className);
+	}
+	
+	public <T> String toJson(T object){
+		return gson.toJson(object);
+	}
 	
 	public ResponseEntity<String> getSuccessResponse(HttpStatus code,Object object){
 		ResponseEntity<String> responseEntity = new ResponseEntity<String>(gson.toJson(object), code);

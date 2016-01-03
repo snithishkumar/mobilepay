@@ -14,7 +14,8 @@ public class UserEntity {
 	public static final String USER_ID = "userId";
 	public static final String NAME = "name";
 	public static final String MOBILE_NUMBER = "mobileNumber";
-	private static final String LOGIN_ID = "loginId";
+	public static final String LOGIN_ID = "loginId";
+	public static final String IMEI_NUMBER = "imeiNumber";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,6 +27,8 @@ public class UserEntity {
 	private String mobileNumber;
 	@Column(name = "LoginId")
 	private int loginId;
+	@Column(name = "ImeiNumber")
+	private String imeiNumber;
 
 	public int getUserId() {
 		return userId;
@@ -59,11 +62,18 @@ public class UserEntity {
 		this.loginId = loginId;
 	}
 
+	public String getImeiNumber() {
+		return imeiNumber;
+	}
+
+	public void setImeiNumber(String imeiNumber) {
+		this.imeiNumber = imeiNumber;
+	}
+
 	@Override
 	public String toString() {
-		return "UserEntity [userId=" + userId + ", name=" + name
-				+ ", mobileNumber=" + mobileNumber + ", loginId=" + loginId
-				+ "]";
+		return "UserEntity [userId=" + userId + ", name=" + name + ", mobileNumber=" + mobileNumber + ", loginId="
+				+ loginId + ", imeiNumber=" + imeiNumber + "]";
 	}
 
 }

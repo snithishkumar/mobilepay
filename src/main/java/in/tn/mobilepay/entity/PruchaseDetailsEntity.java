@@ -1,4 +1,4 @@
-package in.tn.mobilepay.entity;
+/*package in.tn.mobilepay.entity;
 
 public class PruchaseDetailsEntity {
 
@@ -38,3 +38,4 @@ public class PruchaseDetailsEntity {
 	}
 
 }
+*/

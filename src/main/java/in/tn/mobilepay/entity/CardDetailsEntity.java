@@ -9,6 +9,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import in.tn.mobilepay.enumeration.CardType;
+
+/**
+ * For Security reason names are renamed.
+ * @author Nithish
+ *
+ */
 @Entity
 @Table(name = "TermsConditions")
 public class CardDetailsEntity {
@@ -19,11 +26,15 @@ public class CardDetailsEntity {
 	public static final String CARD_TYPE = "cardType";
 	public static final String USER_ID = "userEntity";
 	public static final String IS_ACTIVE = "isActive";
+	public static final String CARD_GUID = "cardGuid";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "Discount")
 	private int cardDetailsId;
+	
+	@Column(name="CardGuid")
+	private String cardGuid;
 
 	@Column(name = "CardData")
 	private String cardData;
