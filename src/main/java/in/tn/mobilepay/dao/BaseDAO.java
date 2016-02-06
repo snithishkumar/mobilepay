@@ -29,4 +29,12 @@ public abstract class BaseDAO {
 	protected Criteria createCriteria(Class className) {
 		return sessionFactory.getCurrentSession().createCriteria(className);
 	}
+	
+	protected String appendAlias(String name1,String name2){
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(name1);
+		stringBuilder.append(".");
+		stringBuilder.append(name2);
+		return stringBuilder.toString();
+	}
 }

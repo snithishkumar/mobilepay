@@ -11,6 +11,8 @@ public class PurchaseJson {
 	private UserJson users;
 	private String productDetails;
 	private String amountDetails;
+	private boolean isEditable;
+	private boolean isDelivered;
 	
 	public PurchaseJson(){
 		
@@ -22,6 +24,27 @@ public class PurchaseJson {
 		this.billNumber = purchaseEntity.getBillNumber();
 		this.productDetails = purchaseEntity.getPurchaseData();
 		this.amountDetails = purchaseEntity.getAmountDetails();
+		this.isEditable = purchaseEntity.isEditable();
+		this.isDelivered = purchaseEntity.isDeliverable();
+		 
+	}
+	
+	
+
+	public boolean isEditable() {
+		return isEditable;
+	}
+
+	public void setEditable(boolean isEditable) {
+		this.isEditable = isEditable;
+	}
+
+	public boolean isDelivered() {
+		return isDelivered;
+	}
+
+	public void setDelivered(boolean isDelivered) {
+		this.isDelivered = isDelivered;
 	}
 
 	public int getPurchaseId() {

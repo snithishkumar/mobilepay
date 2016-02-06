@@ -4,6 +4,7 @@ public class MerchantEntity {
 
 	private int merchantId;
 	private String merchantName;
+	private String merchantGuid;
 	private String merchantAddress;
 	private String area;
 	private long mobileNumber;

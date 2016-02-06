@@ -13,6 +13,7 @@ import javax.persistence.Table;
 public class PurchaseEntity {
 
 	public static final String PURCHASE_ID = "purchaseId";
+	public static final String PURCHASE_GUID = "purchaseGuid";
 	public static final String PURCHASE_DATE_TIME = "purchaseDateTime";
 	public static final String USER_ID = "userEntity";
 	public static final String MERCHANT_ID = "merchantEntity";
@@ -25,6 +26,8 @@ public class PurchaseEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "PurchaseId")
 	private int purchaseId;
+	@Column(name="PurchaseGuid")
+	private String purchaseGuid;
 	@Column(name = "PurchaseDateTime")
 	private long purchaseDateTime;
 	@ManyToOne

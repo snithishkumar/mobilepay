@@ -19,6 +19,11 @@ public class AccountCntrl {
 		return userServices.userRegisteration(requestData);
 	}
 	
+	@RequestMapping(value="/mobile/otp/validate")
+	public ResponseEntity<String> otpValidate(@RequestBody String requestData){
+		return userServices.validateOtp(requestData);
+	}
+	
 	@RequestMapping(value="/mobile/login")
 	public ResponseEntity<String> loginById(@RequestBody String requestData){
 		return userServices.login(requestData);

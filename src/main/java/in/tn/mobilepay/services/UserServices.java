@@ -8,8 +8,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import in.tn.mobilepay.dao.UserDAO;
+import in.tn.mobilepay.entity.OtpEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.exception.ValidationException;
+import in.tn.mobilepay.request.model.OtpJson;
 import in.tn.mobilepay.request.model.RegisterJson;
 
 @Service
@@ -21,24 +23,52 @@ public class UserServices {
 	@Autowired
 	private ServiceUtil serviceUtil;
 	
-	private void validate(RegisterJson registerJson) throws ValidationException{
+	private UserEntity validate(RegisterJson registerJson) throws ValidationException{
 		UserEntity dbUserEntity =	userDao.getUserEntity(registerJson.getMobileNumber());
-		if(dbUserEntity != null){
+		if(dbUserEntity != null && dbUserEntity.isActive()){
 			throw new ValidationException(HttpStatus.EXPECTATION_FAILED, "Mobile Number Already Registered");
 		}
+		return dbUserEntity;
+	}
+	
+	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
+	public ResponseEntity<String> validateOtp(String optValidationData){
+		try{
+			OtpJson otpJson = serviceUtil.fromJson(optValidationData, OtpJson.class);
+			if(otpJson.getMobileNumber() == null || otpJson.getOtpNumber() == null){
+				return serviceUtil.getErrorResponse(HttpStatus.EXPECTATION_FAILED, "Not Valid Data");
+			}
+			OtpEntity  otpEntity = userDao.getOtpEntity(otpJson.getMobileNumber());
+			if(otpEntity == null || otpEntity.getOptNumber() == Integer.valueOf(otpJson.getOtpNumber())){
+				return serviceUtil.getErrorResponse(HttpStatus.EXPECTATION_FAILED, "Invalid OTP Number");
+			}
+			otpEntity.setValidationTime(serviceUtil.getCurrentGmtTime());
+			userDao.updateOtpEntity(otpEntity);
+			UserEntity userEntity = otpEntity.getUserEntity();
+			userEntity.setActive(true);
+			userDao.updateUser(userEntity);
+			return serviceUtil.getSuccessResponse(HttpStatus.OK, "Success");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
 	}
 
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
 	public ResponseEntity<String> userRegisteration(String registerData){
 		try{
-			RegisterJson registerJson = serviceUtil.fromJson(registerData, RegisterJson.class);
-			validate(registerJson);
-			UserEntity userEntity = new UserEntity();
-			userEntity.setLoginId(Integer.valueOf(registerJson.getPassword()));
-			userEntity.setMobileNumber(registerJson.getMobileNumber());
-			userEntity.setName(registerJson.getName());
-			userEntity.setImeiNumber(registerJson.getImei());
-			userDao.createUser(userEntity);
+			String register = serviceUtil.netDecryption(registerData);
+			RegisterJson registerJson = serviceUtil.fromJson(register, RegisterJson.class);
+			UserEntity dbUserEntity = validate(registerJson);
+			if(dbUserEntity ==  null){
+				dbUserEntity = new UserEntity();
+				dbUserEntity.toUser(registerJson);
+				userDao.createUser(dbUserEntity);
+			}else{
+				dbUserEntity.toUser(registerJson);
+				userDao.updateUser(dbUserEntity);
+			}
+			
 			return serviceUtil.getSuccessResponse(HttpStatus.OK, "Success");
 		}catch(ValidationException e){
 			return serviceUtil.getErrorResponse(e.getCode(), e.getMessage());

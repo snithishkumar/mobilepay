@@ -7,6 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import in.tn.mobilepay.request.model.RegisterJson;
+
 @Entity
 @Table(name = "UserDetails")
 public class UserEntity {
@@ -29,6 +31,16 @@ public class UserEntity {
 	private int loginId;
 	@Column(name = "ImeiNumber")
 	private String imeiNumber;
+	@Column(name = "IsActive")
+	private boolean isActive;
+	
+	public void toUser(RegisterJson registerJson){
+		this.setLoginId(Integer.valueOf(registerJson.getPassword()));
+		this.setMobileNumber(registerJson.getMobileNumber());
+		this.setName(registerJson.getName());
+		this.setImeiNumber(registerJson.getImei());
+		this.setActive(false);
+	}
 
 	public int getUserId() {
 		return userId;
@@ -68,6 +80,16 @@ public class UserEntity {
 
 	public void setImeiNumber(String imeiNumber) {
 		this.imeiNumber = imeiNumber;
+	}
+	
+	
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 
 	@Override
