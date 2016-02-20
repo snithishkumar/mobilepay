@@ -18,7 +18,6 @@ public class OtpEntity {
 	public static final String OTP_NUMBER = "optNumber";
 	public static final String VALIDATION_TIME = "validationTime";
 
-	@Column(name = "UserId")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "UserId", referencedColumnName = "UserId")
 	private UserEntity userEntity;

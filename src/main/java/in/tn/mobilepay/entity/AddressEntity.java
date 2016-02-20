@@ -1,4 +1,4 @@
-package in.tn.mobilepay.entity;
+/*package in.tn.mobilepay.entity;
 
 import javax.persistence.Entity;
 
@@ -40,3 +40,4 @@ public class AddressEntity {
 	}
 
 }
+*/

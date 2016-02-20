@@ -39,13 +39,13 @@ public class CardDetailsEntity {
 	@Column(name = "CardData")
 	private String cardData;
 
-	@Column(name = "Id")
+	@ManyToOne
+	@JoinColumn(name="BankDetailsId",referencedColumnName="BankDetailsId")
 	private BankDetailsEntity bankDetailsEntity;
 	
 	@Column(name = "Outlet")
 	private String cardType;
 	
-	@Column(name="UserId")
 	@ManyToOne
 	@JoinColumn(name="UserId",referencedColumnName="UserId")
 	private UserEntity userEntity;

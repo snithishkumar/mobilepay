@@ -33,6 +33,8 @@ public class UserEntity {
 	private String imeiNumber;
 	@Column(name = "IsActive")
 	private boolean isActive;
+	@Column(name = "Token")
+	private String token;
 	
 	public void toUser(RegisterJson registerJson){
 		this.setLoginId(Integer.valueOf(registerJson.getPassword()));
@@ -90,6 +92,16 @@ public class UserEntity {
 
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
+	}
+	
+	
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 
 	@Override

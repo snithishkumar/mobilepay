@@ -1,13 +1,31 @@
 package in.tn.mobilepay.entity;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="Merchant")
 public class MerchantEntity {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "MerchantId")
 	private int merchantId;
+	@Column(name = "MerchantName")
 	private String merchantName;
+	@Column(name = "MerchantGuid")
 	private String merchantGuid;
+	@Column(name = "MerchantAddress")
 	private String merchantAddress;
+	@Column(name = "Area")
 	private String area;
+	@Column(name = "MobileNumber")
 	private long mobileNumber;
+	@Column(name = "LandLineNumber")
 	private long landLineNumber;
 
 	public int getMerchantId() {

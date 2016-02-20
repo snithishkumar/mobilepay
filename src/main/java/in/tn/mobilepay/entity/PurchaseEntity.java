@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -31,10 +32,10 @@ public class PurchaseEntity {
 	@Column(name = "PurchaseDateTime")
 	private long purchaseDateTime;
 	@ManyToOne
-	@Column(name = "UserId")
+	@JoinColumn(name = "UserId", referencedColumnName = "UserId")
 	private UserEntity userEntity;
 	@ManyToOne
-	@Column(name = "MerchantId")
+	@JoinColumn(name = "MerchantId", referencedColumnName = "MerchantId")
 	private MerchantEntity merchantEntity;
 	@Column(name = "IsPayed")
 	private boolean isPayed;

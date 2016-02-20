@@ -99,10 +99,16 @@ public class UserServices {
 			RegisterJson registerJson = serviceUtil.fromJson(loginData, RegisterJson.class);
 			UserEntity dbUserEntity =	userDao.getUserEntity(registerJson.getMobileNumber());
 			if(dbUserEntity == null){
-				return serviceUtil.getErrorResponse(HttpStatus.UNAUTHORIZED, "Invalid LoginId");
+				return serviceUtil.getErrorResponse(HttpStatus.PRECONDITION_FAILED, "You are not yet register. Please register");
+			}
+			if(!dbUserEntity.isActive()){
+				return serviceUtil.getErrorResponse(HttpStatus.PRECONDITION_FAILED, "Your Account is not yet activate");
 			}
 			if(dbUserEntity.getLoginId() == Integer.valueOf(registerJson.getPassword())){
-				return serviceUtil.getErrorResponse(HttpStatus.OK, "Success");
+				String token = serviceUtil.generateLoginToken();
+				dbUserEntity.setToken(token);
+				userDao.updateUser(dbUserEntity);
+				return serviceUtil.getErrorResponse(HttpStatus.OK,token);
 			}
 			return serviceUtil.getErrorResponse(HttpStatus.UNAUTHORIZED, "Invalid LoginId");
 		}catch(Exception e){

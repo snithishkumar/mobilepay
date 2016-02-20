@@ -3,10 +3,13 @@ package in.tn.mobilepay.services;
 import java.security.Key;
 import java.time.Clock;
 import java.util.Base64;
+import java.util.Random;
+import java.util.UUID;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.hibernate.id.UUIDGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,8 @@ public class ServiceUtil {
 
 	@Autowired
 	private Gson gson;
+	
+	private Random random = new Random();
 	
 	
 	public <T> T fromJson(String data,Class<T> className){
@@ -93,5 +98,9 @@ public class ServiceUtil {
 	
 	public long getCurrentGmtTime(){
 		return Clock.systemUTC().millis();
+	}
+	
+	public String generateLoginToken(){
+		return UUID.randomUUID().toString()+"-"+(10+random.nextInt(Integer.MAX_VALUE))+"-"+UUID.randomUUID().toString();
 	}
 }
