@@ -14,13 +14,11 @@ import javax.persistence.Table;
 @Table(name = "OtpDetails")
 public class OtpEntity {
 
-	public static final String USER_ID = "userEntity";
+	public static final String MOBILE_NUMBER = "mobileNumber";
 	public static final String OTP_NUMBER = "optNumber";
 	public static final String VALIDATION_TIME = "validationTime";
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "UserId", referencedColumnName = "UserId")
-	private UserEntity userEntity;
+	@Column(name = "MobileNumber")
+	private String mobileNumber;
 	@Column(name = OTP_NUMBER)
 	private int optNumber;
 	@Id
@@ -31,12 +29,14 @@ public class OtpEntity {
 	@Column(name = "ValidationTime")
 	private long validationTime;
 
-	public UserEntity getUserEntity() {
-		return userEntity;
+	
+
+	public String getMobileNumber() {
+		return mobileNumber;
 	}
 
-	public void setUserEntity(UserEntity userEntity) {
-		this.userEntity = userEntity;
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
 	}
 
 	public int getOptNumber() {
@@ -67,7 +67,8 @@ public class OtpEntity {
 
 	@Override
 	public String toString() {
-		return "OtpEntity [userEntity=" + userEntity + ", optNumber=" + optNumber + ", optId=" + optId + "]";
+		return "OtpEntity [mobileNumber=" + mobileNumber + ", optNumber=" + optNumber + ", optId=" + optId
+				+ ", validationTime=" + validationTime + "]";
 	}
 
 }

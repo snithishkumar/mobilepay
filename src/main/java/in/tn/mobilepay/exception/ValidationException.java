@@ -1,30 +1,28 @@
 package in.tn.mobilepay.exception;
 
-import org.springframework.http.HttpStatus;
-
 public class ValidationException extends Exception {
 
-	private HttpStatus code;
+	private int code;
 
 	private String message;
 
-	public ValidationException(HttpStatus code, String msg, Throwable cause) {
+	public ValidationException(int code, String msg, Throwable cause) {
 		super(msg, cause);
 		this.code = code;
 		this.message = msg;
 	}
 
-	public ValidationException(HttpStatus code, String msg) {
+	public ValidationException(int code, String msg) {
 		super(msg);
 		this.code = code;
 		this.message = msg;
 	}
 
-	public HttpStatus getCode() {
+	public int getCode() {
 		return code;
 	}
 
-	public void setCode(HttpStatus code) {
+	public void setCode(int code) {
 		this.code = code;
 	}
 

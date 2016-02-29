@@ -15,6 +15,10 @@ public class UserDAO extends BaseDAO{
 		saveObject(userEntity);
 	}
 	
+	public void createOtp(OtpEntity otpEntity){
+		saveObject(otpEntity);
+	}
+	
 	public void updateUser(UserEntity userEntity){
 		updateObject(userEntity);
 	}
@@ -36,8 +40,7 @@ public class UserDAO extends BaseDAO{
 	
 	public OtpEntity getOtpEntity(String mobileNumber){
 		Criteria criteria = createCriteria(OtpEntity.class);
-		criteria.createAlias(OtpEntity.USER_ID, OtpEntity.USER_ID);
-		criteria.add(Restrictions.eq(appendAlias(OtpEntity.USER_ID, UserEntity.MOBILE_NUMBER), mobileNumber));
+		criteria.add(Restrictions.eq(OtpEntity.MOBILE_NUMBER, mobileNumber));
 		return (OtpEntity)criteria.uniqueResult();
 	}
 	

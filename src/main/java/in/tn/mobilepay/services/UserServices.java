@@ -1,7 +1,6 @@
 package in.tn.mobilepay.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -13,6 +12,7 @@ import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.OtpJson;
 import in.tn.mobilepay.request.model.RegisterJson;
+import in.tn.mobilepay.util.StatusCode;
 
 @Service
 public class UserServices {
@@ -26,32 +26,56 @@ public class UserServices {
 	private UserEntity validate(RegisterJson registerJson) throws ValidationException{
 		UserEntity dbUserEntity =	userDao.getUserEntity(registerJson.getMobileNumber());
 		if(dbUserEntity != null && dbUserEntity.isActive()){
-			throw new ValidationException(HttpStatus.EXPECTATION_FAILED, "Mobile Number Already Registered");
+			throw new ValidationException(StatusCode.INVALID_MOBILE, "Mobile Number Already Registered");
 		}
 		return dbUserEntity;
+	}
+	
+	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
+	public ResponseEntity<String> sendOtp(String requestData){
+		try{
+			OtpJson otpJson = serviceUtil.fromJson(requestData, OtpJson.class);
+			if(otpJson.getMobileNumber() == null || otpJson.getOtpNumber() == null){
+				return serviceUtil.getResponse(StatusCode.MOB_VAL_INVALID, "Not Valid Data");
+			}
+			OtpEntity  otpEntity = userDao.getOtpEntity(otpJson.getMobileNumber());
+			if(otpEntity != null){
+				
+			}else{
+				otpEntity = new OtpEntity();
+				otpEntity.setMobileNumber(otpJson.getMobileNumber());
+				userDao.createOtp(otpEntity);
+			}
+			return serviceUtil.getResponse(StatusCode.MOB_VAL_OK, "Success");
+		}catch(Exception e){
+			
+		}
+		return serviceUtil.getResponse(StatusCode.MOB_VAL_INTERNAL_ERROR, "Failure");
 	}
 	
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
 	public ResponseEntity<String> validateOtp(String optValidationData){
 		try{
 			OtpJson otpJson = serviceUtil.fromJson(optValidationData, OtpJson.class);
+			/*OtpJson otpJson = serviceUtil.fromJson(optValidationData, OtpJson.class);
 			if(otpJson.getMobileNumber() == null || otpJson.getOtpNumber() == null){
-				return serviceUtil.getErrorResponse(HttpStatus.EXPECTATION_FAILED, "Not Valid Data");
+				return serviceUtil.getResponse(StatusCode.INVALID_OTP, "Not Valid Data");
 			}
 			OtpEntity  otpEntity = userDao.getOtpEntity(otpJson.getMobileNumber());
 			if(otpEntity == null || otpEntity.getOptNumber() == Integer.valueOf(otpJson.getOtpNumber())){
-				return serviceUtil.getErrorResponse(HttpStatus.EXPECTATION_FAILED, "Invalid OTP Number");
+				return serviceUtil.getResponse(StatusCode.INVALID_OTP, "Invalid OTP Number");
 			}
 			otpEntity.setValidationTime(serviceUtil.getCurrentGmtTime());
-			userDao.updateOtpEntity(otpEntity);
-			UserEntity userEntity = otpEntity.getUserEntity();
+			userDao.updateOtpEntity(otpEntity);*/
+			UserEntity userEntity = userDao.getUserEntity(otpJson.getMobileNumber());
+			//UserEntity userEntity = otpEntity.getUserEntity();
 			userEntity.setActive(true);
 			userDao.updateUser(userEntity);
-			return serviceUtil.getSuccessResponse(HttpStatus.OK, "Success");
+			return serviceUtil.getResponse(StatusCode.OTP_OK, "Success");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+		return serviceUtil.getResponse(StatusCode.OTP_INTERNAL_ERROR, "Failure");
 	}
 
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
@@ -69,13 +93,13 @@ public class UserServices {
 				userDao.updateUser(dbUserEntity);
 			}
 			
-			return serviceUtil.getSuccessResponse(HttpStatus.OK, "Success");
+			return serviceUtil.getResponse(StatusCode.REG_OK, "Success");
 		}catch(ValidationException e){
-			return serviceUtil.getErrorResponse(e.getCode(), e.getMessage());
+			return serviceUtil.getResponse(e.getCode(), e.getMessage());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+		return serviceUtil.getResponse(StatusCode.INTERNAL_ERROR, "Failure");
 	}
 	
 	@Transactional(readOnly = true,propagation=Propagation.REQUIRED)
@@ -84,13 +108,13 @@ public class UserServices {
 			RegisterJson registerJson = serviceUtil.fromJson(loginData, RegisterJson.class);
 			UserEntity dbUserEntity =	userDao.getUserEnity(registerJson.getImei(),registerJson.getPassword());
 			if(dbUserEntity == null){
-				return serviceUtil.getErrorResponse(HttpStatus.UNAUTHORIZED, "Invalid LoginId");
+				return serviceUtil.getResponse(StatusCode.LOGIN_INVALID_PIN, "Invalid LoginId");
 			}
-			return serviceUtil.getSuccessResponse(HttpStatus.OK, "Success");
+			return serviceUtil.getResponse(StatusCode.LOGIN_OK, "Success");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+		return serviceUtil.getResponse(StatusCode.LOGIN_INTERNAL_ERROR, "Internal Error");
 	}
 	
 	@Transactional(readOnly = true,propagation=Propagation.REQUIRED)
@@ -99,21 +123,21 @@ public class UserServices {
 			RegisterJson registerJson = serviceUtil.fromJson(loginData, RegisterJson.class);
 			UserEntity dbUserEntity =	userDao.getUserEntity(registerJson.getMobileNumber());
 			if(dbUserEntity == null){
-				return serviceUtil.getErrorResponse(HttpStatus.PRECONDITION_FAILED, "You are not yet register. Please register");
+				return serviceUtil.getResponse(StatusCode.LOGIN_INVALID_MOBILE, "You are not yet register. Please register");
 			}
-			if(!dbUserEntity.isActive()){
-				return serviceUtil.getErrorResponse(HttpStatus.PRECONDITION_FAILED, "Your Account is not yet activate");
-			}
+			/*if(!dbUserEntity.isActive()){
+				return serviceUtil.getResponse(HttpStatus.PRECONDITION_FAILED, "Your Account is not yet activate");
+			}*/
 			if(dbUserEntity.getLoginId() == Integer.valueOf(registerJson.getPassword())){
 				String token = serviceUtil.generateLoginToken();
 				dbUserEntity.setToken(token);
 				userDao.updateUser(dbUserEntity);
-				return serviceUtil.getErrorResponse(HttpStatus.OK,token);
+				return serviceUtil.getResponse(StatusCode.LOGIN_OK,token);
 			}
-			return serviceUtil.getErrorResponse(HttpStatus.UNAUTHORIZED, "Invalid LoginId");
+			return serviceUtil.getResponse(StatusCode.LOGIN_INVALID_PIN, "Invalid LoginId");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+		return serviceUtil.getResponse(StatusCode.LOGIN_INTERNAL_ERROR, "Failure");
 	}
 }
