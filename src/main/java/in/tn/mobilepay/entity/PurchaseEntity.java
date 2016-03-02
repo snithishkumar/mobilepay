@@ -9,6 +9,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import in.tn.mobilepay.request.model.PurchaseJson;
+import in.tn.mobilepay.services.ServiceUtil;
+
 @Entity
 @Table(name = "Purchase")
 public class PurchaseEntity {
@@ -40,7 +43,7 @@ public class PurchaseEntity {
 	@Column(name = "IsPayed")
 	private boolean isPayed;
 	@Column(name = "BillNumber")
-	private int billNumber;
+	private String billNumber;
 	// Product Number,Product Name,Quantity and Amount as a json array
 	@Column(name = "PurchaseData")
 	private String purchaseData;
@@ -55,14 +58,36 @@ public class PurchaseEntity {
 	// Amount, Tax, Total amount
 	@Column(name = "AmountDetails")
 	private String amountDetails;
+	@Column(name = "TotalAmount")
+	private String totalAmount;
+	@Column(name = "PayableAmount")
+	private String payableAmount;
 	@Column(name = "UnModifiedAmountDetails")
 	private String unModifiedAmountDetails;
+	@Column(name = "IsDiscard")
+	private boolean  isDiscard;
+	
+	public PurchaseEntity(){
+		
+	}
+	
+	
+	
+	public void loadValue(PurchaseJson purchaseJson){
+		this.billNumber = purchaseJson.getBillNumber();
+		this.purchaseGuid = purchaseJson.getPurchaseUuid();
+		this.purchaseDateTime = Long.valueOf(purchaseJson.getDateTime());
+		this.isDeliverable = purchaseJson.getIsHomeDeliver() != null ? purchaseJson.getIsHomeDeliver() : false;
+		this.totalAmount = purchaseJson.getTotalAmount();
+		this.payableAmount = purchaseJson.getPayableAmount();
+		this.updatedDateTime = ServiceUtil.getCurrentGmtTime();
+	}
 
-	public int getBillNumber() {
+	public String getBillNumber() {
 		return billNumber;
 	}
 
-	public void setBillNumber(int billNumber) {
+	public void setBillNumber(String billNumber) {
 		this.billNumber = billNumber;
 	}
 
@@ -161,15 +186,51 @@ public class PurchaseEntity {
 	public void setPayed(boolean isPayed) {
 		this.isPayed = isPayed;
 	}
+	
+	
+
+	public String getPurchaseGuid() {
+		return purchaseGuid;
+	}
+
+	public void setPurchaseGuid(String purchaseGuid) {
+		this.purchaseGuid = purchaseGuid;
+	}
+
+	public String getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(String totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	public String getPayableAmount() {
+		return payableAmount;
+	}
+
+	public void setPayableAmount(String payableAmount) {
+		this.payableAmount = payableAmount;
+	}
+
+	public boolean isDiscard() {
+		return isDiscard;
+	}
+
+	public void setDiscard(boolean isDiscard) {
+		this.isDiscard = isDiscard;
+	}
 
 	@Override
 	public String toString() {
-		return "PurchaseEntity [purchaseId=" + purchaseId + ", purchaseDateTime=" + purchaseDateTime + ", userEntity="
-				+ userEntity + ", merchantEntity=" + merchantEntity + ", isPayed=" + isPayed + ", billNumber="
-				+ billNumber + ", purchaseData=" + purchaseData + ", unModifiedPurchaseData=" + unModifiedPurchaseData
-				+ ", isEditable=" + isEditable + ", updatedDateTime=" + updatedDateTime + ", isDeliverable="
-				+ isDeliverable + ", amountDetails=" + amountDetails + ", unModifiedAmountDetails="
-				+ unModifiedAmountDetails + "]";
+		return "PurchaseEntity [purchaseId=" + purchaseId + ", purchaseGuid=" + purchaseGuid + ", purchaseDateTime="
+				+ purchaseDateTime + ", userEntity=" + userEntity + ", merchantEntity=" + merchantEntity + ", isPayed="
+				+ isPayed + ", billNumber=" + billNumber + ", purchaseData=" + purchaseData
+				+ ", unModifiedPurchaseData=" + unModifiedPurchaseData + ", isEditable=" + isEditable
+				+ ", updatedDateTime=" + updatedDateTime + ", isDeliverable=" + isDeliverable + ", amountDetails="
+				+ amountDetails + ", totalAmount=" + totalAmount + ", payableAmount=" + payableAmount
+				+ ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", isDiscard=" + isDiscard + "]";
 	}
+	
 
 }

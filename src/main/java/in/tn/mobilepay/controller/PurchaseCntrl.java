@@ -24,5 +24,16 @@ public class PurchaseCntrl {
 	public ResponseEntity<String> updatePurchaseDetails(@RequestBody String requestData){
 		return purchaseServices.updatePurchaseDetails(requestData);
 	}
+	
+	
+	@RequestMapping(value="/merchant/createPurchase")
+	public ResponseEntity<String> createPurchase(@RequestBody String requestData){
+		return purchaseServices.createPurchase(requestData);
+	}
+	
+	@RequestMapping(value="/merchant/discardPurchase")
+	public ResponseEntity<String> discardPurchase(@RequestBody String requestData){
+		return purchaseServices.discardPurchase(requestData);
+	}
 
 }

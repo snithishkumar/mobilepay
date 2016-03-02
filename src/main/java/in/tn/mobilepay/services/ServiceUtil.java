@@ -113,7 +113,7 @@ public class ServiceUtil {
 	}
 	
 	
-	public long getCurrentGmtTime(){
+	public static long getCurrentGmtTime(){
 		return Clock.systemUTC().millis();
 	}
 	

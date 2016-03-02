@@ -22,5 +22,13 @@ public class MerchantDAO extends BaseDAO{
 		criteria.add(Restrictions.eq(MerchantEntity.MOBILE_NUMBER, mobileNumber));
 		return (MerchantEntity)criteria.uniqueResult();
 	}
+	
+	
+	public MerchantEntity getMerchant(String merchantToken,String serverToken){
+		Criteria criteria = createCriteria(MerchantEntity.class);
+		criteria.add(Restrictions.eq(MerchantEntity.MERCHANT_TOKEN, merchantToken));
+		criteria.add(Restrictions.eq(MerchantEntity.SERVER_TOKEN, serverToken));
+		return (MerchantEntity)criteria.uniqueResult();
+	}
 
 }
