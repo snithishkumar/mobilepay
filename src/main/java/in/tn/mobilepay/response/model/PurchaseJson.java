@@ -21,7 +21,7 @@ public class PurchaseJson {
 	public PurchaseJson(PurchaseEntity purchaseEntity){
 		this.purchaseId = purchaseEntity.getPurchaseId();
 		this.purchaseDate = purchaseEntity.getPurchaseDateTime();
-		this.billNumber = purchaseEntity.getBillNumber();
+		//this.billNumber = purchaseEntity.getBillNumber();
 		this.productDetails = purchaseEntity.getPurchaseData();
 		this.amountDetails = purchaseEntity.getAmountDetails();
 		this.isEditable = purchaseEntity.isEditable();

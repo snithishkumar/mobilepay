@@ -35,7 +35,7 @@ public class UserServices {
 	public ResponseEntity<String> sendOtp(String requestData){
 		try{
 			OtpJson otpJson = serviceUtil.fromJson(requestData, OtpJson.class);
-			if(otpJson.getMobileNumber() == null || otpJson.getOtpNumber() == null){
+			if(otpJson.getMobileNumber() == null){
 				return serviceUtil.getResponse(StatusCode.MOB_VAL_INVALID, "Not Valid Data");
 			}
 			OtpEntity  otpEntity = userDao.getOtpEntity(otpJson.getMobileNumber());
@@ -67,10 +67,10 @@ public class UserServices {
 			}
 			otpEntity.setValidationTime(serviceUtil.getCurrentGmtTime());
 			userDao.updateOtpEntity(otpEntity);*/
-			UserEntity userEntity = userDao.getUserEntity(otpJson.getMobileNumber());
+		/*	UserEntity userEntity = userDao.getUserEntity(otpJson.getMobileNumber());
 			//UserEntity userEntity = otpEntity.getUserEntity();
 			userEntity.setActive(true);
-			userDao.updateUser(userEntity);
+			userDao.updateUser(userEntity);*/
 			return serviceUtil.getResponse(StatusCode.OTP_OK, "Success");
 		}catch(Exception e){
 			e.printStackTrace();

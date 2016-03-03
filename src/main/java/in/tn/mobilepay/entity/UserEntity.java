@@ -41,7 +41,7 @@ public class UserEntity {
 		this.setMobileNumber(registerJson.getMobileNumber());
 		this.setName(registerJson.getName());
 		this.setImeiNumber(registerJson.getImei());
-		this.setActive(false);
+		this.setActive(true);
 	}
 
 	public int getUserId() {
