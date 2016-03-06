@@ -21,6 +21,16 @@ public class PurchaseDAO extends BaseDAO{
 		return criteria.list();
 	}
 	
+	
+	public List<PurchaseEntity> gePurchaseList(long serverDateTime){
+		Criteria criteria =  createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
+		if(serverDateTime > 0){
+			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverDateTime));
+		}
+		return criteria.list();
+	}
+	
 	public void createDiscard(DiscardEntity discardEntity){
 		saveObject(discardEntity);
 	}

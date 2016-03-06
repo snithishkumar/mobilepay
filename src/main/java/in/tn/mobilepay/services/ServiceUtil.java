@@ -114,7 +114,8 @@ public class ServiceUtil {
 	
 	
 	public static long getCurrentGmtTime(){
-		return Clock.systemUTC().millis();
+		//return Clock.systemUTC().millis(); -- TODO
+		return System.currentTimeMillis();
 	}
 	
 	public String uuid(){

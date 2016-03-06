@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.JsonObject;
+
 import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.entity.OtpEntity;
 import in.tn.mobilepay.entity.UserEntity;
@@ -129,10 +131,15 @@ public class UserServices {
 				return serviceUtil.getResponse(HttpStatus.PRECONDITION_FAILED, "Your Account is not yet activate");
 			}*/
 			if(dbUserEntity.getLoginId() == Integer.valueOf(registerJson.getPassword())){
-				String token = serviceUtil.generateLoginToken();
-				dbUserEntity.setToken(token);
+				String accessToken = serviceUtil.generateLoginToken();
+				dbUserEntity.setAccessToken(accessToken);
+				String serverToken = serviceUtil.generateLoginToken();
+				dbUserEntity.setServerToken(serverToken);
 				userDao.updateUser(dbUserEntity);
-				return serviceUtil.getResponse(StatusCode.LOGIN_OK,token);
+				JsonObject res = new JsonObject();
+				res.addProperty("serverToken", serverToken);
+				res.addProperty("accessToken", accessToken);
+				return serviceUtil.getResponse(StatusCode.LOGIN_OK,res);
 			}
 			return serviceUtil.getResponse(StatusCode.LOGIN_INVALID_PIN, "Invalid LoginId");
 		}catch(Exception e){

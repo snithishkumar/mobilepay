@@ -25,6 +25,7 @@ public class PurchaseEntity {
 	public static final String BILL_NUMBER = "billNumber";
 	public static final String IS_EDITABLE = "isEditable";
 	public static final String UPDATED_DATE_TIME = "updatedDateTime";
+	public static final String SERVER_DATE_TIME = "serverDateTime";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -66,6 +67,8 @@ public class PurchaseEntity {
 	private String unModifiedAmountDetails;
 	@Column(name = "IsDiscard")
 	private boolean  isDiscard;
+	@Column(name = "ServerDateTime")
+	private long serverDateTime;
 	
 	public PurchaseEntity(){
 		
@@ -81,6 +84,7 @@ public class PurchaseEntity {
 		this.totalAmount = purchaseJson.getTotalAmount();
 		this.payableAmount = purchaseJson.getPayableAmount();
 		this.updatedDateTime = ServiceUtil.getCurrentGmtTime();
+		this.serverDateTime = updatedDateTime;
 	}
 
 	public String getBillNumber() {
@@ -220,6 +224,20 @@ public class PurchaseEntity {
 	public void setDiscard(boolean isDiscard) {
 		this.isDiscard = isDiscard;
 	}
+	
+	
+
+	public long getServerDateTime() {
+		return serverDateTime;
+	}
+
+
+
+	public void setServerDateTime(long serverDateTime) {
+		this.serverDateTime = serverDateTime;
+	}
+
+
 
 	@Override
 	public String toString() {
@@ -229,8 +247,13 @@ public class PurchaseEntity {
 				+ ", unModifiedPurchaseData=" + unModifiedPurchaseData + ", isEditable=" + isEditable
 				+ ", updatedDateTime=" + updatedDateTime + ", isDeliverable=" + isDeliverable + ", amountDetails="
 				+ amountDetails + ", totalAmount=" + totalAmount + ", payableAmount=" + payableAmount
-				+ ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", isDiscard=" + isDiscard + "]";
+				+ ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", isDiscard=" + isDiscard
+				+ ", serverDateTime=" + serverDateTime + "]";
 	}
+
+
+
+	
 	
 
 }

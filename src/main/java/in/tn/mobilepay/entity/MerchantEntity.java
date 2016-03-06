@@ -1,11 +1,15 @@
 package in.tn.mobilepay.entity;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.google.gson.Gson;
 
 @Entity
 @Table(name = "Merchant")
@@ -57,6 +61,22 @@ public class MerchantEntity {
 	private String merchantToken;
 	@Column(name = "ServerToken")
 	private String serverToken;
+	
+	public static void main(String[] args) {
+		MerchantEntity merchantEntity = new MerchantEntity();
+		merchantEntity.setArea("Adyar");
+		merchantEntity.setCategory("Shopping");
+		merchantEntity.setLandLineNumber(044234206);
+		merchantEntity.setMerchantAddress("15/B,2nd Cross Street");
+		merchantEntity.setMerchantGuid(UUID.randomUUID().toString());
+		merchantEntity.setMerchantName("Nithish");
+		merchantEntity.setMobileNumber(99423);
+		merchantEntity.setPassword("123456");
+		merchantEntity.setPinCode("600117");
+		Gson gson = new Gson();
+		String ddd = gson.toJson(merchantEntity);
+		System.out.println(ddd);
+	}
 
 	public int getMerchantId() {
 		return merchantId;

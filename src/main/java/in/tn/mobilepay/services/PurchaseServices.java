@@ -19,6 +19,7 @@ import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
+import in.tn.mobilepay.request.model.GetPurchaseList;
 import in.tn.mobilepay.request.model.PurchaseUpdateJson;
 import in.tn.mobilepay.response.model.MerchantJson;
 import in.tn.mobilepay.response.model.PurchaseJson;
@@ -162,6 +163,32 @@ public class PurchaseServices {
 		String amountDetails = serviceUtil.toJson(purchaseJson.getAmountDetails());
 		purchaseEntity.setAmountDetails(amountDetails);
 		
+	}
+	
+	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> getPurchaseList(String requestData) {
+		try {
+			GetPurchaseList getPurchaseList =	serviceUtil.fromJson(requestData, GetPurchaseList.class);
+			validateToken(getPurchaseList.getClientToken(), getPurchaseList.getServerToken());
+			
+			List<PurchaseEntity> purchaseList = purchaseDAO.gePurchaseList(getPurchaseList.getServerTime());
+			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
+			for (PurchaseEntity purchaseEntity : purchaseList) {
+				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
+				UserJson userJson = new UserJson(purchaseEntity.getUserEntity());
+				purchaseJson.setUsers(userJson);
+				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
+				purchaseJson.setMerchants(merchantJson);
+				purchaseJsons.add(purchaseJson);
+			}
+			String responseJson = serviceUtil.toJson(purchaseJsons);
+			String responseEncrypt = serviceUtil.netEncryption(responseJson);
+			return serviceUtil.getSuccessResponse(HttpStatus.OK, responseEncrypt);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
 	}
 
 }
