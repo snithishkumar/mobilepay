@@ -5,10 +5,14 @@ import in.tn.mobilepay.entity.MerchantEntity;
 public class MerchantJson {
 
 	private String merchantName;
+	private String merchantUuid;
 	private String address;
 	private String area;
+	private String pinCode;
 	private long mobileNumber;
 	private long landNumber;
+    private long createdDateTime;
+    private long lastModifiedDateTime;
 
 	public MerchantJson() {
 
@@ -16,6 +20,10 @@ public class MerchantJson {
 
 	public MerchantJson(MerchantEntity merchantEntity) {
 		this.merchantName = merchantEntity.getMerchantName();
+		this.merchantUuid = merchantEntity.getMerchantGuid();
+		this.pinCode = merchantEntity.getPinCode();
+		this.createdDateTime = merchantEntity.getCreatedTime();
+		this.lastModifiedDateTime = merchantEntity.getUpdatedTime();
 		this.address = merchantEntity.getMerchantAddress();
 		this.area = merchantEntity.getArea();
 		this.mobileNumber = merchantEntity.getMobileNumber();

@@ -20,10 +20,10 @@ public class PurchaseCntrl {
 		return purchaseServices.getPurchaseDetails(purchaseId);
 	}
 	
-	@RequestMapping(value="/mobile/updatePurchaseDetails")
+	/*@RequestMapping(value="/mobile/updatePurchaseDetails")
 	public ResponseEntity<String> updatePurchaseDetails(@RequestBody String requestData){
 		return purchaseServices.updatePurchaseDetails(requestData);
-	}
+	}*/
 	
 	
 	@RequestMapping(value="/merchant/createPurchase")
@@ -34,6 +34,12 @@ public class PurchaseCntrl {
 	@RequestMapping(value="/merchant/discardPurchase")
 	public ResponseEntity<String> discardPurchase(@RequestBody String requestData){
 		return purchaseServices.discardPurchase(requestData);
+	}
+	
+
+	@RequestMapping(value="/mobile/getPurchaseList")
+	public ResponseEntity<String> getPurchaseList(@RequestBody String requestData){
+		return purchaseServices.getPurchaseList(requestData);
 	}
 
 }

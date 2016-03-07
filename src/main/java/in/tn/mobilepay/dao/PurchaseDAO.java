@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
+import in.tn.mobilepay.entity.UserEntity;
 
 @Repository
 public class PurchaseDAO extends BaseDAO{
@@ -22,9 +23,10 @@ public class PurchaseDAO extends BaseDAO{
 	}
 	
 	
-	public List<PurchaseEntity> gePurchaseList(long serverDateTime){
+	public List<PurchaseEntity> gePurchaseList(long serverDateTime,UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
+		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
 		if(serverDateTime > 0){
 			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverDateTime));
 		}

@@ -4,54 +4,47 @@ import in.tn.mobilepay.entity.PurchaseEntity;
 
 public class PurchaseJson {
 
-	private int purchaseId;
+	private String purchaseId;
 	private long purchaseDate;
-	private int billNumber;
+	private String billNumber;
 	private MerchantJson merchants;
 	private UserJson users;
 	private String productDetails;
 	private String amountDetails;
+	private String category;
 	private boolean isEditable;
 	private boolean isDelivered;
+	private long lastModifiedDateTime;
+	private long serverDateTime;
+	private String totalAmount;
+	private String payableAmount;
+	private boolean isDiscard;
 	
 	public PurchaseJson(){
 		
 	}
 	
 	public PurchaseJson(PurchaseEntity purchaseEntity){
-		this.purchaseId = purchaseEntity.getPurchaseId();
+		this.purchaseId = purchaseEntity.getPurchaseGuid();
 		this.purchaseDate = purchaseEntity.getPurchaseDateTime();
-		//this.billNumber = purchaseEntity.getBillNumber();
+		this.billNumber = purchaseEntity.getBillNumber();
 		this.productDetails = purchaseEntity.getPurchaseData();
 		this.amountDetails = purchaseEntity.getAmountDetails();
 		this.isEditable = purchaseEntity.isEditable();
 		this.isDelivered = purchaseEntity.isDeliverable();
-		 
-	}
-	
-	
-
-	public boolean isEditable() {
-		return isEditable;
-	}
-
-	public void setEditable(boolean isEditable) {
-		this.isEditable = isEditable;
+		this.category = purchaseEntity.getMerchantEntity().getCategory();
+		this.lastModifiedDateTime = purchaseEntity.getUpdatedDateTime();
+		this.serverDateTime = purchaseEntity.getServerDateTime();
+		this.totalAmount = purchaseEntity.getTotalAmount();
+		this.payableAmount = purchaseEntity.getPayableAmount();
+		 this.isDiscard = purchaseEntity.isDiscard();
 	}
 
-	public boolean isDelivered() {
-		return isDelivered;
-	}
-
-	public void setDelivered(boolean isDelivered) {
-		this.isDelivered = isDelivered;
-	}
-
-	public int getPurchaseId() {
+	public String getPurchaseId() {
 		return purchaseId;
 	}
 
-	public void setPurchaseId(int purchaseId) {
+	public void setPurchaseId(String purchaseId) {
 		this.purchaseId = purchaseId;
 	}
 
@@ -63,11 +56,11 @@ public class PurchaseJson {
 		this.purchaseDate = purchaseDate;
 	}
 
-	public int getBillNumber() {
+	public String getBillNumber() {
 		return billNumber;
 	}
 
-	public void setBillNumber(int billNumber) {
+	public void setBillNumber(String billNumber) {
 		this.billNumber = billNumber;
 	}
 
@@ -103,11 +96,81 @@ public class PurchaseJson {
 		this.amountDetails = amountDetails;
 	}
 
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public boolean isEditable() {
+		return isEditable;
+	}
+
+	public void setEditable(boolean isEditable) {
+		this.isEditable = isEditable;
+	}
+
+	public boolean isDelivered() {
+		return isDelivered;
+	}
+
+	public void setDelivered(boolean isDelivered) {
+		this.isDelivered = isDelivered;
+	}
+
+	public long getLastModifiedDateTime() {
+		return lastModifiedDateTime;
+	}
+
+	public void setLastModifiedDateTime(long lastModifiedDateTime) {
+		this.lastModifiedDateTime = lastModifiedDateTime;
+	}
+
+	public long getServerDateTime() {
+		return serverDateTime;
+	}
+
+	public void setServerDateTime(long serverDateTime) {
+		this.serverDateTime = serverDateTime;
+	}
+
+	public String getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(String totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	public String getPayableAmount() {
+		return payableAmount;
+	}
+
+	public void setPayableAmount(String payableAmount) {
+		this.payableAmount = payableAmount;
+	}
+
+	public boolean isDiscard() {
+		return isDiscard;
+	}
+
+	public void setDiscard(boolean isDiscard) {
+		this.isDiscard = isDiscard;
+	}
+
 	@Override
 	public String toString() {
 		return "PurchaseJson [purchaseId=" + purchaseId + ", purchaseDate=" + purchaseDate + ", billNumber="
 				+ billNumber + ", merchants=" + merchants + ", users=" + users + ", productDetails=" + productDetails
-				+ ", amountDetails=" + amountDetails + "]";
+				+ ", amountDetails=" + amountDetails + ", category=" + category + ", isEditable=" + isEditable
+				+ ", isDelivered=" + isDelivered + ", lastModifiedDateTime=" + lastModifiedDateTime
+				+ ", serverDateTime=" + serverDateTime + ", totalAmount=" + totalAmount + ", payableAmount="
+				+ payableAmount + ", isDiscard=" + isDiscard + "]";
 	}
+	
+	
+
 
 }

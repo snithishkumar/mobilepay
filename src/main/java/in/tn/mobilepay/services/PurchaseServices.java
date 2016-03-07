@@ -59,7 +59,7 @@ public class PurchaseServices {
 		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
 	}
 
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	/*@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> updatePurchaseDetails(String requestData) {
 		try {
 			String purchaseJson = serviceUtil.netDecryption(requestData);
@@ -83,7 +83,7 @@ public class PurchaseServices {
 			e.printStackTrace();
 		}
 		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
-	}
+	}*/
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> discardPurchase(String requestData){
@@ -148,6 +148,16 @@ public class PurchaseServices {
 	}
 	
 	
+	private UserEntity validateUserToken(String client,String serverToken) throws ValidationException{
+		UserEntity userEntity = userDAO.getUserEnityByToken(client, serverToken);
+		if(userEntity == null){
+			throw new ValidationException(10, "Invalid User", null);
+		}
+		return userEntity;
+		
+	}
+	
+	
 	private UserEntity validateMobile(String mobileNumber) throws ValidationException{
 		UserEntity userEntity = userDAO.getUserEntity(mobileNumber);
 		if(userEntity == null){
@@ -170,21 +180,21 @@ public class PurchaseServices {
 	public ResponseEntity<String> getPurchaseList(String requestData) {
 		try {
 			GetPurchaseList getPurchaseList =	serviceUtil.fromJson(requestData, GetPurchaseList.class);
-			validateToken(getPurchaseList.getClientToken(), getPurchaseList.getServerToken());
+			UserEntity userEntity = validateUserToken(getPurchaseList.getClientToken(), getPurchaseList.getServerToken());
 			
-			List<PurchaseEntity> purchaseList = purchaseDAO.gePurchaseList(getPurchaseList.getServerTime());
+			List<PurchaseEntity> purchaseList = purchaseDAO.gePurchaseList(getPurchaseList.getServerTime(),userEntity);
 			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
 			for (PurchaseEntity purchaseEntity : purchaseList) {
 				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
-				UserJson userJson = new UserJson(purchaseEntity.getUserEntity());
+				UserJson userJson = new UserJson(userEntity);
 				purchaseJson.setUsers(userJson);
 				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
 				purchaseJson.setMerchants(merchantJson);
 				purchaseJsons.add(purchaseJson);
 			}
 			String responseJson = serviceUtil.toJson(purchaseJsons);
-			String responseEncrypt = serviceUtil.netEncryption(responseJson);
-			return serviceUtil.getSuccessResponse(HttpStatus.OK, responseEncrypt);
+		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
+			return serviceUtil.getResponse(300, responseJson);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

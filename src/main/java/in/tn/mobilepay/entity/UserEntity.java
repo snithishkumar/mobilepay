@@ -18,6 +18,8 @@ public class UserEntity {
 	public static final String MOBILE_NUMBER = "mobileNumber";
 	public static final String LOGIN_ID = "loginId";
 	public static final String IMEI_NUMBER = "imeiNumber";
+	public static final String ACCESS_TOKEN = "accessToken";
+	public static final String SERVER_TOKEN = "serverToken";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

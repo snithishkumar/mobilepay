@@ -119,7 +119,7 @@ public class UserServices {
 		return serviceUtil.getResponse(StatusCode.LOGIN_INTERNAL_ERROR, "Internal Error");
 	}
 	
-	@Transactional(readOnly = true,propagation=Propagation.REQUIRED)
+	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
 	public ResponseEntity<String> loginByMobileNumber(String loginData){
 		try{
 			RegisterJson registerJson = serviceUtil.fromJson(loginData, RegisterJson.class);
@@ -139,7 +139,7 @@ public class UserServices {
 				JsonObject res = new JsonObject();
 				res.addProperty("serverToken", serverToken);
 				res.addProperty("accessToken", accessToken);
-				return serviceUtil.getResponse(StatusCode.LOGIN_OK,res);
+				return serviceUtil.getResponse(StatusCode.LOGIN_OK,res.toString());
 			}
 			return serviceUtil.getResponse(StatusCode.LOGIN_INVALID_PIN, "Invalid LoginId");
 		}catch(Exception e){

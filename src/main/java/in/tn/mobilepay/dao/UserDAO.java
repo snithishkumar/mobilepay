@@ -37,6 +37,14 @@ public class UserDAO extends BaseDAO{
 		return (UserEntity) criteria.uniqueResult();
 	}
 	
+	public UserEntity getUserEnityByToken(String clientToken,String serverToken){
+		Criteria criteria = createCriteria(UserEntity.class);
+		criteria.add(Restrictions.eq(UserEntity.ACCESS_TOKEN, clientToken));
+		criteria.add(Restrictions.eq(UserEntity.SERVER_TOKEN, serverToken));
+		return (UserEntity) criteria.uniqueResult();
+	}
+	
+	
 	
 	public OtpEntity getOtpEntity(String mobileNumber){
 		Criteria criteria = createCriteria(OtpEntity.class);
