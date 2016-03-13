@@ -2,6 +2,8 @@ package in.tn.mobilepay.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -10,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import in.tn.mobilepay.enumeration.CardType;
+import in.tn.mobilepay.enumeration.PaymentType;
 
 /**
  * For Security reason names are renamed.
@@ -23,14 +26,14 @@ public class CardDetailsEntity {
 	public static final String CARD_DETAILS_ID = "cardDetailsId";
 	public static final String CARD_DATA = "cardData";
 	public static final String BANK_ID = "bankDetailsEntity";
-	public static final String CARD_TYPE = "cardType";
+	public static final String PAYMENT_TYPE = "paymentType";
 	public static final String USER_ID = "userEntity";
 	public static final String IS_ACTIVE = "isActive";
 	public static final String CARD_GUID = "cardGuid";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "Discount")
+	@Column(name = "CardId")
 	private int cardDetailsId;
 	
 	@Column(name="CardGuid")
@@ -39,12 +42,10 @@ public class CardDetailsEntity {
 	@Column(name = "CardData")
 	private String cardData;
 
-	@ManyToOne
-	@JoinColumn(name="BankDetailsId",referencedColumnName="BankDetailsId")
-	private BankDetailsEntity bankDetailsEntity;
 	
-	@Column(name = "Outlet")
-	private String cardType;
+	@Column(name = "PaymentType")
+	@Enumerated(EnumType.ORDINAL)
+	private PaymentType paymentType;
 	
 	@ManyToOne
 	@JoinColumn(name="UserId",referencedColumnName="UserId")
@@ -56,9 +57,7 @@ public class CardDetailsEntity {
 	@Column(name="CreatedDateTime")
 	private long createdDateTime;
 	
-	@Column(name="ModifiedDateTime")
-	private long modifiedDateTime;
-
+	
 	public int getCardDetailsId() {
 		return cardDetailsId;
 	}
@@ -67,20 +66,12 @@ public class CardDetailsEntity {
 		this.cardDetailsId = cardDetailsId;
 	}
 
-	public BankDetailsEntity getBankDetailsEntity() {
-		return bankDetailsEntity;
+	public String getCardGuid() {
+		return cardGuid;
 	}
 
-	public void setBankDetailsEntity(BankDetailsEntity bankDetailsEntity) {
-		this.bankDetailsEntity = bankDetailsEntity;
-	}
-
-	public String getCardType() {
-		return cardType;
-	}
-
-	public void setCardType(String cardType) {
-		this.cardType = cardType;
+	public void setCardGuid(String cardGuid) {
+		this.cardGuid = cardGuid;
 	}
 
 	public String getCardData() {
@@ -90,8 +81,14 @@ public class CardDetailsEntity {
 	public void setCardData(String cardData) {
 		this.cardData = cardData;
 	}
-	
-	
+
+	public PaymentType getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(PaymentType paymentType) {
+		this.paymentType = paymentType;
+	}
 
 	public UserEntity getUserEntity() {
 		return userEntity;
@@ -108,9 +105,6 @@ public class CardDetailsEntity {
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-	
-	
-	
 
 	public long getCreatedDateTime() {
 		return createdDateTime;
@@ -120,20 +114,15 @@ public class CardDetailsEntity {
 		this.createdDateTime = createdDateTime;
 	}
 
-	public long getModifiedDateTime() {
-		return modifiedDateTime;
-	}
-
-	public void setModifiedDateTime(long modifiedDateTime) {
-		this.modifiedDateTime = modifiedDateTime;
-	}
-
 	@Override
 	public String toString() {
-		return "CardDetailsEntity [cardDetailsId=" + cardDetailsId
-				+ ", cardData=" + cardData + ", bankDetailsEntity="
-				+ bankDetailsEntity + ", cardType=" + cardType
-				+ ", userEntity=" + userEntity + ", isActive=" + isActive + "]";
+		return "CardDetailsEntity [cardDetailsId=" + cardDetailsId + ", cardGuid=" + cardGuid + ", cardData=" + cardData
+				+ ", paymentType=" + paymentType + ", userEntity=" + userEntity + ", isActive=" + isActive
+				+ ", createdDateTime=" + createdDateTime + "]";
 	}
+
+
+
+	
 
 }

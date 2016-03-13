@@ -1,21 +1,36 @@
 package in.tn.mobilepay.dao;
 
-import in.tn.mobilepay.entity.BankDetailsEntity;
-import in.tn.mobilepay.entity.CardDetailsEntity;
-import in.tn.mobilepay.entity.UserEntity;
-
 import java.util.List;
 
+
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
+
+import in.tn.mobilepay.entity.BankDetailsEntity;
+import in.tn.mobilepay.entity.CardDetailsEntity;
+import in.tn.mobilepay.entity.UserEntity;
 
 @Repository
 public class CardDAO extends BaseDAO {
 
 	public void createCard(CardDetailsEntity cardDetailsEntity) {
 		saveObject(cardDetailsEntity);
+	}
+	
+	public int removeCard(CardDetailsEntity cardDetailsEntity){
+		sessionFactory.getCurrentSession().delete(cardDetailsEntity);
+	  
+		return 0;
+	  
+	}
+	
+	public CardDetailsEntity getCardDetailsEntity(String cardGuid){
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(CardDetailsEntity.class);
+		criteria.add(Restrictions.eq(CardDetailsEntity.CARD_GUID, cardGuid));
+		return (CardDetailsEntity)criteria.uniqueResult();
 	}
 
 	public List<CardDetailsEntity> getCardList(UserEntity userEntity) {
@@ -25,10 +40,7 @@ public class CardDAO extends BaseDAO {
 		return criteria.list();
 	}
 	
-	public void removeCardDetails(String cardGuid){
-		// --TODO
-	}
-
+	
 	public boolean isCardPresent(UserEntity userEntity,
 			BankDetailsEntity bankDetailsEntity) {
 		Criteria criteria = createCriteria(CardDetailsEntity.class);

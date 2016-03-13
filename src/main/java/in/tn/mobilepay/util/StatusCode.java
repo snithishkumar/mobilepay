@@ -24,5 +24,10 @@ public class StatusCode {
 	public static final int MOB_VAL_INVALID = 1601;
 	public static final int MOB_VAL_INTERNAL_ERROR = 1602;
 	
+	
+	/** Card 2^7 **/
+    public static final int CARD_LIST_SUCCESS = 128;
+    public static final int CARD_LIST_FAILURE = 12801;
+	
 
 }

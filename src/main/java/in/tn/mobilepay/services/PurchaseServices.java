@@ -89,7 +89,7 @@ public class PurchaseServices {
 	public ResponseEntity<String> discardPurchase(String requestData){
 		try{
 			DiscardJson discardJson = serviceUtil.fromJson(requestData, DiscardJson.class);
-			MerchantEntity merchantEntity = validateToken(discardJson.getClientToken(), discardJson.getServerToken());
+			MerchantEntity merchantEntity = validateToken(discardJson.getAccessToken(), discardJson.getServerToken());
 			UserEntity userEntity = validateMobile(discardJson.getUserMobile());
 			PurchaseEntity purchaseEntity  = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
 			DiscardEntity discardEntity = new DiscardEntity();
@@ -113,7 +113,7 @@ public class PurchaseServices {
 	public ResponseEntity<String> createPurchase(String requestData){
 		try{
 			in.tn.mobilepay.request.model.PurchaseJson purchaseJson =	serviceUtil.fromJson(requestData, in.tn.mobilepay.request.model.PurchaseJson.class);
-			MerchantEntity merchantEntity = validateToken(purchaseJson.getClientToken(), purchaseJson.getServerToken());
+			MerchantEntity merchantEntity = validateToken(purchaseJson.getAccessToken(), purchaseJson.getServerToken());
 			UserEntity userEntity = validateMobile(purchaseJson.getUserMobile());
 			PurchaseEntity dbPurchaseEntity = purchaseDAO.getPurchaseEntity(purchaseJson.getPurchaseUuid());
 			if(dbPurchaseEntity == null){
@@ -180,7 +180,7 @@ public class PurchaseServices {
 	public ResponseEntity<String> getPurchaseList(String requestData) {
 		try {
 			GetPurchaseList getPurchaseList =	serviceUtil.fromJson(requestData, GetPurchaseList.class);
-			UserEntity userEntity = validateUserToken(getPurchaseList.getClientToken(), getPurchaseList.getServerToken());
+			UserEntity userEntity = validateUserToken(getPurchaseList.getAccessToken(), getPurchaseList.getServerToken());
 			
 			List<PurchaseEntity> purchaseList = purchaseDAO.gePurchaseList(getPurchaseList.getServerTime(),userEntity);
 			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();

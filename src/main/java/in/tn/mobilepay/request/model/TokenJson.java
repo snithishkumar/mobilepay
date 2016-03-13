@@ -2,13 +2,14 @@ package in.tn.mobilepay.request.model;
 
 public class TokenJson {
 	
-	private String clientToken;
+	private String accessToken;
 	private String serverToken;
-	public String getClientToken() {
-		return clientToken;
+	
+	public String getAccessToken() {
+		return accessToken;
 	}
-	public void setClientToken(String clientToken) {
-		this.clientToken = clientToken;
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
 	}
 	public String getServerToken() {
 		return serverToken;
@@ -18,7 +19,7 @@ public class TokenJson {
 	}
 	@Override
 	public String toString() {
-		return "TokenJson [clientToken=" + clientToken + ", serverToken=" + serverToken + "]";
+		return "TokenJson [clientToken=" + accessToken + ", serverToken=" + serverToken + "]";
 	}
 	
 	
