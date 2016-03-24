@@ -2,12 +2,16 @@ package in.tn.mobilepay.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import in.tn.mobilepay.enumeration.DiscardBy;
 
 @Entity
 @Table(name = "DiscardDetails")
@@ -29,6 +33,10 @@ public class DiscardEntity {
 	@ManyToOne
 	@JoinColumn(name = "PurchaseId", referencedColumnName = "PurchaseId")
 	private PurchaseEntity purchaseEntity;
+	
+	@Column(name="DiscardBy")
+	@Enumerated(EnumType.STRING)
+	private DiscardBy discardBy;
 
 	public int getDiscardId() {
 		return discardId;
@@ -78,6 +86,16 @@ public class DiscardEntity {
 
 	public void setPurchaseEntity(PurchaseEntity purchaseEntity) {
 		this.purchaseEntity = purchaseEntity;
+	}
+	
+	
+
+	public DiscardBy getDiscardBy() {
+		return discardBy;
+	}
+
+	public void setDiscardBy(DiscardBy discardBy) {
+		this.discardBy = discardBy;
 	}
 
 	@Override

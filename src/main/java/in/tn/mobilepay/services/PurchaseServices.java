@@ -17,6 +17,7 @@ import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.entity.UserEntity;
+import in.tn.mobilepay.enumeration.DiscardBy;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
 import in.tn.mobilepay.request.model.GetPurchaseList;
@@ -98,6 +99,29 @@ public class PurchaseServices {
 			discardEntity.setUserEntity(userEntity);
 			discardEntity.setReason(discardJson.getReason());
 			discardEntity.setPurchaseEntity(purchaseEntity);
+			purchaseEntity.setDiscard(true);
+			purchaseDAO.updatePurchaseObject(purchaseEntity);
+			purchaseDAO.createDiscard(discardEntity);
+			return serviceUtil.getResponse(200, "success");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return serviceUtil.getResponse(200, "success");
+	}
+	
+	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> discardPurchaseByUser(String requestData){
+		try{
+			DiscardJson discardJson = serviceUtil.fromJson(requestData, DiscardJson.class);
+			UserEntity userEntity = validateUserToken(discardJson.getAccessToken(), discardJson.getServerToken());
+			PurchaseEntity purchaseEntity  = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
+			DiscardEntity discardEntity = new DiscardEntity();
+			discardEntity.setDiscardGuid(serviceUtil.uuid());
+			discardEntity.setUserEntity(userEntity);
+			discardEntity.setReason(discardJson.getReason());
+			discardEntity.setPurchaseEntity(purchaseEntity);
+			discardEntity.setDiscardBy(DiscardBy.USER);
 			purchaseEntity.setDiscard(true);
 			purchaseDAO.updatePurchaseObject(purchaseEntity);
 			purchaseDAO.createDiscard(discardEntity);

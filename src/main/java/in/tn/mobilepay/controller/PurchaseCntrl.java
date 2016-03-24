@@ -41,5 +41,10 @@ public class PurchaseCntrl {
 	public ResponseEntity<String> getPurchaseList(@RequestBody String requestData){
 		return purchaseServices.getPurchaseList(requestData);
 	}
+	
+	@RequestMapping(value="/mobile/discardPurchase")
+	public ResponseEntity<String> discardPurchaseByUser(@RequestBody String requestData){
+		return purchaseServices.discardPurchaseByUser(requestData);
+	}
 
 }

@@ -5,6 +5,8 @@ public class DiscardJson extends TokenJson {
 	private String userMobile;
 	private String purchaseGuid;
 	private String reason;
+	
+	
 
 	public String getUserMobile() {
 		return userMobile;
