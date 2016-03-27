@@ -1,6 +1,6 @@
 package in.tn.mobilepay.request.model;
 
-public class RegisterJson {
+public class RegisterJson extends TokenJson{
 	
 	private String name;
 	private String password;

@@ -79,13 +79,46 @@ public class UserServices {
 		}
 		return serviceUtil.getResponse(StatusCode.OTP_INTERNAL_ERROR, "Failure");
 	}
+	
+	private UserEntity validateUserToken(String client,String serverToken) throws ValidationException{
+		UserEntity userEntity = userDao.getUserEnityByToken(client, serverToken);
+		if(userEntity == null){
+			throw new ValidationException(10, "Invalid User", null);
+		}
+		return userEntity;
+		
+	}
+	
+	
+	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
+	public ResponseEntity<String> updateUserProfile(String registerData){
+		try{
+			String register = serviceUtil.netDecryption(registerData);
+			RegisterJson registerJson = serviceUtil.fromJson(register, RegisterJson.class);
+			UserEntity dbUserEntity = validateUserToken(registerJson.getAccessToken(), registerJson.getServerToken());
+			dbUserEntity.setName(registerJson.getName());
+			dbUserEntity.setMobileNumber(registerJson.getMobileNumber());
+			if(registerJson.getPassword() != null && !registerJson.getPassword().trim().isEmpty()){
+				dbUserEntity.setLoginId(Integer.valueOf(registerJson.getPassword()));
+			}
+			dbUserEntity.toUser(registerJson);
+			userDao.updateUser(dbUserEntity);
+			
+			return serviceUtil.getResponse(StatusCode.REG_OK, "Success");
+		}catch(ValidationException e){
+			return serviceUtil.getResponse(e.getCode(), e.getMessage());
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return serviceUtil.getResponse(StatusCode.INTERNAL_ERROR, "Failure");
+	}
 
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
 	public ResponseEntity<String> userRegisteration(String registerData){
 		try{
 			String register = serviceUtil.netDecryption(registerData);
 			RegisterJson registerJson = serviceUtil.fromJson(register, RegisterJson.class);
-			UserEntity dbUserEntity = validate(registerJson);
+			UserEntity dbUserEntity =	userDao.getUserEntity(registerJson.getMobileNumber());
 			if(dbUserEntity ==  null){
 				dbUserEntity = new UserEntity();
 				dbUserEntity.toUser(registerJson);

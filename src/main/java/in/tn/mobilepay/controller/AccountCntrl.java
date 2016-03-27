@@ -20,6 +20,11 @@ public class AccountCntrl {
 		return userServices.userRegisteration(requestData);
 	}
 	
+	@RequestMapping(value="/mobile/updateProfile")
+	public ResponseEntity<String> updateProfile(@RequestBody String requestData){
+		return userServices.updateUserProfile(requestData);
+	}
+	
 	@RequestMapping(value="/mobile/verifyMobileNo")
 	public ResponseEntity<String> verifyMobileNumber(@RequestBody String requestData){
 		return userServices.sendOtp(requestData);
