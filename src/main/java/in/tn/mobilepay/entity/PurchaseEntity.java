@@ -2,6 +2,7 @@ package in.tn.mobilepay.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -9,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.request.model.PurchaseJson;
 import in.tn.mobilepay.services.ServiceUtil;
 
@@ -26,6 +28,8 @@ public class PurchaseEntity {
 	public static final String IS_EDITABLE = "isEditable";
 	public static final String UPDATED_DATE_TIME = "updatedDateTime";
 	public static final String SERVER_DATE_TIME = "serverDateTime";
+	public static final String IS_DISCARD = "isDiscard";
+	public static final String ORDER_STATUS = "orderStatus";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -69,6 +73,13 @@ public class PurchaseEntity {
 	private boolean  isDiscard;
 	@Column(name = "ServerDateTime")
 	private long serverDateTime;
+	
+	@Enumerated
+	@Column(name = "DeliveryOptions")
+	private DeliveryOptions deliveryOptions;
+	
+	@Column(name = "OrderStatus")//ORDER_STATUS any one of status
+	private String orderStatus;
 	
 	public PurchaseEntity(){
 		
@@ -235,6 +246,32 @@ public class PurchaseEntity {
 
 	public void setServerDateTime(long serverDateTime) {
 		this.serverDateTime = serverDateTime;
+	}
+	
+	
+
+
+
+	public DeliveryOptions getDeliveryOptions() {
+		return deliveryOptions;
+	}
+
+
+
+	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
+		this.deliveryOptions = deliveryOptions;
+	}
+
+
+
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+
+
+
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
 	}
 
 

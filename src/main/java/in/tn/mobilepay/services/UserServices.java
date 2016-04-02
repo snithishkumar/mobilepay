@@ -93,8 +93,8 @@ public class UserServices {
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
 	public ResponseEntity<String> updateUserProfile(String registerData){
 		try{
-			String register = serviceUtil.netDecryption(registerData);
-			RegisterJson registerJson = serviceUtil.fromJson(register, RegisterJson.class);
+			//String register = serviceUtil.netDecryption(registerData);
+			RegisterJson registerJson = serviceUtil.fromJson(registerData, RegisterJson.class);
 			UserEntity dbUserEntity = validateUserToken(registerJson.getAccessToken(), registerJson.getServerToken());
 			dbUserEntity.setName(registerJson.getName());
 			dbUserEntity.setMobileNumber(registerJson.getMobileNumber());

@@ -1,6 +1,7 @@
 package in.tn.mobilepay.response.model;
 
 import in.tn.mobilepay.entity.PurchaseEntity;
+import in.tn.mobilepay.enumeration.DeliveryOptions;
 
 public class PurchaseJson {
 
@@ -19,6 +20,9 @@ public class PurchaseJson {
 	private String totalAmount;
 	private String payableAmount;
 	private boolean isDiscard;
+	private boolean isPayed;
+	private String orderStatus;
+	private DeliveryOptions deliveryOptions;
 	
 	public PurchaseJson(){
 		
@@ -38,6 +42,9 @@ public class PurchaseJson {
 		this.totalAmount = purchaseEntity.getTotalAmount();
 		this.payableAmount = purchaseEntity.getPayableAmount();
 		 this.isDiscard = purchaseEntity.isDiscard();
+		 this.isPayed = purchaseEntity.isPayed();
+		 this.orderStatus = purchaseEntity.getOrderStatus();
+		 this.deliveryOptions = purchaseEntity.getDeliveryOptions();
 	}
 
 	public String getPurchaseId() {
@@ -160,6 +167,30 @@ public class PurchaseJson {
 		this.isDiscard = isDiscard;
 	}
 
+	public boolean isPayed() {
+		return isPayed;
+	}
+
+	public void setPayed(boolean isPayed) {
+		this.isPayed = isPayed;
+	}
+
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
+	public DeliveryOptions getDeliveryOptions() {
+		return deliveryOptions;
+	}
+
+	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
+		this.deliveryOptions = deliveryOptions;
+	}
+
 	@Override
 	public String toString() {
 		return "PurchaseJson [purchaseId=" + purchaseId + ", purchaseDate=" + purchaseDate + ", billNumber="
@@ -167,8 +198,11 @@ public class PurchaseJson {
 				+ ", amountDetails=" + amountDetails + ", category=" + category + ", isEditable=" + isEditable
 				+ ", isDelivered=" + isDelivered + ", lastModifiedDateTime=" + lastModifiedDateTime
 				+ ", serverDateTime=" + serverDateTime + ", totalAmount=" + totalAmount + ", payableAmount="
-				+ payableAmount + ", isDiscard=" + isDiscard + "]";
+				+ payableAmount + ", isDiscard=" + isDiscard + ", isPayed=" + isPayed + ", orderStatus=" + orderStatus
+				+ ", deliveryOptions=" + deliveryOptions + "]";
 	}
+
+	
 	
 	
 

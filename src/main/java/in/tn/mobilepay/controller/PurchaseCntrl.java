@@ -42,6 +42,16 @@ public class PurchaseCntrl {
 		return purchaseServices.getPurchaseList(requestData);
 	}
 	
+	@RequestMapping(value="/mobile/getPurchaseHistoryList")
+	public ResponseEntity<String> getPurchaseHistoryList(@RequestBody String requestData){
+		return purchaseServices.getPurchaseHistoryList(requestData);
+	}
+	
+	@RequestMapping(value="/mobile/getLuggageList")
+	public ResponseEntity<String> getLuggageList(@RequestBody String requestData){
+		return purchaseServices.getLuggageList(requestData);
+	}
+	
 	@RequestMapping(value="/mobile/discardPurchase")
 	public ResponseEntity<String> discardPurchaseByUser(@RequestBody String requestData){
 		return purchaseServices.discardPurchaseByUser(requestData);

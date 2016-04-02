@@ -3,6 +3,7 @@ package in.tn.mobilepay.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +21,14 @@ import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.DiscardBy;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
+import in.tn.mobilepay.request.model.GetLuggageList;
 import in.tn.mobilepay.request.model.GetPurchaseList;
-import in.tn.mobilepay.request.model.PurchaseUpdateJson;
+import in.tn.mobilepay.response.model.LuggageJson;
+import in.tn.mobilepay.response.model.LuggagesListJson;
 import in.tn.mobilepay.response.model.MerchantJson;
 import in.tn.mobilepay.response.model.PurchaseJson;
 import in.tn.mobilepay.response.model.UserJson;
+import in.tn.mobilepay.util.StatusCode;
 
 @Service
 public class PurchaseServices {
@@ -37,6 +41,8 @@ public class PurchaseServices {
 	private MerchantDAO merchantDAO;
 	@Autowired
 	private ServiceUtil serviceUtil;
+	
+	private static final Logger logger = Logger.getLogger(PurchaseServices.class);
 
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> getPurchaseDetails(int purchaseId) {
@@ -86,27 +92,41 @@ public class PurchaseServices {
 		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
 	}*/
 	
+	/**
+	 * Discard Purchase Data
+	 * @param requestData
+	 * @return
+	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> discardPurchase(String requestData){
 		try{
+			// Json to Object
 			DiscardJson discardJson = serviceUtil.fromJson(requestData, DiscardJson.class);
+			// Validate Merchant Authorize
 			MerchantEntity merchantEntity = validateToken(discardJson.getAccessToken(), discardJson.getServerToken());
+			//  Validate User Mobile
 			UserEntity userEntity = validateMobile(discardJson.getUserMobile());
+			// Get Purchase Data
 			PurchaseEntity purchaseEntity  = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
+			// Discard
 			DiscardEntity discardEntity = new DiscardEntity();
 			discardEntity.setDiscardGuid(serviceUtil.uuid());
 			discardEntity.setMerchantEntity(merchantEntity);
 			discardEntity.setUserEntity(userEntity);
 			discardEntity.setReason(discardJson.getReason());
 			discardEntity.setPurchaseEntity(purchaseEntity);
+			discardEntity.setDiscardBy(DiscardBy.MERCHANT);
 			purchaseEntity.setDiscard(true);
 			purchaseDAO.updatePurchaseObject(purchaseEntity);
 			purchaseDAO.createDiscard(discardEntity);
-			return serviceUtil.getResponse(200, "success");
+			return serviceUtil.getResponse(StatusCode.MER_OK, "success");
+		}catch(ValidationException e){
+			logger.error("Error in ValidationException", e);
+			return serviceUtil.getResponse(e.getCode(), e.getMessage());
 		}catch(Exception e){
-			e.printStackTrace();
+			logger.error("Error in discardPurchase", e);
 		}
-		return serviceUtil.getResponse(200, "success");
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
 	}
 	
 	
@@ -132,40 +152,62 @@ public class PurchaseServices {
 		return serviceUtil.getResponse(200, "success");
 	}
 	
-	
+	/**
+	 * Create or update Purchase Record
+	 * @param requestData
+	 * @return
+	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> createPurchase(String requestData){
 		try{
+			// Json to Object conversion
 			in.tn.mobilepay.request.model.PurchaseJson purchaseJson =	serviceUtil.fromJson(requestData, in.tn.mobilepay.request.model.PurchaseJson.class);
+			// Validate Merchant Authorize
 			MerchantEntity merchantEntity = validateToken(purchaseJson.getAccessToken(), purchaseJson.getServerToken());
+		    // Validate User Mobile
 			UserEntity userEntity = validateMobile(purchaseJson.getUserMobile());
+			//Check whether Purchase Details already Present
 			PurchaseEntity dbPurchaseEntity = purchaseDAO.getPurchaseEntity(purchaseJson.getPurchaseUuid());
+			// Create New Purchase record
 			if(dbPurchaseEntity == null){
 				dbPurchaseEntity = new PurchaseEntity();
 				dbPurchaseEntity.setPurchaseDateTime(Long.valueOf(purchaseJson.getDateTime()));
 				dbPurchaseEntity.setMerchantEntity(merchantEntity);
 				dbPurchaseEntity.setUserEntity(userEntity);
+				// Json obj to Entity
 				populatePurchaseData(dbPurchaseEntity, purchaseJson);
+				//Create New Record
 				purchaseDAO.createPurchaseObject(dbPurchaseEntity);
-				return serviceUtil.getResponse(200, "success");
-			}else{
+				//Response
+				return serviceUtil.getResponse(StatusCode.MER_OK, "success");
+			}else{ // Update Purchase Data // -- TODO
 				populatePurchaseData(dbPurchaseEntity, purchaseJson);
 				dbPurchaseEntity.setMerchantEntity(merchantEntity);
 				dbPurchaseEntity.setUserEntity(userEntity);
 				purchaseDAO.updatePurchaseObject(dbPurchaseEntity);
-				return serviceUtil.getResponse(200, "success");
+				return serviceUtil.getResponse(StatusCode.MER_OK, "updated");
 			}
 			
+		}catch(ValidationException e){
+			logger.error("Error in ValidationException", e);
+			return serviceUtil.getResponse(e.getCode(), e.getMessage());
 		}catch(Exception e){
-			e.printStackTrace();
+			logger.error("Error in createPurchase", e);
 		}
-		return serviceUtil.getResponse(200, "failure");
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
 	}
 	
+	/**
+	 * Validate Merchant Authorization
+	 * @param merchantToken
+	 * @param serverToken
+	 * @return
+	 * @throws ValidationException
+	 */
 	private MerchantEntity validateToken(String merchantToken,String serverToken) throws ValidationException{
 		MerchantEntity merchantEntity = merchantDAO.getMerchant(merchantToken, serverToken);
 		if(merchantEntity == null){
-			throw new ValidationException(10, "Invalid User", null);
+			throw new ValidationException(StatusCode.MER_UNAUTHORIZE, "Invalid User", null);
 		}
 		return merchantEntity;
 		
@@ -181,11 +223,16 @@ public class PurchaseServices {
 		
 	}
 	
-	
+	/**
+	 * Validate User Details
+	 * @param mobileNumber
+	 * @return
+	 * @throws ValidationException
+	 */
 	private UserEntity validateMobile(String mobileNumber) throws ValidationException{
 		UserEntity userEntity = userDAO.getUserEntity(mobileNumber);
 		if(userEntity == null){
-			throw new ValidationException(10, "Invalid Mobile", null);
+			throw new ValidationException(StatusCode.MER_INVALID_MOBILE, "Invalid Mobile", null);
 		}
 		return userEntity;
 	}
@@ -199,14 +246,21 @@ public class PurchaseServices {
 		
 	}
 	
-	
+	/**
+	 * Returns Current Purchase List
+	 * @param requestData
+	 * @return
+	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> getPurchaseList(String requestData) {
 		try {
+			// Json to Object
 			GetPurchaseList getPurchaseList =	serviceUtil.fromJson(requestData, GetPurchaseList.class);
+			// Validate User Details
 			UserEntity userEntity = validateUserToken(getPurchaseList.getAccessToken(), getPurchaseList.getServerToken());
-			
+			// Get Current Purchase List
 			List<PurchaseEntity> purchaseList = purchaseDAO.gePurchaseList(getPurchaseList.getServerTime(),userEntity);
+			// Entity to Json Object
 			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
 			for (PurchaseEntity purchaseEntity : purchaseList) {
 				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
@@ -220,7 +274,83 @@ public class PurchaseServices {
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error in getPurchaseList",e);
+		}
+		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+	}
+	
+	/**
+	 * Returns Purchase History List
+	 * @param requestData
+	 * @return
+	 */
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> getPurchaseHistoryList(String requestData) {
+		try {
+			//Json to Object
+			GetPurchaseList getPurchaseList =	serviceUtil.fromJson(requestData, GetPurchaseList.class);
+			// Validate User Details
+			UserEntity userEntity = validateUserToken(getPurchaseList.getAccessToken(), getPurchaseList.getServerToken());
+			// Get Current Purchase List
+			List<PurchaseEntity> purchaseList = purchaseDAO.getPurchaseHistoryList(getPurchaseList.getServerTime(),userEntity);
+			// Entity to Json Object
+			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
+			for (PurchaseEntity purchaseEntity : purchaseList) {
+				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
+				UserJson userJson = new UserJson(userEntity);
+				purchaseJson.setUsers(userJson);
+				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
+				purchaseJson.setMerchants(merchantJson);
+				purchaseJsons.add(purchaseJson);
+			}
+			String responseJson = serviceUtil.toJson(purchaseJsons);
+		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
+			return serviceUtil.getResponse(300, responseJson);
+		} catch (Exception e) {
+			logger.error("Error in getPurchaseHistoryList",e);
+		}
+		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+	}
+	
+	/**
+	 * Returns Luggage List
+	 * @param requestData
+	 * @return
+	 */
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> getLuggageList(String requestData){
+		try{
+			//Json to Object
+			GetLuggageList getLuggageList =	serviceUtil.fromJson(requestData, GetLuggageList.class);
+			// Validate User Details
+			UserEntity userEntity = validateUserToken(getLuggageList.getAccessToken(), getLuggageList.getServerToken());
+			LuggagesListJson luggagesListJson = new LuggagesListJson();
+			List<PurchaseEntity> purchaseList = null;
+			// Get Luggage Details and Purchase with Luggage Details
+			if(getLuggageList.getStartTime() > 0){
+				List<LuggageJson> luggageJsons = purchaseDAO.getLuggageList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
+				luggagesListJson.setLuggageJsons(luggageJsons);
+				purchaseList = purchaseDAO.getLuggageWithPurchaseList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
+			}else{ // Get  Purchase with Luggage Full List
+				purchaseList = purchaseDAO.getLuggageWithPurchaseList(userEntity);
+			}
+			
+			// Entity to Json Object
+			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
+			luggagesListJson.setPurchaseJsons(purchaseJsons);
+			for (PurchaseEntity purchaseEntity : purchaseList) {
+				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
+				UserJson userJson = new UserJson(userEntity);
+				purchaseJson.setUsers(userJson);
+				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
+				purchaseJson.setMerchants(merchantJson);
+				purchaseJsons.add(purchaseJson);
+			}
+			String responseJson = serviceUtil.toJson(luggagesListJson);
+		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
+			return serviceUtil.getResponse(300, responseJson);
+		}catch(Exception e){
+			logger.error("Error in getLuggageList",e);
 		}
 		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
 	}
