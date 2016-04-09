@@ -37,6 +37,8 @@ public class DiscardEntity {
 	@Column(name="DiscardBy")
 	@Enumerated(EnumType.STRING)
 	private DiscardBy discardBy;
+	@Column(name = "CreatedDateTime")
+	private long createdDateTime;
 
 	public int getDiscardId() {
 		return discardId;
@@ -97,12 +99,22 @@ public class DiscardEntity {
 	public void setDiscardBy(DiscardBy discardBy) {
 		this.discardBy = discardBy;
 	}
+	
+	
+
+	public long getCreatedDateTime() {
+		return createdDateTime;
+	}
+
+	public void setCreatedDateTime(long createdDateTime) {
+		this.createdDateTime = createdDateTime;
+	}
 
 	@Override
 	public String toString() {
 		return "DiscardEntity [discardId=" + discardId + ", discardGuid=" + discardGuid + ", merchantEntity="
 				+ merchantEntity + ", userEntity=" + userEntity + ", reason=" + reason + ", purchaseEntity="
-				+ purchaseEntity + "]";
+				+ purchaseEntity + ", discardBy=" + discardBy + ", createdDateTime=" + createdDateTime + "]";
 	}
 
 }

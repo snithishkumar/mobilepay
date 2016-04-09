@@ -1,5 +1,6 @@
 package in.tn.mobilepay.services;
 
+import java.lang.reflect.Type;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.time.Clock;
@@ -30,6 +31,10 @@ public class ServiceUtil {
 	
 	
 	public <T> T fromJson(String data,Class<T> className){
+		return gson.fromJson(data, className);
+	}
+	
+	public <T> T fromJson(String data,Type className){
 		return gson.fromJson(data, className);
 	}
 	

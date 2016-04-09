@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.reflect.TypeToken;
+
 import in.tn.mobilepay.dao.MerchantDAO;
 import in.tn.mobilepay.dao.PurchaseDAO;
 import in.tn.mobilepay.dao.UserDAO;
@@ -19,6 +21,7 @@ import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.DiscardBy;
+import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
 import in.tn.mobilepay.request.model.GetLuggageList;
@@ -101,24 +104,32 @@ public class PurchaseServices {
 	public ResponseEntity<String> discardPurchase(String requestData){
 		try{
 			// Json to Object
-			DiscardJson discardJson = serviceUtil.fromJson(requestData, DiscardJson.class);
-			// Validate Merchant Authorize
-			MerchantEntity merchantEntity = validateToken(discardJson.getAccessToken(), discardJson.getServerToken());
-			//  Validate User Mobile
-			UserEntity userEntity = validateMobile(discardJson.getUserMobile());
-			// Get Purchase Data
-			PurchaseEntity purchaseEntity  = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
-			// Discard
-			DiscardEntity discardEntity = new DiscardEntity();
-			discardEntity.setDiscardGuid(serviceUtil.uuid());
-			discardEntity.setMerchantEntity(merchantEntity);
-			discardEntity.setUserEntity(userEntity);
-			discardEntity.setReason(discardJson.getReason());
-			discardEntity.setPurchaseEntity(purchaseEntity);
-			discardEntity.setDiscardBy(DiscardBy.MERCHANT);
-			purchaseEntity.setDiscard(true);
-			purchaseDAO.updatePurchaseObject(purchaseEntity);
-			purchaseDAO.createDiscard(discardEntity);
+			List<DiscardJson> discardJsonList = serviceUtil.fromJson(requestData, new TypeToken<ArrayList<DiscardJson>>() {}.getType());
+			for(DiscardJson discardJson : discardJsonList){
+				
+				// Validate Merchant Authorize
+				MerchantEntity merchantEntity = validateToken(discardJson.getAccessToken(), discardJson.getServerToken());
+				//  Validate User Mobile
+				UserEntity userEntity = validateMobile(discardJson.getUserMobile());
+				// Get Purchase Data
+				PurchaseEntity purchaseEntity  = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
+				// Discard
+				DiscardEntity discardEntity = new DiscardEntity();
+				discardEntity.setDiscardGuid(serviceUtil.uuid());
+				discardEntity.setMerchantEntity(merchantEntity);
+				discardEntity.setUserEntity(userEntity);
+				discardEntity.setReason(discardJson.getReason());
+				discardEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
+				discardEntity.setPurchaseEntity(purchaseEntity);
+				discardEntity.setDiscardBy(DiscardBy.MERCHANT);
+				purchaseEntity.setDiscard(true);
+				purchaseEntity.setOrderStatus(OrderStatus.CANCELED.toString());
+				purchaseEntity.setServerDateTime(discardEntity.getCreatedDateTime());
+				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
+				purchaseDAO.updatePurchaseObject(purchaseEntity);
+				purchaseDAO.createDiscard(discardEntity);
+			}
+			
 			return serviceUtil.getResponse(StatusCode.MER_OK, "success");
 		}catch(ValidationException e){
 			logger.error("Error in ValidationException", e);
@@ -132,19 +143,28 @@ public class PurchaseServices {
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> discardPurchaseByUser(String requestData){
-		try{
-			DiscardJson discardJson = serviceUtil.fromJson(requestData, DiscardJson.class);
-			UserEntity userEntity = validateUserToken(discardJson.getAccessToken(), discardJson.getServerToken());
-			PurchaseEntity purchaseEntity  = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
-			DiscardEntity discardEntity = new DiscardEntity();
-			discardEntity.setDiscardGuid(serviceUtil.uuid());
-			discardEntity.setUserEntity(userEntity);
-			discardEntity.setReason(discardJson.getReason());
-			discardEntity.setPurchaseEntity(purchaseEntity);
-			discardEntity.setDiscardBy(DiscardBy.USER);
-			purchaseEntity.setDiscard(true);
-			purchaseDAO.updatePurchaseObject(purchaseEntity);
-			purchaseDAO.createDiscard(discardEntity);
+		try {
+			// Json to Object
+			List<DiscardJson> discardJsonList = serviceUtil.fromJson(requestData,new TypeToken<ArrayList<DiscardJson>>() {
+					}.getType());
+			for (DiscardJson discardJson : discardJsonList) {
+				UserEntity userEntity = validateUserToken(discardJson.getAccessToken(), discardJson.getServerToken());
+				PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
+				DiscardEntity discardEntity = new DiscardEntity();
+				discardEntity.setDiscardGuid(serviceUtil.uuid());
+				discardEntity.setUserEntity(userEntity);
+				discardEntity.setReason(discardJson.getReason());
+				discardEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
+				discardEntity.setPurchaseEntity(purchaseEntity);
+				discardEntity.setDiscardBy(DiscardBy.USER);
+				purchaseEntity.setDiscard(true);
+				purchaseEntity.setOrderStatus(OrderStatus.CANCELED.toString());
+				purchaseEntity.setServerDateTime(discardEntity.getCreatedDateTime());
+				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
+				purchaseDAO.updatePurchaseObject(purchaseEntity);
+				purchaseDAO.createDiscard(discardEntity);
+			
+			}
 			return serviceUtil.getResponse(200, "success");
 		}catch(Exception e){
 			e.printStackTrace();

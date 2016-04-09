@@ -1,9 +1,12 @@
 package in.tn.mobilepay.dao;
 
+import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.OtpEntity;
 import in.tn.mobilepay.entity.UserEntity;
 
@@ -54,6 +57,51 @@ public class UserDAO extends BaseDAO{
 	
 	public void updateOtpEntity(OtpEntity otpEntity){
 		updateObject(otpEntity);
+	}
+	
+	/**
+	 * Returns AddressEntity for an addressGuid
+	 * @param addressGuid
+	 * @return
+	 */
+	public AddressEntity getAddressEntity(String addressGuid){
+		Criteria criteria = createCriteria(AddressEntity.class);
+		criteria.add(Restrictions.eq(AddressEntity.ADDRESS_UUID, addressGuid));
+		return (AddressEntity)criteria.uniqueResult();
+	}
+	
+	/**
+	 * Returns AddressEntity for an addressGuid
+	 * @param addressGuid
+	 * @return
+	 */
+	public AddressEntity getAddressEntity(String addressGuid,UserEntity userEntity){
+		Criteria criteria = createCriteria(AddressEntity.class);
+		criteria.add(Restrictions.eq(AddressEntity.ADDRESS_UUID, addressGuid));
+		criteria.add(Restrictions.eq(AddressEntity.USER_ENTITY, userEntity));
+		return (AddressEntity)criteria.uniqueResult();
+	}
+	
+	/**
+	 * Get Address List
+	 * @param lastModifiedTime
+	 * @return
+	 */
+	public List<AddressEntity> getAddressList(Long lastModifiedTime,UserEntity userEntity){
+		Criteria criteria = createCriteria(AddressEntity.class);
+		if(lastModifiedTime != null && lastModifiedTime > 0){
+			criteria.add(Restrictions.gt(AddressEntity.LAST_MODIFIED_TIME, lastModifiedTime));
+		}
+		criteria.add(Restrictions.eq(AddressEntity.USER_ENTITY, userEntity));
+		return criteria.list();
+	}
+	
+	public void createAddressEntity(AddressEntity addressEntity){
+		saveObject(addressEntity);
+	}
+	
+	public void updateAddressEntity(AddressEntity addressEntity){
+		updateObject(addressEntity);
 	}
 	
 	

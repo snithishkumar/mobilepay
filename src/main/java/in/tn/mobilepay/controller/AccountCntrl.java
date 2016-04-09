@@ -45,4 +45,9 @@ public class AccountCntrl {
 	public ResponseEntity<String> loginByMobileNumber(@RequestBody String requestData){
 		return userServices.loginByMobileNumber(requestData);
 	}
+	
+	@RequestMapping(value="/mobile/syncUserDeliveryAddress")
+	public ResponseEntity<String> syncUserDeliveryAddress(@RequestBody String requestData){
+		return userServices.syncUserDeliveryAddress(requestData);
+	}
 }

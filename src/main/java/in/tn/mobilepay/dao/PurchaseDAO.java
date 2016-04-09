@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.entity.UserEntity;
+import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.response.model.LuggageJson;
 import in.tn.mobilepay.util.MessageConstants;
 
@@ -53,7 +54,7 @@ public class PurchaseDAO extends BaseDAO{
 	public List<PurchaseEntity> getPurchaseHistoryList(long serverDateTime,UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
-		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, MessageConstants.ORDER_STATUS[3]), Restrictions.eq(PurchaseEntity.ORDER_STATUS, MessageConstants.ORDER_STATUS[4])));
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
 		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
 		if(serverDateTime > 0){
 			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverDateTime));
@@ -77,8 +78,8 @@ public class PurchaseDAO extends BaseDAO{
 		
 		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
 		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, MessageConstants.ORDER_STATUS[3]));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, MessageConstants.ORDER_STATUS[4]));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
 		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
 	}
 	

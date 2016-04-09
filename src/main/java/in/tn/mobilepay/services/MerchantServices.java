@@ -129,7 +129,7 @@ public class MerchantServices {
 			MerchantEntity dbMerchantEntity = merchantDAO.getMerchant(merchantLogin.getMobileNumber());
 			// If Not Present, then invalid mobile
 			if(dbMerchantEntity == null){
-				return serviceUtil.getResponse(HttpStatus.UNAUTHORIZED.value(), "Invalid Login");
+				return serviceUtil.getResponse(StatusCode.MER_INVALID_LOGIN, "Invalid Login");
 			}
 			// Validate User Password 
 			if(dbMerchantEntity.getPassword().equals(merchantLogin.getPassword())){
