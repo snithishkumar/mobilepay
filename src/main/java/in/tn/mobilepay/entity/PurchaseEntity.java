@@ -63,10 +63,7 @@ public class PurchaseEntity {
 	// Amount, Tax, Total amount
 	@Column(name = "AmountDetails")
 	private String amountDetails;
-	@Column(name = "TotalAmount")
-	private String totalAmount;
-	@Column(name = "PayableAmount")
-	private String payableAmount;
+	
 	@Column(name = "UnModifiedAmountDetails")
 	private String unModifiedAmountDetails;
 	@Column(name = "IsDiscard")
@@ -81,6 +78,9 @@ public class PurchaseEntity {
 	@Column(name = "OrderStatus")//ORDER_STATUS any one of status
 	private String orderStatus;
 	
+	@Column(name = "TotalAmount")
+	private String totalAmount;
+	
 	public PurchaseEntity(){
 		
 	}
@@ -88,12 +88,11 @@ public class PurchaseEntity {
 	
 	
 	public void loadValue(PurchaseJson purchaseJson){
+		this.totalAmount = purchaseJson.getTotalAmount();
 		this.billNumber = purchaseJson.getBillNumber();
 		this.purchaseGuid = purchaseJson.getPurchaseUuid();
 		this.purchaseDateTime = Long.valueOf(purchaseJson.getDateTime());
 		this.isDeliverable = purchaseJson.getIsHomeDeliver() != null ? purchaseJson.getIsHomeDeliver() : false;
-		this.totalAmount = purchaseJson.getTotalAmount();
-		this.payableAmount = purchaseJson.getPayableAmount();
 		this.updatedDateTime = ServiceUtil.getCurrentGmtTime();
 		this.serverDateTime = updatedDateTime;
 	}
@@ -212,21 +211,7 @@ public class PurchaseEntity {
 		this.purchaseGuid = purchaseGuid;
 	}
 
-	public String getTotalAmount() {
-		return totalAmount;
-	}
-
-	public void setTotalAmount(String totalAmount) {
-		this.totalAmount = totalAmount;
-	}
-
-	public String getPayableAmount() {
-		return payableAmount;
-	}
-
-	public void setPayableAmount(String payableAmount) {
-		this.payableAmount = payableAmount;
-	}
+	
 
 	public boolean isDiscard() {
 		return isDiscard;
@@ -273,6 +258,20 @@ public class PurchaseEntity {
 	public void setOrderStatus(String orderStatus) {
 		this.orderStatus = orderStatus;
 	}
+	
+	
+
+
+
+	public String getTotalAmount() {
+		return totalAmount;
+	}
+
+
+
+	public void setTotalAmount(String totalAmount) {
+		this.totalAmount = totalAmount;
+	}
 
 
 
@@ -283,10 +282,13 @@ public class PurchaseEntity {
 				+ isPayed + ", billNumber=" + billNumber + ", purchaseData=" + purchaseData
 				+ ", unModifiedPurchaseData=" + unModifiedPurchaseData + ", isEditable=" + isEditable
 				+ ", updatedDateTime=" + updatedDateTime + ", isDeliverable=" + isDeliverable + ", amountDetails="
-				+ amountDetails + ", totalAmount=" + totalAmount + ", payableAmount=" + payableAmount
-				+ ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", isDiscard=" + isDiscard
-				+ ", serverDateTime=" + serverDateTime + "]";
+				+ amountDetails + ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", isDiscard=" + isDiscard
+				+ ", serverDateTime=" + serverDateTime + ", deliveryOptions=" + deliveryOptions + ", orderStatus="
+				+ orderStatus + "]";
 	}
+
+
+
 
 
 

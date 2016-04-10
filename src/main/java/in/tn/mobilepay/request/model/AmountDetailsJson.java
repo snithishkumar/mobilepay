@@ -1,29 +1,50 @@
 package in.tn.mobilepay.request.model;
 
+import in.tn.mobilepay.enumeration.DiscountType;
+
 public class AmountDetailsJson {
 
-	private String key;
-	private String value;
+	private float taxAmount;
+	private double discount;
+	private DiscountType discountType;
+	private double discountMiniVal;
 
-	public String getKey() {
-		return key;
+	public float getTaxAmount() {
+		return taxAmount;
 	}
 
-	public void setKey(String key) {
-		this.key = key;
+	public void setTaxAmount(float taxAmount) {
+		this.taxAmount = taxAmount;
 	}
 
-	public String getValue() {
-		return value;
+	public double getDiscount() {
+		return discount;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
+	public void setDiscount(double discount) {
+		this.discount = discount;
+	}
+
+	public DiscountType getDiscountType() {
+		return discountType;
+	}
+
+	public void setDiscountType(DiscountType discountType) {
+		this.discountType = discountType;
+	}
+
+	public double getDiscountMiniVal() {
+		return discountMiniVal;
+	}
+
+	public void setDiscountMiniVal(double discountMiniVal) {
+		this.discountMiniVal = discountMiniVal;
 	}
 
 	@Override
 	public String toString() {
-		return "AmountDetailsJson [key=" + key + ", value=" + value + "]";
+		return "AmountDetailsJson [taxAmount=" + taxAmount + ", discount=" + discount + ", discountType=" + discountType
+				+ ", discountMiniVal=" + discountMiniVal + "]";
 	}
 
 }
