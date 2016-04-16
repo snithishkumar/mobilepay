@@ -33,5 +33,11 @@ public class MerchantCntrl {
 	public ResponseEntity<String> login(@RequestBody String requestData){
 		return merchantServices.merchantLogin(requestData);
 	}
+	
+	
+	@RequestMapping(value="/user/merchant/profilepic")
+	public ResponseEntity getProfilePic(@RequestParam String merchantGuid,@RequestParam String merchantId){
+		return merchantServices.getShopLogo(merchantGuid,merchantId);
+	}
 
 }

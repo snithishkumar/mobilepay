@@ -5,6 +5,7 @@ import in.tn.mobilepay.entity.MerchantEntity;
 public class MerchantJson {
 
 	private String merchantName;
+	private int serverMerchantId;
 	private String merchantUuid;
 	private String address;
 	private String area;
@@ -20,6 +21,7 @@ public class MerchantJson {
 
 	public MerchantJson(MerchantEntity merchantEntity) {
 		this.merchantName = merchantEntity.getMerchantName();
+		this.serverMerchantId = merchantEntity.getMerchantId();
 		this.merchantUuid = merchantEntity.getMerchantGuid();
 		this.pinCode = merchantEntity.getPinCode();
 		this.createdDateTime = merchantEntity.getCreatedTime();

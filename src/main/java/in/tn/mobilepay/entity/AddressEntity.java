@@ -15,15 +15,15 @@ import in.tn.mobilepay.response.model.AddressJson;
 @Table(name = "DeliveryAddress")
 public class AddressEntity {
 	public static final String ADDRESS_ID = "addressId";
-	public static final String ADDRESS_UUID = "addressId";
+	public static final String ADDRESS_UUID = "addressUUID";
 	public static final String NAME = "name";
 	public static final String MOBILE_NUMBER = "mobileNumber";
-	public static final String STREET = "addressId";
-	public static final String ADDRESS = "addressId";
-	public static final String AREA = "addressId";
-	public static final String CITY = "addressId";
-	public static final String POSTAL_CODE = "addressId";
-	public static final String LAST_MODIFIED_TIME = "addressId";
+	public static final String STREET = "street";
+	public static final String ADDRESS = "address";
+	public static final String AREA = "area";
+	public static final String CITY = "city";
+	public static final String POSTAL_CODE = "postalCode";
+	public static final String LAST_MODIFIED_TIME = "lastModifiedTime";
 	public static final String USER_ENTITY = "userEntity";
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

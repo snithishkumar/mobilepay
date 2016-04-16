@@ -1,14 +1,16 @@
 package in.tn.mobilepay.services;
 
+import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.Gson;
@@ -146,6 +148,24 @@ public class MerchantServices {
 			return serviceUtil.getResponse(StatusCode.MER_INVALID_LOGIN, "Invalid Login");
 		}catch(Exception e){
 			logger.error("Error in merchantLogin", e);
+		}
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal Server Error.");
+	}
+	
+	@Transactional(readOnly = true,propagation= Propagation.REQUIRED)
+	public ResponseEntity getShopLogo(String merchantGuid,String merchantId){
+		try{
+			MerchantProfile merchantProfile  = merchantDAO.getMerchantProfile(merchantGuid, Integer.valueOf(merchantId));
+			if(merchantProfile != null){
+				InputStream inputStream = merchantProfile.getMerchantProfile().getBinaryStream();
+				byte[] data = IOUtils.toByteArray(inputStream);
+				ResponseEntity<byte[]> responseEntity = new ResponseEntity<byte[]>(data, HttpStatus.OK);
+				return responseEntity;
+				
+			}
+			return serviceUtil.getResponse(StatusCode.MER_INVALID_PROFILE, "File");
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal Server Error.");
 	}

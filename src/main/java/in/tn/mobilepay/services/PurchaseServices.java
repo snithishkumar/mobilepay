@@ -147,6 +147,7 @@ public class PurchaseServices {
 			// Json to Object
 			List<DiscardJson> discardJsonList = serviceUtil.fromJson(requestData,new TypeToken<ArrayList<DiscardJson>>() {
 					}.getType());
+			List<PurchaseJson> purchaseJsons = new ArrayList<>();
 			for (DiscardJson discardJson : discardJsonList) {
 				UserEntity userEntity = validateUserToken(discardJson.getAccessToken(), discardJson.getServerToken());
 				PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
@@ -163,13 +164,16 @@ public class PurchaseServices {
 				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
 				purchaseDAO.updatePurchaseObject(purchaseEntity);
 				purchaseDAO.createDiscard(discardEntity);
-			
+				PurchaseJson purchaseJson = new PurchaseJson();
+				purchaseJson.setPurchaseId(purchaseEntity.getPurchaseGuid());
+				purchaseJson.setServerDateTime(purchaseEntity.getPurchaseDateTime());
+				purchaseJsons.add(purchaseJson);
 			}
-			return serviceUtil.getResponse(200, "success");
+			return serviceUtil.getResponse(200, purchaseJsons);
 		}catch(Exception e){
-			e.printStackTrace();
+			logger.error("Error in discardPurchaseByUser", e);
 		}
-		return serviceUtil.getResponse(200, "success");
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
 	}
 	
 	/**

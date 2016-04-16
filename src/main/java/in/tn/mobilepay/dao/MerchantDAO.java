@@ -40,5 +40,14 @@ public class MerchantDAO extends BaseDAO{
 		criteria.add(Restrictions.eq(MerchantEntity.SERVER_TOKEN, serverToken));
 		return (MerchantEntity)criteria.uniqueResult();
 	}
+	
+	
+	public MerchantProfile getMerchantProfile(String merchantGuid,int merchantId){
+		Criteria criteria = createCriteria(MerchantProfile.class);
+		criteria.createAlias(MerchantProfile.MERCHANT_ID, MerchantProfile.MERCHANT_ID);
+		criteria.add(Restrictions.eq(appendAlias(MerchantProfile.MERCHANT_ID, MerchantEntity.MERCHANT_ID), merchantId));
+		criteria.add(Restrictions.eq(appendAlias(MerchantProfile.MERCHANT_ID, MerchantEntity.MERCHANT_GUID), merchantGuid));
+		return (MerchantProfile)criteria.uniqueResult();
+	}
 
 }

@@ -5,8 +5,19 @@ public class DiscardJson extends TokenJson {
 	private String userMobile;
 	private String purchaseGuid;
 	private String reason;
+	private long createdDateTime;
 	
 	
+	
+	
+
+	public long getCreatedDateTime() {
+		return createdDateTime;
+	}
+
+	public void setCreatedDateTime(long createdDateTime) {
+		this.createdDateTime = createdDateTime;
+	}
 
 	public String getUserMobile() {
 		return userMobile;

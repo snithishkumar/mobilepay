@@ -9,6 +9,7 @@ public class StatusCode {
 	public static final int MER_INVALID_LOGIN = 404;
 	public static final int MER_UNAUTHORIZE = 405;
 	public static final int MER_INVALID_MOBILE = 406;
+	public static final int MER_INVALID_PROFILE = 407;
 	
 	/** Registration 2^1 **/
 	public static final int REG_OK = 2;

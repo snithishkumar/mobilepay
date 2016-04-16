@@ -234,6 +234,7 @@ public class UserServices {
 			//Response
 			return serviceUtil.getResponse(StatusCode.MER_OK, responseAddressBook);
 		}catch(Exception e){
+			e.printStackTrace();
 			logger.error("Error in syncUserDeliveryAddress", e);
 		}
 		// Error Response

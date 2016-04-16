@@ -15,6 +15,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "MerchantProfile")
 public class MerchantProfile {
+	
+	public static final String MERCHANT_PRO_ID = "merchantProfileId";
+	public static final String MERCHANT_ID = "merchantEntity";
+	public static final String MERCHANT_PRO = "merchantProfile";
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)

@@ -52,7 +52,7 @@ public class PurchaseCntrl {
 		return purchaseServices.getLuggageList(requestData);
 	}
 	
-	@RequestMapping(value="/mobile/discardPurchase")
+	@RequestMapping(value="/mobile/syncDiscardData")
 	public ResponseEntity<String> discardPurchaseByUser(@RequestBody String requestData){
 		return purchaseServices.discardPurchaseByUser(requestData);
 	}
