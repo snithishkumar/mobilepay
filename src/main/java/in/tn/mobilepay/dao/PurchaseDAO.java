@@ -3,6 +3,7 @@ package in.tn.mobilepay.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -14,6 +15,8 @@ import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.OrderStatus;
+import in.tn.mobilepay.request.model.MerchantOrderStatusJson;
+import in.tn.mobilepay.request.model.UnPayedMerchantPurchaseJson;
 import in.tn.mobilepay.response.model.LuggageJson;
 import in.tn.mobilepay.util.MessageConstants;
 
@@ -54,7 +57,6 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public List<PurchaseEntity> getPurchaseHistoryList(long serverDateTime,UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
 		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
 		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
 		if(serverDateTime > 0){
@@ -171,5 +173,218 @@ public class PurchaseDAO extends BaseDAO{
 		criteria.add(Restrictions.eq(DiscardEntity.PURCHASE_ID, purchaseEntity));
 		return (DiscardEntity) criteria.uniqueResult();
 	}
+	
+	/**
+	 * Returns list of PurchaseEntity which are not payed.
+	 * @param merchantPurchaseJson
+	 * @param merchantEntity
+	 * @return
+	 */
+	public List<PurchaseEntity> getUnPayedPurchase(UnPayedMerchantPurchaseJson merchantPurchaseJson,MerchantEntity merchantEntity){
+		Criteria criteria =  createCriteria(PurchaseEntity.class);
+		// Add Merchant Restriction
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
+		// If ServerSyncTime is > 0, then send after those record.
+		if(merchantPurchaseJson.getServerSyncTime() > 0){
+			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, merchantPurchaseJson.getServerSyncTime()));
+		}
+		//OffSet -  Offset for lists of records
+		if(merchantPurchaseJson.getOffSet() > 0){
+			criteria.setFirstResult(merchantPurchaseJson.getOffSet());
+		}
+		//Limit - Maximum number of items to return
+		if(merchantPurchaseJson.getLimit() > 0){
+			criteria.setMaxResults(merchantPurchaseJson.getLimit());
+		}
+		criteria.addOrder(Order.asc(PurchaseEntity.SERVER_DATE_TIME));
+		return criteria.list();
+	}
+	
+	
+	/**
+	 * Returns Number of PurchaseEntity which are not payed.
+	 * 
+	 * @param merchantEntity
+	 * @return
+	 */
+	public long getUnPayedPurchaseCount(MerchantEntity merchantEntity) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
+		// set projection to be Purchase count
+		criteria.setProjection(Projections.rowCount());
+
+		return (Long) criteria.uniqueResult();
+	}
+	
+	/**
+	 * Returns Number of PurchaseEntity which are not payed.
+	 * 
+	 * @param merchantEntity
+	 * @return
+	 */
+	public long getUnPayedPurchaseCount(MerchantEntity merchantEntity,long serverSyncTime) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
+		if(serverSyncTime > 0){
+			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverSyncTime));
+		}
+		// set projection to be Purchase count
+		criteria.setProjection(Projections.rowCount());
+
+		return (Long) criteria.uniqueResult();
+	}
+	
+	
+	
+	/**
+	 * Returns list of PurchaseEntity which are payed and not cancel and not delivered.
+	 * @param merchantPurchaseJson
+	 * @param merchantEntity
+	 * @return
+	 */
+	public List<PurchaseEntity> getPurchaseOrderStatusList(MerchantOrderStatusJson merchantOrderStatusJson,MerchantEntity merchantEntity){
+		Criteria criteria =  createCriteria(PurchaseEntity.class);
+		// Add Merchant Restriction
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
+		
+		// If ServerSyncTime is > 0, then send after those record.
+		if(merchantOrderStatusJson.getPurchaseDateTime() > 0){
+			criteria.add(Restrictions.gt(PurchaseEntity.PURCHASE_DATE_TIME, merchantOrderStatusJson.getPurchaseDateTime()));
+		}
+		//OffSet -  Offset for lists of records
+		if(merchantOrderStatusJson.getOffSet() > 0){
+			criteria.setFirstResult(merchantOrderStatusJson.getOffSet());
+		}
+		//Limit - Maximum number of items to return
+		if(merchantOrderStatusJson.getLimit() > 0){
+			criteria.setMaxResults(merchantOrderStatusJson.getLimit());
+		}
+		criteria.addOrder(Order.asc(PurchaseEntity.PURCHASE_DATE_TIME));
+		return criteria.list();
+	}
+	
+	
+	/**
+	 * Returns list of PurchaseEntity which are payed and not cancel and not delivered.
+	 * 
+	 * @param merchantEntity
+	 * @return
+	 */
+	public long getPurchaseOrderStatusListCount(MerchantEntity merchantEntity) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
+		// set projection to be Purchase count
+		criteria.setProjection(Projections.rowCount());
+
+		return (Long) criteria.uniqueResult();
+	}
+	
+	/**
+	 * Returns list of PurchaseEntity which are payed and not cancel and not delivered.
+	 * 
+	 * @param merchantEntity
+	 * @return
+	 */
+	public long getPurchaseOrderStatusListCount(MerchantEntity merchantEntity,long purchaseDateTime) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
+		if(purchaseDateTime > 0){
+			criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_DATE_TIME, purchaseDateTime));
+		}
+		// set projection to be Purchase count
+		criteria.setProjection(Projections.rowCount());
+
+		return (Long) criteria.uniqueResult();
+	}
+	
+	
+	/**
+	 * Returns list of PurchaseEntity which are  canceled or  delivered.
+	 * @param merchantPurchaseJson
+	 * @param merchantEntity
+	 * @return
+	 */
+	public List<PurchaseEntity> getPurchaseHistoryList(UnPayedMerchantPurchaseJson merchantPurchaseJson,MerchantEntity merchantEntity){
+		Criteria criteria =  createCriteria(PurchaseEntity.class);
+		// Add Merchant Restriction
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		
+		//CANCELED or DELIVERED
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
+		
+		// If ServerSyncTime is > 0, then send after those record.
+		if(merchantPurchaseJson.getServerSyncTime() > 0){
+			criteria.add(Restrictions.gt(PurchaseEntity.PURCHASE_DATE_TIME, merchantPurchaseJson.getServerSyncTime()));
+		}
+		//OffSet -  Offset for lists of records
+		if(merchantPurchaseJson.getOffSet() > 0){
+			criteria.setFirstResult(merchantPurchaseJson.getOffSet());
+		}
+		//Limit - Maximum number of items to return
+		if(merchantPurchaseJson.getLimit() > 0){
+			criteria.setMaxResults(merchantPurchaseJson.getLimit());
+		}
+		criteria.addOrder(Order.asc(PurchaseEntity.SERVER_DATE_TIME));
+		return criteria.list();
+	}
+	
+	
+	/**
+	 * Returns Number of PurchaseEntity which are  canceled or  delivered.
+	 * 
+	 * @param merchantEntity
+	 * @return
+	 */
+	public long getPurchaseHistoryListCount(MerchantEntity merchantEntity) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		//CANCELED or DELIVERED
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
+				
+		// set projection to be Purchase count
+		criteria.setProjection(Projections.rowCount());
+
+		return (Long) criteria.uniqueResult();
+	}
+	
+	
+	/**
+	 * Returns Number of PurchaseEntity which are  canceled or  delivered.
+	 * 
+	 * @param merchantEntity
+	 * @return
+	 */
+	public long getPurchaseHistoryListCount(MerchantEntity merchantEntity,long serverSyncTime) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		//CANCELED or DELIVERED
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
+				
+		if(serverSyncTime > 0){
+			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverSyncTime));
+		}
+		// set projection to be Purchase count
+		criteria.setProjection(Projections.rowCount());
+
+		return (Long) criteria.uniqueResult();
+	}
+	
+	
+	
+	
 
 }

@@ -36,6 +36,7 @@ import in.tn.mobilepay.request.model.OrderStatusUpdateJsonList;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsJson;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsList;
 import in.tn.mobilepay.request.model.PurchaseDetailsJson;
+import in.tn.mobilepay.request.model.UnPayedMerchantPurchaseJson;
 import in.tn.mobilepay.response.model.LuggageJson;
 import in.tn.mobilepay.response.model.LuggagesListJson;
 import in.tn.mobilepay.response.model.MerchantJson;
@@ -161,24 +162,33 @@ public class PurchaseServices {
 				PurchaseEntity purchaseEntity = purchaseDAO.getNonDiscardPurchaseEntity(payedPurchaseDetailsJson.getPurchaseId());
 				if(purchaseEntity != null){
 					purchaseEntity.setDeliveryOptions(payedPurchaseDetailsJson.getDeliveryOptions());
-					if(payedPurchaseDetailsJson.getDeliveryOptions().toString().equals(DeliveryOptions.NONE.toString())){
+					switch (payedPurchaseDetailsJson.getDeliveryOptions()) {
+					case NONE:
 						purchaseEntity.setOrderStatus(OrderStatus.DELIVERED.toString());
-					}else{
+						break;
+					case LUGGAGE:
 						purchaseEntity.setOrderStatus(OrderStatus.PACKING.toString());
-					}
-					if(payedPurchaseDetailsJson.getAddressGuid() != null){
-						AddressEntity addressEntity = userDAO.getAddressEntity(payedPurchaseDetailsJson.getAddressGuid());
-						purchaseEntity.getAddressEntities().add(addressEntity);
-					}else{
-						AddressEntity addressEntity =  addressList.get(payedPurchaseDetailsJson.getAddressJson());
-						if(addressEntity == null){
-							addressEntity = new AddressEntity(payedPurchaseDetailsJson.getAddressJson());
-							addressEntity.setUserEntity(userEntity);
-							userDAO.createAddressEntity(addressEntity);
+						break;
+					case HOME:
+						purchaseEntity.setOrderStatus(OrderStatus.PACKING.toString());
+						if(payedPurchaseDetailsJson.getAddressGuid() != null){
+							AddressEntity addressEntity = userDAO.getAddressEntity(payedPurchaseDetailsJson.getAddressGuid());
+							purchaseEntity.getAddressEntities().add(addressEntity);
+						}else{
+							AddressEntity addressEntity =  addressList.get(payedPurchaseDetailsJson.getAddressJson());
+							if(addressEntity == null){
+								addressEntity = new AddressEntity(payedPurchaseDetailsJson.getAddressJson());
+								addressEntity.setUserEntity(userEntity);
+								userDAO.createAddressEntity(addressEntity);
+							}
+							purchaseEntity.getAddressEntities().add(addressEntity);
+							addressList.put(payedPurchaseDetailsJson.getAddressJson().getAddressUUID(), addressEntity);
 						}
-						purchaseEntity.getAddressEntities().add(addressEntity);
-						addressList.put(payedPurchaseDetailsJson.getAddressJson().getAddressUUID(), addressEntity);
+						break;
+					
 					}
+					
+					
 					purchaseEntity.setPayed(true);
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(payedPurchaseDetailsJson.getPayemetTime());
@@ -465,6 +475,19 @@ public class PurchaseServices {
 			logger.error("Error in getLuggageList",e);
 		}
 		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+	}
+	
+	
+	public ResponseEntity<String> getUnPayedPurchase(String requestData){
+		try{
+			UnPayedMerchantPurchaseJson payedMerchantPurchaseJson = serviceUtil.fromJson(requestData, UnPayedMerchantPurchaseJson.class);
+			MerchantEntity merchantEntity = validateToken(payedMerchantPurchaseJson.getAccessToken(), payedMerchantPurchaseJson.getServerToken());
+			List<PurchaseEntity> purchaseEntities = purchaseDAO.getUnPayedPurchase(payedMerchantPurchaseJson, merchantEntity);
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal Server Error.");
 	}
 
 }

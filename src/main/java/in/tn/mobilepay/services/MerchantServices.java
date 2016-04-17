@@ -169,5 +169,7 @@ public class MerchantServices {
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal Server Error.");
 	}
+	
+
 
 }
