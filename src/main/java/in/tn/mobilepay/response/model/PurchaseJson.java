@@ -2,6 +2,7 @@ package in.tn.mobilepay.response.model;
 
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
+import in.tn.mobilepay.request.model.DiscardJson;
 
 public class PurchaseJson {
 
@@ -22,6 +23,7 @@ public class PurchaseJson {
 	private String orderStatus;
 	private DeliveryOptions deliveryOptions;
 	private String totalAmount;
+	private DiscardJson discardJson;
 	
 	public PurchaseJson(){
 		
@@ -169,6 +171,24 @@ public class PurchaseJson {
 
 	public DeliveryOptions getDeliveryOptions() {
 		return deliveryOptions;
+	}
+	
+	
+
+	public String getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(String totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	public DiscardJson getDiscardJson() {
+		return discardJson;
+	}
+
+	public void setDiscardJson(DiscardJson discardJson) {
+		this.discardJson = discardJson;
 	}
 
 	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {

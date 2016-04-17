@@ -1,7 +1,9 @@
 package in.tn.mobilepay.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +18,24 @@ import com.google.gson.reflect.TypeToken;
 import in.tn.mobilepay.dao.MerchantDAO;
 import in.tn.mobilepay.dao.PurchaseDAO;
 import in.tn.mobilepay.dao.UserDAO;
+import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.entity.UserEntity;
+import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.DiscardBy;
 import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
+import in.tn.mobilepay.request.model.DiscardJsonList;
 import in.tn.mobilepay.request.model.GetLuggageList;
 import in.tn.mobilepay.request.model.GetPurchaseList;
+import in.tn.mobilepay.request.model.OrderStatusUpdate;
+import in.tn.mobilepay.request.model.OrderStatusUpdateJsonList;
+import in.tn.mobilepay.request.model.PayedPurchaseDetailsJson;
+import in.tn.mobilepay.request.model.PayedPurchaseDetailsList;
+import in.tn.mobilepay.request.model.PurchaseDetailsJson;
 import in.tn.mobilepay.response.model.LuggageJson;
 import in.tn.mobilepay.response.model.LuggagesListJson;
 import in.tn.mobilepay.response.model.MerchantJson;
@@ -104,8 +114,8 @@ public class PurchaseServices {
 	public ResponseEntity<String> discardPurchase(String requestData){
 		try{
 			// Json to Object
-			List<DiscardJson> discardJsonList = serviceUtil.fromJson(requestData, new TypeToken<ArrayList<DiscardJson>>() {}.getType());
-			for(DiscardJson discardJson : discardJsonList){
+			DiscardJsonList discardJsonList = serviceUtil.fromJson(requestData, DiscardJsonList.class);
+			for(DiscardJson discardJson : discardJsonList.getDiscardJsons()){
 				
 				// Validate Merchant Authorize
 				MerchantEntity merchantEntity = validateToken(discardJson.getAccessToken(), discardJson.getServerToken());
@@ -140,16 +150,67 @@ public class PurchaseServices {
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
 	}
 	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> syncPayedData(String requestData){
+		try{
+			PayedPurchaseDetailsList payedPurchaseDetailsJsons = serviceUtil.fromJson(requestData,PayedPurchaseDetailsList.class);
+			UserEntity userEntity = validateUserToken(payedPurchaseDetailsJsons.getAccessToken(), payedPurchaseDetailsJsons.getServerToken());
+			List<PurchaseJson> purchaseJsons = new ArrayList<>();
+			Map<String, AddressEntity> addressList = new HashMap<>();
+			for (PayedPurchaseDetailsJson payedPurchaseDetailsJson : payedPurchaseDetailsJsons.getPurchaseDetailsJsons()) {
+				PurchaseEntity purchaseEntity = purchaseDAO.getNonDiscardPurchaseEntity(payedPurchaseDetailsJson.getPurchaseId());
+				if(purchaseEntity != null){
+					purchaseEntity.setDeliveryOptions(payedPurchaseDetailsJson.getDeliveryOptions());
+					if(payedPurchaseDetailsJson.getDeliveryOptions().toString().equals(DeliveryOptions.NONE.toString())){
+						purchaseEntity.setOrderStatus(OrderStatus.DELIVERED.toString());
+					}else{
+						purchaseEntity.setOrderStatus(OrderStatus.PACKING.toString());
+					}
+					if(payedPurchaseDetailsJson.getAddressGuid() != null){
+						AddressEntity addressEntity = userDAO.getAddressEntity(payedPurchaseDetailsJson.getAddressGuid());
+						purchaseEntity.getAddressEntities().add(addressEntity);
+					}else{
+						AddressEntity addressEntity =  addressList.get(payedPurchaseDetailsJson.getAddressJson());
+						if(addressEntity == null){
+							addressEntity = new AddressEntity(payedPurchaseDetailsJson.getAddressJson());
+							addressEntity.setUserEntity(userEntity);
+							userDAO.createAddressEntity(addressEntity);
+						}
+						purchaseEntity.getAddressEntities().add(addressEntity);
+						addressList.put(payedPurchaseDetailsJson.getAddressJson().getAddressUUID(), addressEntity);
+					}
+					purchaseEntity.setPayed(true);
+					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
+					purchaseEntity.setUpdatedDateTime(payedPurchaseDetailsJson.getPayemetTime());
+					purchaseEntity.setUnModifiedAmountDetails(purchaseEntity.getAmountDetails());
+					purchaseEntity.setUnModifiedPurchaseData(purchaseEntity.getPurchaseData());
+					purchaseEntity.setAmountDetails(payedPurchaseDetailsJson.getAmountDetails());
+					purchaseEntity.setPurchaseData(payedPurchaseDetailsJson.getProductDetails());
+					purchaseDAO.updatePurchaseObject(purchaseEntity);
+					PurchaseJson purchaseJson = new PurchaseJson();
+					purchaseJson.setPurchaseId(purchaseEntity.getPurchaseGuid());
+					purchaseJson.setServerDateTime(purchaseEntity.getPurchaseDateTime());
+					purchaseJsons.add(purchaseJson);
+				}
+				
+			}
+			String responseJson = serviceUtil.toJson(purchaseJsons);
+			return serviceUtil.getResponse(200, responseJson);
+		}catch(Exception e){
+			logger.error("Error in discardPurchaseByUser", e);
+		}
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
+	}
+	
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> discardPurchaseByUser(String requestData){
 		try {
 			// Json to Object
-			List<DiscardJson> discardJsonList = serviceUtil.fromJson(requestData,new TypeToken<ArrayList<DiscardJson>>() {
-					}.getType());
+			DiscardJsonList discardJsonList = serviceUtil.fromJson(requestData,DiscardJsonList.class);
+			UserEntity userEntity = validateUserToken(discardJsonList.getAccessToken(), discardJsonList.getServerToken());
 			List<PurchaseJson> purchaseJsons = new ArrayList<>();
-			for (DiscardJson discardJson : discardJsonList) {
-				UserEntity userEntity = validateUserToken(discardJson.getAccessToken(), discardJson.getServerToken());
+			for (DiscardJson discardJson : discardJsonList.getDiscardJsons()) {
 				PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
 				DiscardEntity discardEntity = new DiscardEntity();
 				discardEntity.setDiscardGuid(serviceUtil.uuid());
@@ -160,7 +221,7 @@ public class PurchaseServices {
 				discardEntity.setDiscardBy(DiscardBy.USER);
 				purchaseEntity.setDiscard(true);
 				purchaseEntity.setOrderStatus(OrderStatus.CANCELED.toString());
-				purchaseEntity.setServerDateTime(discardEntity.getCreatedDateTime());
+				purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
 				purchaseDAO.updatePurchaseObject(purchaseEntity);
 				purchaseDAO.createDiscard(discardEntity);
@@ -169,9 +230,33 @@ public class PurchaseServices {
 				purchaseJson.setServerDateTime(purchaseEntity.getPurchaseDateTime());
 				purchaseJsons.add(purchaseJson);
 			}
-			return serviceUtil.getResponse(200, purchaseJsons);
+			String responseJson = serviceUtil.toJson(purchaseJsons);
+			return serviceUtil.getResponse(200, responseJson);
 		}catch(Exception e){
+			e.printStackTrace();
 			logger.error("Error in discardPurchaseByUser", e);
+		}
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
+	}
+	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> updateOrderStatus(String requestData){
+		try{
+			OrderStatusUpdateJsonList orderStatusUpdateJsonList =	serviceUtil.fromJson(requestData, OrderStatusUpdateJsonList.class);
+			MerchantEntity merchantEntity = validateToken(orderStatusUpdateJsonList.getAccessToken(), orderStatusUpdateJsonList.getServerToken());
+			for(OrderStatusUpdate orderStatusUpdate : orderStatusUpdateJsonList.getOrderStatusUpdates()){
+				PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),merchantEntity);
+				if(purchaseEntity != null){
+					purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
+					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
+					purchaseEntity.setUpdatedDateTime(purchaseEntity.getServerDateTime());
+					purchaseDAO.updatePurchaseObject(purchaseEntity);
+				}
+			}
+			return serviceUtil.getResponse(200, "success");
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("Error in updateOrderStatus", e);
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
 	}
@@ -320,12 +405,15 @@ public class PurchaseServices {
 			// Entity to Json Object
 			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
 			for (PurchaseEntity purchaseEntity : purchaseList) {
+				DiscardEntity discardEntity = purchaseDAO.getDiscardEntity(purchaseEntity);
+				DiscardJson discardJson = new DiscardJson(discardEntity);
 				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
 				UserJson userJson = new UserJson(userEntity);
 				purchaseJson.setUsers(userJson);
 				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
 				purchaseJson.setMerchants(merchantJson);
 				purchaseJsons.add(purchaseJson);
+				purchaseJson.setDiscardJson(discardJson);
 			}
 			String responseJson = serviceUtil.toJson(purchaseJsons);
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);

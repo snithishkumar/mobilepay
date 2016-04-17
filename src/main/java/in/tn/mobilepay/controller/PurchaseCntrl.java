@@ -31,6 +31,14 @@ public class PurchaseCntrl {
 		return purchaseServices.createPurchase(requestData);
 	}
 	
+	//
+	@RequestMapping(value="/merchant/updateOrderStatus")
+	public ResponseEntity<String> updateOrderStatus(@RequestBody String requestData){
+		return purchaseServices.updateOrderStatus(requestData);
+	}
+	
+	//
+	
 	@RequestMapping(value="/merchant/discardPurchase")
 	public ResponseEntity<String> discardPurchase(@RequestBody String requestData){
 		return purchaseServices.discardPurchase(requestData);
@@ -55,6 +63,12 @@ public class PurchaseCntrl {
 	@RequestMapping(value="/mobile/syncDiscardData")
 	public ResponseEntity<String> discardPurchaseByUser(@RequestBody String requestData){
 		return purchaseServices.discardPurchaseByUser(requestData);
+	}
+	
+	
+	@RequestMapping(value="/mobile/syncPayedData")
+	public ResponseEntity<String> syncPayedData(@RequestBody String requestData){
+		return purchaseServices.syncPayedData(requestData);
 	}
 
 }

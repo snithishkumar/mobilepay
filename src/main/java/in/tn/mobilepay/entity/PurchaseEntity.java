@@ -1,5 +1,7 @@
 package in.tn.mobilepay.entity;
 
+import java.util.Collection;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -7,6 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -80,6 +84,10 @@ public class PurchaseEntity {
 	
 	@Column(name = "TotalAmount")
 	private String totalAmount;
+	
+	@ManyToMany
+	@JoinTable(name="HomeDeliveryAddress",joinColumns={@JoinColumn(name="addressId")},inverseJoinColumns={@JoinColumn(name="purchaseId")})
+	private Collection<AddressEntity> addressEntities;
 	
 	public PurchaseEntity(){
 		
@@ -271,6 +279,20 @@ public class PurchaseEntity {
 
 	public void setTotalAmount(String totalAmount) {
 		this.totalAmount = totalAmount;
+	}
+	
+	
+
+
+
+	public Collection<AddressEntity> getAddressEntities() {
+		return addressEntities;
+	}
+
+
+
+	public void setAddressEntities(Collection<AddressEntity> addressEntities) {
+		this.addressEntities = addressEntities;
 	}
 
 

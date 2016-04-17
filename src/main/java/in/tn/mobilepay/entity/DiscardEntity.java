@@ -16,6 +16,9 @@ import in.tn.mobilepay.enumeration.DiscardBy;
 @Entity
 @Table(name = "DiscardDetails")
 public class DiscardEntity {
+	
+	public static final String PURCHASE_ID = "purchaseEntity";
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "DiscardId")

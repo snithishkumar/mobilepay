@@ -10,6 +10,7 @@ import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 
 import in.tn.mobilepay.entity.DiscardEntity;
+import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.OrderStatus;
@@ -80,7 +81,6 @@ public class PurchaseDAO extends BaseDAO{
 		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
-		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
 	}
 	
 	/**
@@ -91,9 +91,10 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public List<LuggageJson> getLuggageList(long startTime,long endTime,UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.ge(PurchaseEntity.SERVER_DATE_TIME, startTime));
-		criteria.add(Restrictions.le(PurchaseEntity.SERVER_DATE_TIME, endTime));
-		defaultLuggFilter(userEntity, criteria);
+		criteria.add(Restrictions.ge(PurchaseEntity.PURCHASE_DATE_TIME, startTime));
+		criteria.add(Restrictions.le(PurchaseEntity.PURCHASE_DATE_TIME, endTime));
+		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
 		ProjectionList projectionList = Projections.projectionList();
 		projectionList.add(Projections.property(PurchaseEntity.SERVER_DATE_TIME),PurchaseEntity.SERVER_DATE_TIME);
 		projectionList.add(Projections.property(PurchaseEntity.PURCHASE_GUID),PurchaseEntity.PURCHASE_GUID);
@@ -113,8 +114,8 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public List<PurchaseEntity> getLuggageWithPurchaseList(long startTime,long endTime,UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.le(PurchaseEntity.SERVER_DATE_TIME, startTime));
-		criteria.add(Restrictions.ge(PurchaseEntity.SERVER_DATE_TIME, endTime));
+		criteria.add(Restrictions.lt(PurchaseEntity.PURCHASE_DATE_TIME, startTime));
+		criteria.add(Restrictions.gt(PurchaseEntity.PURCHASE_DATE_TIME, endTime));
 		defaultLuggFilter(userEntity, criteria);
 		return criteria.list();
 	}
@@ -144,6 +145,31 @@ public class PurchaseDAO extends BaseDAO{
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_GUID, purchaseGuid));
 		return (PurchaseEntity) criteria.uniqueResult();
+	}
+	
+	public PurchaseEntity getPurchaseEntity(String purchaseGuid,MerchantEntity merchantEntity){
+		Criteria criteria =  createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_GUID, purchaseGuid));
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
+		return (PurchaseEntity) criteria.uniqueResult();
+	}
+	
+	
+	public PurchaseEntity getNonDiscardPurchaseEntity(String purchaseGuid){
+		Criteria criteria =  createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_GUID, purchaseGuid));
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_DISCARD, false));
+		return (PurchaseEntity) criteria.uniqueResult();
+	}
+	
+	
+	public DiscardEntity getDiscardEntity(PurchaseEntity purchaseEntity){
+		Criteria criteria =  createCriteria(DiscardEntity.class);
+		criteria.add(Restrictions.eq(DiscardEntity.PURCHASE_ID, purchaseEntity));
+		return (DiscardEntity) criteria.uniqueResult();
 	}
 
 }

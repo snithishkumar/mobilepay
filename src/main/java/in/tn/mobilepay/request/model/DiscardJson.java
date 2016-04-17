@@ -1,14 +1,27 @@
 package in.tn.mobilepay.request.model;
 
-public class DiscardJson extends TokenJson {
+import in.tn.mobilepay.entity.DiscardEntity;
+import in.tn.mobilepay.enumeration.DiscardBy;
+
+public class DiscardJson extends TokenJson{
 	
 	private String userMobile;
 	private String purchaseGuid;
 	private String reason;
 	private long createdDateTime;
 	
+	private DiscardBy discardBy;
 	
 	
+	public DiscardJson(){
+		
+	}
+	
+	public DiscardJson(DiscardEntity discardEntity){
+		this.reason = discardEntity.getReason();
+		this.discardBy = discardEntity.getDiscardBy();
+		
+	}
 	
 
 	public long getCreatedDateTime() {
@@ -41,6 +54,16 @@ public class DiscardJson extends TokenJson {
 
 	public void setReason(String reason) {
 		this.reason = reason;
+	}
+	
+	
+
+	public DiscardBy getDiscardBy() {
+		return discardBy;
+	}
+
+	public void setDiscardBy(DiscardBy discardBy) {
+		this.discardBy = discardBy;
 	}
 
 	@Override
