@@ -23,6 +23,11 @@ import in.tn.mobilepay.util.MessageConstants;
 @Repository
 public class PurchaseDAO extends BaseDAO{
 	
+	/**
+	 * Get List of Purchase 
+	 * @param purchaseId
+	 * @return
+	 */
 	public List<PurchaseEntity> gePurchase(int purchaseId){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));

@@ -80,31 +80,7 @@ public class PurchaseServices {
 		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
 	}
 
-	/*@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> updatePurchaseDetails(String requestData) {
-		try {
-			String purchaseJson = serviceUtil.netDecryption(requestData);
-			PurchaseUpdateJson purchaseUpdateJson = serviceUtil.fromJson(purchaseJson, PurchaseUpdateJson.class);
-			PurchaseEntity dbPurchaseEntity = purchaseDAO.getPurchaseById(purchaseUpdateJson.getPurchaseId());
-			if (dbPurchaseEntity != null) {
-				if (dbPurchaseEntity.getUnModifiedPurchaseData() != null) {
-					dbPurchaseEntity.setUnModifiedPurchaseData(dbPurchaseEntity.getPurchaseData());
-				}
-				if (dbPurchaseEntity.getUnModifiedAmountDetails() != null) {
-					dbPurchaseEntity.setUnModifiedAmountDetails(dbPurchaseEntity.getAmountDetails());
-				}
-				dbPurchaseEntity.setUpdatedDateTime(purchaseUpdateJson.getUpdatedDateTime());
-				dbPurchaseEntity.setAmountDetails(purchaseUpdateJson.getAmountDetails());
-				dbPurchaseEntity.setPurchaseData(purchaseUpdateJson.getProductDetails());
-				purchaseDAO.updatePurchaseObject(dbPurchaseEntity);
-				return serviceUtil.getSuccessResponse(HttpStatus.OK, "Success");
-			}
-			return serviceUtil.getErrorResponse(HttpStatus.EXPECTATION_FAILED, "Invalid Details");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
-	}*/
+	
 	
 	/**
 	 * Discard Purchase Data
@@ -264,6 +240,9 @@ public class PurchaseServices {
 				}
 			}
 			return serviceUtil.getResponse(200, "success");
+		}catch(ValidationException e){
+			logger.error("Error in updateOrderStatus", e);
+			return serviceUtil.getResponse(e.getCode(), e.getMessage());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("Error in updateOrderStatus", e);
