@@ -13,12 +13,19 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
+import in.tn.mobilepay.enumeration.NotificationType;
+import in.tn.mobilepay.response.model.NotificationJson;
 import in.tn.mobilepay.response.model.ResponseData;
 
 @Service
@@ -139,5 +146,21 @@ public class ServiceUtil {
 		stringBuilder.append(secureRandom.nextInt());
 		stringBuilder.append(RandomStringUtils.randomAlphanumeric(5));
 		return stringBuilder.toString();
+	}
+	
+	public void sendAndroidNotification(NotificationJson notificationJson,String deviceToken){
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "key=AIzaSyBuFk_OddMviHfKLK7eilEw3P5v0KEG7tc");
+		headers.set("Content-Type", "application/json");
+		JsonObject mainJson = new JsonObject();
+		
+		mainJson.add("data", gson.toJsonTree(notificationJson));
+		mainJson.addProperty("to", deviceToken);
+		//mainJson.addProperty("collapse_key", "terragoedge");
+		HttpEntity<String> request = new HttpEntity<>(mainJson.toString(),headers);
+		ResponseEntity<String> responseEntity = restTemplate.exchange("https://gcm-http.googleapis.com/gcm/send", HttpMethod.POST, request, String.class);
+		System.out.println(responseEntity.getBody());
+		
 	}
 }

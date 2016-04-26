@@ -3,6 +3,7 @@ package in.tn.mobilepay.services;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,9 +14,11 @@ import com.google.gson.JsonObject;
 
 import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.entity.AddressEntity;
+import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.OtpEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.exception.ValidationException;
+import in.tn.mobilepay.request.model.CloudMessageJson;
 import in.tn.mobilepay.request.model.OtpJson;
 import in.tn.mobilepay.request.model.RegisterJson;
 import in.tn.mobilepay.response.model.AddressBookJson;
@@ -239,5 +242,43 @@ public class UserServices {
 		}
 		// Error Response
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Failure");
+	}
+	
+	/**
+	 * Add Cloud id
+	 * @param requestData
+	 * @return
+	 */
+	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
+	public ResponseEntity<String> addCloudToken(String requestData){
+		try{
+			//Json to Object
+			CloudMessageJson cloudMessageJson = serviceUtil.fromJson(requestData, CloudMessageJson.class);
+			//Validate User token
+			UserEntity userEntity =	userDao.getUserEnityByToken(cloudMessageJson.getAccessToken(), cloudMessageJson.getServerToken());
+			// Check same imei number is present in any other user
+			CloudMessageEntity dbCloudMessageEntity =  userDao.getCloudMessageEntity(cloudMessageJson.getImeiNumber(),userEntity);
+			// If its present, then need to delete
+			if(dbCloudMessageEntity != null){
+				userDao.removeCloudMessageEntity(dbCloudMessageEntity);
+			}
+			// Get CloudMessageEntity for this user
+			CloudMessageEntity cloudMessageEntity = 	userDao.getCloudMessageEntity(userEntity);
+			// If its present, then update otherwise need to create
+			if(cloudMessageEntity != null){
+				cloudMessageEntity.toCloudMessageEntity(cloudMessageJson);
+				userDao.updateCloudMessageEntity(cloudMessageEntity);
+			}else{
+				cloudMessageEntity = new CloudMessageEntity(cloudMessageJson);
+				cloudMessageEntity.setUserEntity(userEntity);
+				userDao.saveCloudMessageEntity(cloudMessageEntity);
+			}
+			//Response
+			return serviceUtil.getResponse(StatusCode.MER_OK, "success");
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("Error in addCloudToken", e);
+		}
+		return serviceUtil.getResponse(StatusCode.INTERNAL_ERROR, "failure");
 	}
 }

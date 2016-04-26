@@ -19,12 +19,14 @@ import in.tn.mobilepay.dao.MerchantDAO;
 import in.tn.mobilepay.dao.PurchaseDAO;
 import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.entity.AddressEntity;
+import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.DiscardBy;
+import in.tn.mobilepay.enumeration.NotificationType;
 import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
@@ -40,6 +42,7 @@ import in.tn.mobilepay.request.model.UnPayedMerchantPurchaseJson;
 import in.tn.mobilepay.response.model.LuggageJson;
 import in.tn.mobilepay.response.model.LuggagesListJson;
 import in.tn.mobilepay.response.model.MerchantJson;
+import in.tn.mobilepay.response.model.NotificationJson;
 import in.tn.mobilepay.response.model.PurchaseJson;
 import in.tn.mobilepay.response.model.UserJson;
 import in.tn.mobilepay.util.StatusCode;
@@ -115,6 +118,16 @@ public class PurchaseServices {
 				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
 				purchaseDAO.updatePurchaseObject(purchaseEntity);
 				purchaseDAO.createDiscard(discardEntity);
+				
+				//Send Push Notification
+				CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(purchaseEntity.getUserEntity());
+				if(cloudMessageEntity != null){
+					NotificationJson notificationJson = new NotificationJson();
+					notificationJson.setNotificationType(NotificationType.STATUS);
+					notificationJson.setMessage("Your order has been Declined by Merchant. Because of "+discardEntity.getReason());
+					notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
+					serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
+				}
 			}
 			
 			return serviceUtil.getResponse(StatusCode.MER_OK, "success");
@@ -237,6 +250,16 @@ public class PurchaseServices {
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(purchaseEntity.getServerDateTime());
 					purchaseDAO.updatePurchaseObject(purchaseEntity);
+					
+					//Send Push Notification
+					CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(purchaseEntity.getUserEntity());
+					if(cloudMessageEntity != null){
+						NotificationJson notificationJson = new NotificationJson();
+						notificationJson.setNotificationType(NotificationType.STATUS);
+						notificationJson.setMessage("Your order has been Packed. You can collect from Saravana Stores.");
+						notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
+						serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
+					}
 				}
 			}
 			return serviceUtil.getResponse(200, "success");
@@ -276,6 +299,16 @@ public class PurchaseServices {
 				populatePurchaseData(dbPurchaseEntity, purchaseJson);
 				//Create New Record
 				purchaseDAO.createPurchaseObject(dbPurchaseEntity);
+				//Send Push Notification
+				CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(userEntity);
+				if(cloudMessageEntity != null){
+					NotificationJson notificationJson = new NotificationJson();
+					notificationJson.setNotificationType(NotificationType.PURCHASE);
+					notificationJson.setMessage("You have Purhcased in  Saravana Stores.Total Cost : 520000.");
+					notificationJson.setPurchaseGuid(dbPurchaseEntity.getPurchaseGuid());
+					serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
+				}
+				
 				//Response
 				return serviceUtil.getResponse(StatusCode.MER_OK, "success");
 			}else{ // Update Purchase Data // -- TODO

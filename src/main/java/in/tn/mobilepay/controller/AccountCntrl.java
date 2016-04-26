@@ -50,4 +50,10 @@ public class AccountCntrl {
 	public ResponseEntity<String> syncUserDeliveryAddress(@RequestBody String requestData){
 		return userServices.syncUserDeliveryAddress(requestData);
 	}
+	
+	
+	@RequestMapping(value="/mobile/addCloudId")
+	public ResponseEntity<String> addCloudId(@RequestBody String requestData){
+		return userServices.addCloudToken(requestData);
+	}
 }

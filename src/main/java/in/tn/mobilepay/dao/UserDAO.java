@@ -7,6 +7,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import in.tn.mobilepay.entity.AddressEntity;
+import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.OtpEntity;
 import in.tn.mobilepay.entity.UserEntity;
 
@@ -102,6 +103,54 @@ public class UserDAO extends BaseDAO{
 	
 	public void updateAddressEntity(AddressEntity addressEntity){
 		updateObject(addressEntity);
+	}
+	
+	/**
+	 * Get CloudMessageEntity by User
+	 * @param userEntity
+	 * @return
+	 */
+	public CloudMessageEntity getCloudMessageEntity(UserEntity userEntity){
+		Criteria criteria = createCriteria(CloudMessageEntity.class);
+		criteria.add(Restrictions.eq(CloudMessageEntity.USER_ENTITY, userEntity));
+		return (CloudMessageEntity)criteria.uniqueResult();
+	}
+	
+	
+	/**
+	 * Get CloudMessageEntity by IMEI
+	 * @param imeiNumber
+	 * @return
+	 */
+	public CloudMessageEntity getCloudMessageEntity(String  imeiNumber,UserEntity userEntity){
+		Criteria criteria = createCriteria(CloudMessageEntity.class);
+		criteria.add(Restrictions.eq(CloudMessageEntity.IMEI_NUMBER, imeiNumber));
+		criteria.add(Restrictions.ne(CloudMessageEntity.USER_ENTITY, userEntity));
+		return (CloudMessageEntity)criteria.uniqueResult();
+	}
+	
+	/**
+	 * Every device must only single record. so remove CloudMessageEntity
+	 * @param cloudMessageEntity
+	 */
+	public void removeCloudMessageEntity(CloudMessageEntity cloudMessageEntity){
+		sessionFactory.getCurrentSession().delete(cloudMessageEntity);
+	}
+	
+	/**
+	 * Create New CloudMessageEntity
+	 * @param cloudMessageEntity
+	 */
+	public void saveCloudMessageEntity(CloudMessageEntity cloudMessageEntity){
+		sessionFactory.getCurrentSession().save(cloudMessageEntity);
+	}
+	
+	/**
+	 * Update CloudMessageEntity
+	 * @param cloudMessageEntity
+	 */
+	public void updateCloudMessageEntity(CloudMessageEntity cloudMessageEntity){
+		sessionFactory.getCurrentSession().update(cloudMessageEntity);
 	}
 	
 	
