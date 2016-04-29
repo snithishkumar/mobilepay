@@ -38,35 +38,51 @@ public class PurchaseDAO extends BaseDAO{
 	}
 	
 	/**
-	 * Get Current Purchase List
+	 * Get Current Purchase UUIDs List
 	 * @param serverDateTime
 	 * @param userEntity
 	 * @return
 	 */
-	public List<PurchaseEntity> gePurchaseList(long serverDateTime,UserEntity userEntity){
+	public List<String> gePurchaseList(UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
 		criteria.add(Restrictions.eq(PurchaseEntity.IS_DISCARD, false));
 		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
-		if(serverDateTime > 0){
-			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverDateTime));
-		}
+		criteria.addOrder(Order.asc(PurchaseEntity.SERVER_DATE_TIME));
+		criteria.setProjection(Projections.property(PurchaseEntity.PURCHASE_GUID));
 		return criteria.list();
 	}
 	
+	
 	/**
-	 * Get Purchase History List
+	 * Returns List of PurchaseEntity based on purchaseGuids
+	 * @param purchaseGuids
+	 * @param userEntity
+	 * @return
+	 */
+	public List<PurchaseEntity> getPurchaseDetails(List<String> purchaseGuids,UserEntity userEntity){
+		Criteria criteria =  createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
+		criteria.add(Restrictions.in(PurchaseEntity.PURCHASE_GUID, purchaseGuids));
+		return criteria.list();
+	}
+	
+	
+	
+	
+	/**
+	 * Get Purchase History UUIDs List
 	 * @param serverDateTime
 	 * @param userEntity
 	 * @return
 	 */
-	public List<PurchaseEntity> getPurchaseHistoryList(long serverDateTime,UserEntity userEntity){
+	public List<String> getPurchaseHistoryList(UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
 		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
-		if(serverDateTime > 0){
-			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverDateTime));
-		}
+		criteria.setProjection(Projections.property(PurchaseEntity.PURCHASE_GUID));
+		criteria.addOrder(Order.desc(PurchaseEntity.SERVER_DATE_TIME));
+		criteria.setMaxResults(25);
 		return criteria.list();
 	}
 	

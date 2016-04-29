@@ -32,12 +32,14 @@ import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
 import in.tn.mobilepay.request.model.DiscardJsonList;
 import in.tn.mobilepay.request.model.GetLuggageList;
+import in.tn.mobilepay.request.model.GetPurchaseDetailsList;
 import in.tn.mobilepay.request.model.GetPurchaseList;
 import in.tn.mobilepay.request.model.OrderStatusUpdate;
 import in.tn.mobilepay.request.model.OrderStatusUpdateJsonList;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsJson;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsList;
 import in.tn.mobilepay.request.model.PurchaseDetailsJson;
+import in.tn.mobilepay.request.model.TokenJson;
 import in.tn.mobilepay.request.model.UnPayedMerchantPurchaseJson;
 import in.tn.mobilepay.response.model.LuggageJson;
 import in.tn.mobilepay.response.model.LuggagesListJson;
@@ -61,7 +63,7 @@ public class PurchaseServices {
 	
 	private static final Logger logger = Logger.getLogger(PurchaseServices.class);
 
-	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	/*@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> getPurchaseDetails(int purchaseId) {
 		try {
 			List<PurchaseEntity> purchaseList = purchaseDAO.gePurchase(purchaseId);
@@ -81,7 +83,7 @@ public class PurchaseServices {
 			e.printStackTrace();
 		}
 		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
-	}
+	}*/
 
 	
 	
@@ -377,6 +379,50 @@ public class PurchaseServices {
 		
 	}
 	
+	
+	/**
+	 * Returns Current Purchase Detail List
+	 * @param requestData
+	 * @return
+	 */
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> getPurchaseDetailsList(String requestData) {
+		try {
+			// Json to Object
+			GetPurchaseDetailsList getPurchaseList =	serviceUtil.fromJson(requestData, GetPurchaseDetailsList.class);
+			// Validate User Details
+			UserEntity userEntity = validateUserToken(getPurchaseList.getAccessToken(), getPurchaseList.getServerToken());
+			// Get Current Purchase List
+			List<PurchaseEntity> purchaseList = purchaseDAO.getPurchaseDetails(getPurchaseList.getPurchaseUUIDs(), userEntity);
+			// Entity to Json Object
+			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
+			for (PurchaseEntity purchaseEntity : purchaseList) {
+				
+				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
+				UserJson userJson = new UserJson(userEntity);
+				purchaseJson.setUsers(userJson);
+				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
+				purchaseJson.setMerchants(merchantJson);
+				
+				if(purchaseEntity.isDiscard()){
+					DiscardEntity discardEntity = purchaseDAO.getDiscardEntity(purchaseEntity);
+					DiscardJson discardJson = new DiscardJson(discardEntity);
+					purchaseJson.setDiscardJson(discardJson);
+				}
+				
+				purchaseJsons.add(purchaseJson);
+			}
+			String responseJson = serviceUtil.toJson(purchaseList);
+		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
+			return serviceUtil.getResponse(300, responseJson);
+		} catch (Exception e) {
+			logger.error("Error in getPurchaseList",e);
+		}
+		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+	}
+	
+	
+	
 	/**
 	 * Returns Current Purchase List
 	 * @param requestData
@@ -386,28 +432,22 @@ public class PurchaseServices {
 	public ResponseEntity<String> getPurchaseList(String requestData) {
 		try {
 			// Json to Object
-			GetPurchaseList getPurchaseList =	serviceUtil.fromJson(requestData, GetPurchaseList.class);
+			TokenJson tokenJson =	serviceUtil.fromJson(requestData, TokenJson.class);
 			// Validate User Details
-			UserEntity userEntity = validateUserToken(getPurchaseList.getAccessToken(), getPurchaseList.getServerToken());
+			UserEntity userEntity = validateUserToken(tokenJson.getAccessToken(), tokenJson.getServerToken());
 			// Get Current Purchase List
-			List<PurchaseEntity> purchaseList = purchaseDAO.gePurchaseList(getPurchaseList.getServerTime(),userEntity);
-			// Entity to Json Object
-			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
-			for (PurchaseEntity purchaseEntity : purchaseList) {
-				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
-				UserJson userJson = new UserJson(userEntity);
-				purchaseJson.setUsers(userJson);
-				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
-				purchaseJson.setMerchants(merchantJson);
-				purchaseJsons.add(purchaseJson);
-			}
-			String responseJson = serviceUtil.toJson(purchaseJsons);
+			List<String> purchaseList = purchaseDAO.gePurchaseList(userEntity);
+			String responseJson = serviceUtil.toJson(purchaseList);
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
+		}catch(ValidationException e){
+			logger.error("Error in ValidationException",e);
+			return serviceUtil.getResponse(e.getCode(), e.getMessage());
+			
 		} catch (Exception e) {
 			logger.error("Error in getPurchaseList",e);
 		}
-		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal ServerError");
 	}
 	
 	/**
@@ -419,32 +459,25 @@ public class PurchaseServices {
 	public ResponseEntity<String> getPurchaseHistoryList(String requestData) {
 		try {
 			//Json to Object
-			GetPurchaseList getPurchaseList =	serviceUtil.fromJson(requestData, GetPurchaseList.class);
+			TokenJson tokenJson =	serviceUtil.fromJson(requestData, TokenJson.class);
 			// Validate User Details
-			UserEntity userEntity = validateUserToken(getPurchaseList.getAccessToken(), getPurchaseList.getServerToken());
+			UserEntity userEntity = validateUserToken(tokenJson.getAccessToken(), tokenJson.getServerToken());
+			
 			// Get Current Purchase List
-			List<PurchaseEntity> purchaseList = purchaseDAO.getPurchaseHistoryList(getPurchaseList.getServerTime(),userEntity);
-			// Entity to Json Object
-			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
-			for (PurchaseEntity purchaseEntity : purchaseList) {
-				DiscardEntity discardEntity = purchaseDAO.getDiscardEntity(purchaseEntity);
-				DiscardJson discardJson = new DiscardJson(discardEntity);
-				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
-				UserJson userJson = new UserJson(userEntity);
-				purchaseJson.setUsers(userJson);
-				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
-				purchaseJson.setMerchants(merchantJson);
-				purchaseJsons.add(purchaseJson);
-				purchaseJson.setDiscardJson(discardJson);
-			}
-			String responseJson = serviceUtil.toJson(purchaseJsons);
-		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
+			List<String> purchaseUUIDsList = purchaseDAO.getPurchaseHistoryList(userEntity);
+			String responseJson = serviceUtil.toJson(purchaseUUIDsList);	
 			return serviceUtil.getResponse(300, responseJson);
-		} catch (Exception e) {
+		}catch(ValidationException e){
+			logger.error("Error in ValidationException",e);
+			return serviceUtil.getResponse(e.getCode(), e.getMessage());
+			
+		}catch (Exception e) {
 			logger.error("Error in getPurchaseHistoryList",e);
 		}
-		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal ServerError");
 	}
+	
+	
 	
 	/**
 	 * Returns Luggage List
@@ -483,10 +516,14 @@ public class PurchaseServices {
 			String responseJson = serviceUtil.toJson(luggagesListJson);
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
-		}catch(Exception e){
+		}catch(ValidationException e){
+			logger.error("Error in ValidationException",e);
+			return serviceUtil.getResponse(e.getCode(), e.getMessage());
+			
+		} catch(Exception e){
 			logger.error("Error in getLuggageList",e);
 		}
-		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal Server Error.");
 	}
 	
 	
