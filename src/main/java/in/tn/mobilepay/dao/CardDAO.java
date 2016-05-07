@@ -27,6 +27,13 @@ public class CardDAO extends BaseDAO {
 	  
 	}
 	
+	
+	public void removeCard(UserEntity userEntity){
+		 Query	query =  sessionFactory.getCurrentSession().createQuery("delete CardDetailsEntity nb where nb.userEntity = :userEntity");
+			query.setParameter("userEntity", userEntity);
+			query.executeUpdate();
+	}
+	
 	public CardDetailsEntity getCardDetailsEntity(String cardGuid){
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(CardDetailsEntity.class);
 		criteria.add(Restrictions.eq(CardDetailsEntity.CARD_GUID, cardGuid));

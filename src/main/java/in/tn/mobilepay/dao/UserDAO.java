@@ -60,6 +60,10 @@ public class UserDAO extends BaseDAO{
 		updateObject(otpEntity);
 	}
 	
+	public void deleteOtpEntity(OtpEntity otpEntity){
+		sessionFactory.getCurrentSession().delete(otpEntity);
+	}
+	
 	/**
 	 * Returns AddressEntity for an addressGuid
 	 * @param addressGuid

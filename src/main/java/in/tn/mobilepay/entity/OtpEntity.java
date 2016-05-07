@@ -2,12 +2,9 @@ package in.tn.mobilepay.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -17,10 +14,12 @@ public class OtpEntity {
 	public static final String MOBILE_NUMBER = "mobileNumber";
 	public static final String OTP_NUMBER = "optNumber";
 	public static final String VALIDATION_TIME = "validationTime";
+	public static final String CREATED_DATE = "createdDateTime";
+	
 	@Column(name = "MobileNumber")
 	private String mobileNumber;
 	@Column(name = OTP_NUMBER)
-	private int optNumber;
+	private String optNumber;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "OtpId")
@@ -28,6 +27,9 @@ public class OtpEntity {
 
 	@Column(name = "ValidationTime")
 	private long validationTime;
+	
+	@Column(name = "CreatedDate")
+	private long createdDateTime;
 
 	
 
@@ -39,11 +41,11 @@ public class OtpEntity {
 		this.mobileNumber = mobileNumber;
 	}
 
-	public int getOptNumber() {
+	public String getOptNumber() {
 		return optNumber;
 	}
 
-	public void setOptNumber(int optNumber) {
+	public void setOptNumber(String optNumber) {
 		this.optNumber = optNumber;
 	}
 
@@ -56,6 +58,16 @@ public class OtpEntity {
 	}
 	
 	
+	
+	
+
+	public long getCreatedDateTime() {
+		return createdDateTime;
+	}
+
+	public void setCreatedDateTime(long createdDateTime) {
+		this.createdDateTime = createdDateTime;
+	}
 
 	public long getValidationTime() {
 		return validationTime;

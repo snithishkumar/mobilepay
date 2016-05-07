@@ -3,15 +3,19 @@ package in.tn.mobilepay.services;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.JsonObject;
 
+import in.tn.mobilepay.dao.CardDAO;
 import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
@@ -23,6 +27,7 @@ import in.tn.mobilepay.request.model.OtpJson;
 import in.tn.mobilepay.request.model.RegisterJson;
 import in.tn.mobilepay.response.model.AddressBookJson;
 import in.tn.mobilepay.response.model.AddressJson;
+import in.tn.mobilepay.response.model.OTPResponse;
 import in.tn.mobilepay.util.StatusCode;
 
 @Service
@@ -30,6 +35,9 @@ public class UserServices {
 	
 	@Autowired
 	private UserDAO userDao;
+	
+	@Autowired
+	private CardDAO cardDao;
 	
 	@Autowired
 	private ServiceUtil serviceUtil;
@@ -47,43 +55,73 @@ public class UserServices {
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
 	public ResponseEntity<String> sendOtp(String requestData){
 		try{
+			// Json to Object
 			OtpJson otpJson = serviceUtil.fromJson(requestData, OtpJson.class);
 			if(otpJson.getMobileNumber() == null){
 				return serviceUtil.getResponse(StatusCode.MOB_VAL_INVALID, "Not Valid Data");
 			}
-			OtpEntity  otpEntity = userDao.getOtpEntity(otpJson.getMobileNumber());
-			if(otpEntity != null){
-				
+			OTPResponse otpResponse = sendOtpPassword(otpJson.getMobileNumber());
+			if(otpResponse.getStatus().equals("success") && otpResponse.getResponse().getCode().equals("OTP_SENT_SUCCESSFULLY")){
+				String otpPassword = otpResponse.getResponse().getOneTimePassword();
+				OtpEntity  otpEntity = userDao.getOtpEntity(otpJson.getMobileNumber());
+				if(otpEntity != null){
+					otpEntity.setOptNumber(otpPassword);
+					otpEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
+					userDao.updateOtpEntity(otpEntity);
+				}else{
+					otpEntity = new OtpEntity();
+					otpEntity.setMobileNumber(otpJson.getMobileNumber());
+					otpEntity.setOptNumber(otpPassword);
+					otpEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
+					userDao.createOtp(otpEntity);
+				}
+				return serviceUtil.getResponse(StatusCode.MOB_VAL_OK, "Success");
 			}else{
-				otpEntity = new OtpEntity();
-				otpEntity.setMobileNumber(otpJson.getMobileNumber());
-				userDao.createOtp(otpEntity);
+				return serviceUtil.getResponse(StatusCode.OTP_ERROR, "Failure");
 			}
-			return serviceUtil.getResponse(StatusCode.MOB_VAL_OK, "Success");
-		}catch(Exception e){
 			
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		return serviceUtil.getResponse(StatusCode.MOB_VAL_INTERNAL_ERROR, "Failure");
+	}
+	
+	
+	
+	
+	private OTPResponse sendOtpPassword(String mobileNumber){
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("countryCode", "91");
+		jsonObject.addProperty("mobileNumber", "9942320690");
+		jsonObject.addProperty("getGeneratedOTP", true);
+		
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		headers.add("Content-Type", "application/json");
+		headers.add("application-Key", "yOFpqvU7yea9fWq3SvA1BcE-O9SNvvVXW5Cdqgft53YOO9aDlUlSeR4i7W5o1zjZo0GMhA6np5JNaka4jVYip3W0vD1Tpy9uod5NJpVm6JeVPvE6IPiemhKl6q44dmTrgZifGruhn4ddS3aSZpiDjA==");
+		
+		RestTemplate restTemplate = new RestTemplate();
+		HttpEntity<JsonObject> request = new HttpEntity<>(jsonObject, headers);
+		OTPResponse otpResponse = restTemplate.postForObject("https://sendotp.msg91.com/api/generateOTP", request, OTPResponse.class);
+		return otpResponse;
 	}
 	
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
 	public ResponseEntity<String> validateOtp(String optValidationData){
 		try{
 			OtpJson otpJson = serviceUtil.fromJson(optValidationData, OtpJson.class);
-			/*OtpJson otpJson = serviceUtil.fromJson(optValidationData, OtpJson.class);
-			if(otpJson.getMobileNumber() == null || otpJson.getOtpNumber() == null){
+			if(otpJson.getMobileNumber() == null || otpJson.getOtpPassword() == null){
 				return serviceUtil.getResponse(StatusCode.INVALID_OTP, "Not Valid Data");
 			}
 			OtpEntity  otpEntity = userDao.getOtpEntity(otpJson.getMobileNumber());
-			if(otpEntity == null || otpEntity.getOptNumber() == Integer.valueOf(otpJson.getOtpNumber())){
+			if(otpEntity == null || !otpEntity.getOptNumber().equals(otpJson.getOtpPassword())){
 				return serviceUtil.getResponse(StatusCode.INVALID_OTP, "Invalid OTP Number");
 			}
-			otpEntity.setValidationTime(serviceUtil.getCurrentGmtTime());
-			userDao.updateOtpEntity(otpEntity);*/
-		/*	UserEntity userEntity = userDao.getUserEntity(otpJson.getMobileNumber());
-			//UserEntity userEntity = otpEntity.getUserEntity();
-			userEntity.setActive(true);
-			userDao.updateUser(userEntity);*/
+			if(ServiceUtil.getCurrentGmtTime() - otpEntity.getCreatedDateTime() > (1000*60*10)){
+				return serviceUtil.getResponse(StatusCode.OTP_EXPIRED, "OTP Expired");
+			}
+			otpEntity.setValidationTime(ServiceUtil.getCurrentGmtTime());
+			userDao.deleteOtpEntity(otpEntity);
+		
 			return serviceUtil.getResponse(StatusCode.OTP_OK, "Success");
 		}catch(Exception e){
 			e.printStackTrace();
@@ -135,6 +173,9 @@ public class UserServices {
 				dbUserEntity.toUser(registerJson);
 				userDao.createUser(dbUserEntity);
 			}else{
+				if(registerJson.isPasswordForget()){
+					cardDao.removeCard(dbUserEntity);
+				}
 				dbUserEntity.toUser(registerJson);
 				userDao.updateUser(dbUserEntity);
 			}

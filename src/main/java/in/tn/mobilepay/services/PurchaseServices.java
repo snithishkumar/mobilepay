@@ -412,7 +412,7 @@ public class PurchaseServices {
 				
 				purchaseJsons.add(purchaseJson);
 			}
-			String responseJson = serviceUtil.toJson(purchaseList);
+			String responseJson = serviceUtil.toJson(purchaseJsons);
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
 		} catch (Exception e) {

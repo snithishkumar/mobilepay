@@ -6,6 +6,7 @@ public class RegisterJson extends TokenJson{
 	private String password;
 	private String mobileNumber;
 	private String imei;
+	 private boolean isPasswordForget;
 
 	public String getName() {
 		return name;
@@ -37,6 +38,16 @@ public class RegisterJson extends TokenJson{
 
 	public void setImei(String imei) {
 		this.imei = imei;
+	}
+	
+	
+
+	public boolean isPasswordForget() {
+		return isPasswordForget;
+	}
+
+	public void setPasswordForget(boolean isPasswordForget) {
+		this.isPasswordForget = isPasswordForget;
 	}
 
 	@Override

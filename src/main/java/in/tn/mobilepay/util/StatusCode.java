@@ -19,6 +19,7 @@ public class StatusCode {
 	/** OTP Validation 2^2 **/
 	public static final int OTP_OK = 4;
 	public static final int INVALID_OTP = 401;
+	public static final int OTP_EXPIRED = 403;
 	public static final int OTP_INTERNAL_ERROR = 402;
 	
 	/** Login 2^3 **/
@@ -32,6 +33,7 @@ public class StatusCode {
 	public static final int MOB_VAL_OK = 16;
 	public static final int MOB_VAL_INVALID = 1601;
 	public static final int MOB_VAL_INTERNAL_ERROR = 1602;
+	public static final int OTP_ERROR = 1604;
 	
 	
 	/** Card 2^7 **/
