@@ -29,6 +29,12 @@ public class MerchantCntrl {
 	}
 	
 	
+	@RequestMapping(value = "/merchant/register")
+	public ResponseEntity<String> register(@RequestBody String requestData) {
+		return merchantServices.merchantRegister(requestData);
+	}
+	
+	
 	@RequestMapping(value="/merchant/login")
 	public ResponseEntity<String> login(@RequestBody String requestData){
 		return merchantServices.merchantLogin(requestData);
