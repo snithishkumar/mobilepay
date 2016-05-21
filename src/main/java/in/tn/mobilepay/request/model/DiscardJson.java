@@ -1,6 +1,10 @@
 package in.tn.mobilepay.request.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import in.tn.mobilepay.entity.DiscardEntity;
+import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.enumeration.DiscardBy;
 
 public class DiscardJson extends TokenJson{
@@ -12,6 +16,7 @@ public class DiscardJson extends TokenJson{
 	
 	private DiscardBy discardBy;
 	
+	 private List<TransactionalDetailsEntity> transactions = new ArrayList<>();
 	
 	public DiscardJson(){
 		
@@ -65,10 +70,22 @@ public class DiscardJson extends TokenJson{
 	public void setDiscardBy(DiscardBy discardBy) {
 		this.discardBy = discardBy;
 	}
+	
+	
+
+	public List<TransactionalDetailsEntity> getTransactions() {
+		return transactions;
+	}
+
+	public void setTransactions(List<TransactionalDetailsEntity> transactions) {
+		this.transactions = transactions;
+	}
 
 	@Override
 	public String toString() {
-		return "DiscardJson [userMobile=" + userMobile + ", purchaseGuid=" + purchaseGuid + ", reason=" + reason + "]";
+		return "DiscardJson [userMobile=" + userMobile + ", purchaseGuid=" + purchaseGuid + ", reason=" + reason
+				+ ", createdDateTime=" + createdDateTime + ", discardBy=" + discardBy + ", transactions=" + transactions
+				+ "]";
 	}
 
 }

@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.Gson;
 
 import in.tn.mobilepay.dao.MerchantDAO;
 import in.tn.mobilepay.dao.PurchaseDAO;
@@ -23,6 +26,7 @@ import in.tn.mobilepay.request.model.MerchantOrderStatusJson;
 import in.tn.mobilepay.request.model.UnPayedMerchantPurchaseJson;
 import in.tn.mobilepay.response.model.AddressJson;
 import in.tn.mobilepay.response.model.PurchaseJson;
+import in.tn.mobilepay.response.model.PurchaseMerchantJson;
 import in.tn.mobilepay.response.model.UserJson;
 import in.tn.mobilepay.util.StatusCode;
 
@@ -40,6 +44,8 @@ public class MerchantPurchaseService {
 	private ServiceUtil serviceUtil;
 	@Autowired
 	private MerchantDAO merchantDAO;
+	@Autowired
+	private Gson gson;
 	
 	
 	private MerchantEntity validateToken(String merchantToken,String serverToken) throws ValidationException{
@@ -56,6 +62,7 @@ public class MerchantPurchaseService {
 	 * @param requestData
 	 * @return
 	 */
+	@Transactional(readOnly = true)
 	public ResponseEntity<String> getUnPayedPurchaseList(String requestData){
 		try{
 			//Json to object
@@ -64,23 +71,23 @@ public class MerchantPurchaseService {
 			MerchantEntity merchantEntity = validateToken(unPayedMerchantPurchaseJson.getAccessToken(), unPayedMerchantPurchaseJson.getServerToken());
 			// Get UnPayed Data 
 			List<PurchaseEntity>  purchaseEntities = purchaseDAO.getUnPayedPurchase(unPayedMerchantPurchaseJson, merchantEntity);
-			List<PurchaseJson> purchaseJsons = new ArrayList<>();
+			List<PurchaseMerchantJson> purchaseJsons = new ArrayList<>();
 			// Entity to Json
 			for(PurchaseEntity purchaseEntity : purchaseEntities){
-				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
+				PurchaseMerchantJson purchaseJson = new PurchaseMerchantJson(purchaseEntity,gson);
 				// Add User Details
 				UserJson userJson = new UserJson(purchaseEntity.getUserEntity());
 				purchaseJson.setUsers(userJson);
 				purchaseJsons.add(purchaseJson);
 			}
-			String response = serviceUtil.toJson(purchaseJsons);
+			//String response = serviceUtil.toJson(purchaseJsons);
 			// Get Total Count
 			long totalCount = purchaseDAO.getUnPayedPurchaseCount(merchantEntity);
 			// Get Count (After ServerSyncTime)
 			long count = purchaseDAO.getUnPayedPurchaseCount(merchantEntity,unPayedMerchantPurchaseJson.getServerSyncTime());
-			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200, response);
-			responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
-			responseEntity.getHeaders().add(COUNT, String.valueOf(count));
+			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200,purchaseJsons);
+			//responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
+			//responseEntity.getHeaders().add(COUNT, String.valueOf(count));
 			return responseEntity;
 		}catch(ValidationException e1){
 			logger.error("Error in getUnPayedPurchaseList, Raw Data["+requestData+"]", e1);
@@ -97,6 +104,7 @@ public class MerchantPurchaseService {
 	 * @param requestData
 	 * @return
 	 */
+	@Transactional(readOnly = true)
 	public ResponseEntity<String> getPayedPurchaseList(String requestData){
 		try{
 			//Json to object
@@ -105,10 +113,10 @@ public class MerchantPurchaseService {
 			MerchantEntity merchantEntity = validateToken(payedMerchantPurchaseJson.getAccessToken(), payedMerchantPurchaseJson.getServerToken());
 			// Get UnPayed Data 
 			List<PurchaseEntity>  purchaseEntities = purchaseDAO.getPurchaseOrderStatusList(payedMerchantPurchaseJson, merchantEntity);
-			List<PurchaseJson> purchaseJsons = new ArrayList<>();
+			List<PurchaseMerchantJson> purchaseJsons = new ArrayList<>();
 			// Entity to Json
 			for(PurchaseEntity purchaseEntity : purchaseEntities){
-				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
+				PurchaseMerchantJson purchaseJson = new PurchaseMerchantJson(purchaseEntity,gson);
 				//Add User Details
 				UserJson userJson = new UserJson(purchaseEntity.getUserEntity());
 				purchaseJson.setUsers(userJson);
@@ -124,14 +132,14 @@ public class MerchantPurchaseService {
 				
 				purchaseJsons.add(purchaseJson);
 			}
-			String response = serviceUtil.toJson(purchaseJsons);
+			//String response = serviceUtil.toJson(purchaseJsons);
 			// Get Total Count
 			long totalCount = purchaseDAO.getPurchaseOrderStatusListCount(merchantEntity);
 			// Get Count (After PurchaseDateTime)
 			long count = purchaseDAO.getPurchaseOrderStatusListCount(merchantEntity,payedMerchantPurchaseJson.getPurchaseDateTime());
-			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200, response);
-			responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
-			responseEntity.getHeaders().add(COUNT, String.valueOf(count));
+			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200, purchaseJsons);
+			//responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
+			//responseEntity.getHeaders().add(COUNT, String.valueOf(count));
 			return responseEntity;
 		}catch(ValidationException e1){
 			logger.error("Error in getPayedPurchaseList, Raw Data["+requestData+"]", e1);
@@ -189,8 +197,8 @@ public class MerchantPurchaseService {
 			// Get Count (After ServerSyncTime)
 			long count = purchaseDAO.getPurchaseHistoryListCount(merchantEntity,unPayedMerchantPurchaseJson.getServerSyncTime());
 			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200, response);
-			responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
-			responseEntity.getHeaders().add(COUNT, String.valueOf(count));
+		//	responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
+		//	responseEntity.getHeaders().add(COUNT, String.valueOf(count));
 			return responseEntity;
 		}catch(ValidationException e1){
 			logger.error("Error in getPayedPurchaseList, Raw Data["+requestData+"]", e1);

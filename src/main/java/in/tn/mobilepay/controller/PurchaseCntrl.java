@@ -2,6 +2,7 @@ package in.tn.mobilepay.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,9 +67,9 @@ public class PurchaseCntrl {
 	
 
 	
-	@RequestMapping(value="/mobile/getLuggageList")
-	public ResponseEntity<String> getLuggageList(@RequestBody String requestData){
-		return purchaseServices.getLuggageList(requestData);
+	@RequestMapping(value="/mobile/getOrderStatusList")
+	public ResponseEntity<String> getOrderStatusList(@RequestBody String requestData){
+		return purchaseServices.getOrderStatusList(requestData);
 	}
 	
 
@@ -89,6 +90,9 @@ public class PurchaseCntrl {
 		return purchaseServices.syncPayedData(requestData);
 	}
 	
-	
+	@RequestMapping(value="/mobile/{purchaseUUID}/syncTransactions")
+	public ResponseEntity<String> syncTransactions(@PathVariable("purchaseUUID") String purchaseUUID,@RequestBody String requestData){
+		return purchaseServices.syncTransactionData(purchaseUUID,requestData);
+	}
 
 }

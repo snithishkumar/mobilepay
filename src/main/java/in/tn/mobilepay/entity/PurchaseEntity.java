@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import in.tn.mobilepay.enumeration.DeliveryOptions;
+import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.request.model.PurchaseJson;
 import in.tn.mobilepay.services.ServiceUtil;
 
@@ -27,7 +29,7 @@ public class PurchaseEntity {
 	public static final String PURCHASE_DATE_TIME = "purchaseDateTime";
 	public static final String USER_ID = "userEntity";
 	public static final String MERCHANT_ID = "merchantEntity";
-	public static final String IS_PAYED = "isPayed";
+	public static final String PAYMENT_STATUS = "paymentStatus";
 	public static final String BILL_NUMBER = "billNumber";
 	public static final String IS_EDITABLE = "isEditable";
 	public static final String UPDATED_DATE_TIME = "updatedDateTime";
@@ -39,7 +41,7 @@ public class PurchaseEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "PurchaseId")
 	private int purchaseId;
-	@Column(name="PurchaseGuid")
+	@Column(name = "PurchaseGuid")
 	private String purchaseGuid;
 	@Column(name = "PurchaseDateTime")
 	private long purchaseDateTime;
@@ -49,8 +51,9 @@ public class PurchaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "MerchantId", referencedColumnName = "MerchantId")
 	private MerchantEntity merchantEntity;
-	@Column(name = "IsPayed")
-	private boolean isPayed;
+	@Column(name = "PaymentStatus")
+	@Enumerated(EnumType.ORDINAL)
+	private PaymentStatus paymentStatus;
 	@Column(name = "BillNumber")
 	private String billNumber;
 	// Product Number,Product Name,Quantity and Amount as a json array
@@ -67,35 +70,34 @@ public class PurchaseEntity {
 	// Amount, Tax, Total amount
 	@Column(name = "AmountDetails")
 	private String amountDetails;
-	
+
 	@Column(name = "UnModifiedAmountDetails")
 	private String unModifiedAmountDetails;
 	@Column(name = "IsDiscard")
-	private boolean  isDiscard;
+	private boolean isDiscard;
 	@Column(name = "ServerDateTime")
 	private long serverDateTime;
-	
+
 	@Enumerated
 	@Column(name = "DeliveryOptions")
 	private DeliveryOptions deliveryOptions;
-	
-	@Column(name = "OrderStatus")//ORDER_STATUS any one of status
+
+	@Column(name = "OrderStatus") // ORDER_STATUS any one of status
 	private String orderStatus;
-	
+
 	@Column(name = "TotalAmount")
 	private String totalAmount;
-	
+
 	@ManyToMany
-	@JoinTable(name="HomeDeliveryAddress",joinColumns={@JoinColumn(name="addressId")},inverseJoinColumns={@JoinColumn(name="purchaseId")})
+	@JoinTable(name = "HomeDeliveryAddress", joinColumns = { @JoinColumn(name = "addressId") }, inverseJoinColumns = {
+			@JoinColumn(name = "purchaseId") })
 	private Collection<AddressEntity> addressEntities;
-	
-	public PurchaseEntity(){
-		
+
+	public PurchaseEntity() {
+
 	}
-	
-	
-	
-	public void loadValue(PurchaseJson purchaseJson){
+
+	public void loadValue(PurchaseJson purchaseJson) {
 		this.totalAmount = purchaseJson.getTotalAmount();
 		this.billNumber = purchaseJson.getBillNumber();
 		this.purchaseGuid = purchaseJson.getPurchaseUuid();
@@ -201,16 +203,6 @@ public class PurchaseEntity {
 		this.merchantEntity = merchantEntity;
 	}
 
-	public boolean isPayed() {
-		return isPayed;
-	}
-
-	public void setPayed(boolean isPayed) {
-		this.isPayed = isPayed;
-	}
-	
-	
-
 	public String getPurchaseGuid() {
 		return purchaseGuid;
 	}
@@ -219,8 +211,6 @@ public class PurchaseEntity {
 		this.purchaseGuid = purchaseGuid;
 	}
 
-	
-
 	public boolean isDiscard() {
 		return isDiscard;
 	}
@@ -228,93 +218,67 @@ public class PurchaseEntity {
 	public void setDiscard(boolean isDiscard) {
 		this.isDiscard = isDiscard;
 	}
-	
-	
 
 	public long getServerDateTime() {
 		return serverDateTime;
 	}
 
-
-
 	public void setServerDateTime(long serverDateTime) {
 		this.serverDateTime = serverDateTime;
 	}
-	
-	
-
-
 
 	public DeliveryOptions getDeliveryOptions() {
 		return deliveryOptions;
 	}
 
-
-
 	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
 		this.deliveryOptions = deliveryOptions;
 	}
-
-
 
 	public String getOrderStatus() {
 		return orderStatus;
 	}
 
-
-
 	public void setOrderStatus(String orderStatus) {
 		this.orderStatus = orderStatus;
 	}
-	
-	
-
-
 
 	public String getTotalAmount() {
 		return totalAmount;
 	}
 
-
-
 	public void setTotalAmount(String totalAmount) {
 		this.totalAmount = totalAmount;
 	}
-	
-	
-
-
 
 	public Collection<AddressEntity> getAddressEntities() {
 		return addressEntities;
 	}
 
-
-
 	public void setAddressEntities(Collection<AddressEntity> addressEntities) {
 		this.addressEntities = addressEntities;
 	}
+	
+	
 
+	public PaymentStatus getPaymentStatus() {
+		return paymentStatus;
+	}
 
+	public void setPaymentStatus(PaymentStatus paymentStatus) {
+		this.paymentStatus = paymentStatus;
+	}
 
 	@Override
 	public String toString() {
 		return "PurchaseEntity [purchaseId=" + purchaseId + ", purchaseGuid=" + purchaseGuid + ", purchaseDateTime="
-				+ purchaseDateTime + ", userEntity=" + userEntity + ", merchantEntity=" + merchantEntity + ", isPayed="
-				+ isPayed + ", billNumber=" + billNumber + ", purchaseData=" + purchaseData
+				+ purchaseDateTime + ", userEntity=" + userEntity + ", merchantEntity=" + merchantEntity
+				+ ", paymentStatus=" + paymentStatus + ", billNumber=" + billNumber + ", purchaseData=" + purchaseData
 				+ ", unModifiedPurchaseData=" + unModifiedPurchaseData + ", isEditable=" + isEditable
 				+ ", updatedDateTime=" + updatedDateTime + ", isDeliverable=" + isDeliverable + ", amountDetails="
 				+ amountDetails + ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", isDiscard=" + isDiscard
 				+ ", serverDateTime=" + serverDateTime + ", deliveryOptions=" + deliveryOptions + ", orderStatus="
-				+ orderStatus + "]";
+				+ orderStatus + ", totalAmount=" + totalAmount + ", addressEntities=" + addressEntities + "]";
 	}
-
-
-
-
-
-
-	
-	
 
 }

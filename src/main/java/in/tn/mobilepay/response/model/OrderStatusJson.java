@@ -1,6 +1,6 @@
 package in.tn.mobilepay.response.model;
 
-public class LuggageJson {
+public class OrderStatusJson {
 	private long serverDateTime;
 	private String purchaseGuid;
 	private String orderStatus;

@@ -5,14 +5,14 @@ import java.util.List;
 
 public class LuggagesListJson {
 
-	private List<LuggageJson> luggageJsons = new ArrayList<>();
+	private List<OrderStatusJson> luggageJsons = new ArrayList<>();
 	private List<PurchaseJson> purchaseJsons = new ArrayList<>();
 
-	public List<LuggageJson> getLuggageJsons() {
+	public List<OrderStatusJson> getLuggageJsons() {
 		return luggageJsons;
 	}
 
-	public void setLuggageJsons(List<LuggageJson> luggageJsons) {
+	public void setLuggageJsons(List<OrderStatusJson> luggageJsons) {
 		this.luggageJsons = luggageJsons;
 	}
 

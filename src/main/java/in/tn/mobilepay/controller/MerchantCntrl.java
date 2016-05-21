@@ -17,7 +17,7 @@ public class MerchantCntrl {
 	@Autowired
 	private MerchantServices merchantServices;
 	
-	@RequestMapping(value = "/merchant/signup")
+	/*@RequestMapping(value = "/merchant/signup")
 	public ResponseEntity<String> signup(@RequestPart("file") MultipartFile multipartFile,
 			@RequestParam(value = "merchantName") String merchantName,
 			@RequestParam(value = "merchantAddress") String merchantAddress, @RequestParam(value = "area") String area,
@@ -26,10 +26,10 @@ public class MerchantCntrl {
 			@RequestParam(value = "category") String category, @RequestParam(value = "password") String password) {
 		return merchantServices.merchantRegsiteration(multipartFile, merchantName, merchantAddress, area, pinCode,
 				mobileNumber, landLineNumber, category, password);
-	}
+	}*/
 	
 	
-	@RequestMapping(value = "/merchant/register")
+	@RequestMapping(value = "/merchant/signup")
 	public ResponseEntity<String> register(@RequestBody String requestData) {
 		return merchantServices.merchantRegister(requestData);
 	}

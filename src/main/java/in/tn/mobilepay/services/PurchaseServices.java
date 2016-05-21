@@ -1,5 +1,6 @@
 package in.tn.mobilepay.services;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,25 +24,23 @@ import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
+import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.entity.UserEntity;
-import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.DiscardBy;
 import in.tn.mobilepay.enumeration.NotificationType;
 import in.tn.mobilepay.enumeration.OrderStatus;
+import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
 import in.tn.mobilepay.request.model.DiscardJsonList;
 import in.tn.mobilepay.request.model.GetLuggageList;
 import in.tn.mobilepay.request.model.GetPurchaseDetailsList;
-import in.tn.mobilepay.request.model.GetPurchaseList;
 import in.tn.mobilepay.request.model.OrderStatusUpdate;
 import in.tn.mobilepay.request.model.OrderStatusUpdateJsonList;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsJson;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsList;
-import in.tn.mobilepay.request.model.PurchaseDetailsJson;
 import in.tn.mobilepay.request.model.TokenJson;
-import in.tn.mobilepay.request.model.UnPayedMerchantPurchaseJson;
-import in.tn.mobilepay.response.model.LuggageJson;
+import in.tn.mobilepay.response.model.OrderStatusJson;
 import in.tn.mobilepay.response.model.LuggagesListJson;
 import in.tn.mobilepay.response.model.MerchantJson;
 import in.tn.mobilepay.response.model.NotificationJson;
@@ -63,28 +62,6 @@ public class PurchaseServices {
 	
 	private static final Logger logger = Logger.getLogger(PurchaseServices.class);
 
-	/*@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> getPurchaseDetails(int purchaseId) {
-		try {
-			List<PurchaseEntity> purchaseList = purchaseDAO.gePurchase(purchaseId);
-			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
-			for (PurchaseEntity purchaseEntity : purchaseList) {
-				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
-				UserJson userJson = new UserJson(purchaseEntity.getUserEntity());
-				purchaseJson.setUsers(userJson);
-				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
-				purchaseJson.setMerchants(merchantJson);
-				purchaseJsons.add(purchaseJson);
-			}
-			String responseJson = serviceUtil.toJson(purchaseJsons);
-			String responseEncrypt = serviceUtil.netEncryption(responseJson);
-			return serviceUtil.getSuccessResponse(HttpStatus.OK, responseEncrypt);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
-	}*/
-
 	
 	
 	/**
@@ -104,7 +81,8 @@ public class PurchaseServices {
 				//  Validate User Mobile
 				UserEntity userEntity = validateMobile(discardJson.getUserMobile());
 				// Get Purchase Data
-				PurchaseEntity purchaseEntity  = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
+				PurchaseEntity purchaseEntity  = purchaseDAO.getDiscardablePurchaseEntity(discardJson.getPurchaseGuid(),merchantEntity);
+				
 				// Discard
 				DiscardEntity discardEntity = new DiscardEntity();
 				discardEntity.setDiscardGuid(serviceUtil.uuid());
@@ -126,7 +104,7 @@ public class PurchaseServices {
 				if(cloudMessageEntity != null){
 					NotificationJson notificationJson = new NotificationJson();
 					notificationJson.setNotificationType(NotificationType.STATUS);
-					notificationJson.setMessage("Your order has been Declined by Merchant. Because of "+discardEntity.getReason());
+					notificationJson.setMessage("Your order has been Declined by Merchant. Because of "+discardEntity.getReason()); // TODO
 					notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
 					serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
 				}
@@ -179,8 +157,7 @@ public class PurchaseServices {
 					
 					}
 					
-					
-					purchaseEntity.setPayed(true);
+					purchaseEntity.setPaymentStatus(PaymentStatus.PAIED);
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(payedPurchaseDetailsJson.getPayemetTime());
 					purchaseEntity.setUnModifiedAmountDetails(purchaseEntity.getAmountDetails());
@@ -188,6 +165,7 @@ public class PurchaseServices {
 					purchaseEntity.setAmountDetails(payedPurchaseDetailsJson.getAmountDetails());
 					purchaseEntity.setPurchaseData(payedPurchaseDetailsJson.getProductDetails());
 					purchaseDAO.updatePurchaseObject(purchaseEntity);
+					processTransactions(purchaseEntity, payedPurchaseDetailsJson.getTransactions());
 					PurchaseJson purchaseJson = new PurchaseJson();
 					purchaseJson.setPurchaseId(purchaseEntity.getPurchaseGuid());
 					purchaseJson.setServerDateTime(purchaseEntity.getPurchaseDateTime());
@@ -203,6 +181,31 @@ public class PurchaseServices {
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
 	}
 	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> syncTransactionData(String purchaseUUID, String requestData) {
+		try {
+			PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(purchaseUUID);
+			if (purchaseEntity != null) {
+				Type listType = new TypeToken<ArrayList<TransactionalDetailsEntity>>() {
+				}.getType();
+				List<TransactionalDetailsEntity> transactions = serviceUtil.fromJson(requestData, listType);
+				processTransactions(purchaseEntity, transactions);
+			}
+			return serviceUtil.getResponse(200, "success");
+		} catch (Exception e) {
+			logger.error("Error in syncTransactionData", e);
+		}
+		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
+	}
+	
+	
+	private void processTransactions(PurchaseEntity purchaseEntity,List<TransactionalDetailsEntity> transactions){
+		for(TransactionalDetailsEntity transactionalDetailsEntity : transactions){
+			transactionalDetailsEntity.setPurchaseEntity(purchaseEntity);
+			purchaseDAO.createTransactions(transactionalDetailsEntity);
+		}
+	}
+	
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> discardPurchaseByUser(String requestData){
@@ -213,23 +216,26 @@ public class PurchaseServices {
 			List<PurchaseJson> purchaseJsons = new ArrayList<>();
 			for (DiscardJson discardJson : discardJsonList.getDiscardJsons()) {
 				PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
-				DiscardEntity discardEntity = new DiscardEntity();
-				discardEntity.setDiscardGuid(serviceUtil.uuid());
-				discardEntity.setUserEntity(userEntity);
-				discardEntity.setReason(discardJson.getReason());
-				discardEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
-				discardEntity.setPurchaseEntity(purchaseEntity);
-				discardEntity.setDiscardBy(DiscardBy.USER);
-				purchaseEntity.setDiscard(true);
-				purchaseEntity.setOrderStatus(OrderStatus.CANCELED.toString());
-				purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
-				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
-				purchaseDAO.updatePurchaseObject(purchaseEntity);
-				purchaseDAO.createDiscard(discardEntity);
-				PurchaseJson purchaseJson = new PurchaseJson();
-				purchaseJson.setPurchaseId(purchaseEntity.getPurchaseGuid());
-				purchaseJson.setServerDateTime(purchaseEntity.getPurchaseDateTime());
-				purchaseJsons.add(purchaseJson);
+				if(purchaseEntity != null && !purchaseEntity.isDiscard()){
+					DiscardEntity discardEntity = new DiscardEntity();
+					discardEntity.setDiscardGuid(serviceUtil.uuid());
+					discardEntity.setUserEntity(userEntity);
+					discardEntity.setReason(discardJson.getReason());
+					discardEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
+					discardEntity.setPurchaseEntity(purchaseEntity);
+					discardEntity.setDiscardBy(DiscardBy.USER);
+					purchaseEntity.setDiscard(true);
+					purchaseEntity.setOrderStatus(OrderStatus.CANCELED.toString());
+					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
+					purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
+					purchaseDAO.updatePurchaseObject(purchaseEntity);
+					processTransactions(purchaseEntity, discardJson.getTransactions());
+					purchaseDAO.createDiscard(discardEntity);
+					PurchaseJson purchaseJson = new PurchaseJson();
+					purchaseJson.setPurchaseId(purchaseEntity.getPurchaseGuid());
+					purchaseJson.setServerDateTime(purchaseEntity.getPurchaseDateTime());
+					purchaseJsons.add(purchaseJson);
+				}
 			}
 			String responseJson = serviceUtil.toJson(purchaseJsons);
 			return serviceUtil.getResponse(200, responseJson);
@@ -246,7 +252,7 @@ public class PurchaseServices {
 			OrderStatusUpdateJsonList orderStatusUpdateJsonList =	serviceUtil.fromJson(requestData, OrderStatusUpdateJsonList.class);
 			MerchantEntity merchantEntity = validateToken(orderStatusUpdateJsonList.getAccessToken(), orderStatusUpdateJsonList.getServerToken());
 			for(OrderStatusUpdate orderStatusUpdate : orderStatusUpdateJsonList.getOrderStatusUpdates()){
-				PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),merchantEntity);
+				PurchaseEntity purchaseEntity = purchaseDAO.getOrderStatusPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),merchantEntity);
 				if(purchaseEntity != null){
 					purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
@@ -258,7 +264,7 @@ public class PurchaseServices {
 					if(cloudMessageEntity != null){
 						NotificationJson notificationJson = new NotificationJson();
 						notificationJson.setNotificationType(NotificationType.STATUS);
-						notificationJson.setMessage("Your order has been Packed. You can collect from Saravana Stores.");
+						notificationJson.setMessage("Your order has been Packed. You can collect from Saravana Stores."); // TODO
 						notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
 						serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
 					}
@@ -289,37 +295,28 @@ public class PurchaseServices {
 			MerchantEntity merchantEntity = validateToken(purchaseJson.getAccessToken(), purchaseJson.getServerToken());
 		    // Validate User Mobile
 			UserEntity userEntity = validateMobile(purchaseJson.getUserMobile());
-			//Check whether Purchase Details already Present
-			PurchaseEntity dbPurchaseEntity = purchaseDAO.getPurchaseEntity(purchaseJson.getPurchaseUuid());
-			// Create New Purchase record
-			if(dbPurchaseEntity == null){
-				dbPurchaseEntity = new PurchaseEntity();
-				dbPurchaseEntity.setPurchaseDateTime(Long.valueOf(purchaseJson.getDateTime()));
-				dbPurchaseEntity.setMerchantEntity(merchantEntity);
-				dbPurchaseEntity.setUserEntity(userEntity);
-				// Json obj to Entity
-				populatePurchaseData(dbPurchaseEntity, purchaseJson);
-				//Create New Record
-				purchaseDAO.createPurchaseObject(dbPurchaseEntity);
-				//Send Push Notification
-				CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(userEntity);
-				if(cloudMessageEntity != null){
-					NotificationJson notificationJson = new NotificationJson();
-					notificationJson.setNotificationType(NotificationType.PURCHASE);
-					notificationJson.setMessage("You have Purhcased in  Saravana Stores.Total Cost : 520000.");
-					notificationJson.setPurchaseGuid(dbPurchaseEntity.getPurchaseGuid());
-					serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
-				}
-				
-				//Response
-				return serviceUtil.getResponse(StatusCode.MER_OK, "success");
-			}else{ // Update Purchase Data // -- TODO
-				populatePurchaseData(dbPurchaseEntity, purchaseJson);
-				dbPurchaseEntity.setMerchantEntity(merchantEntity);
-				dbPurchaseEntity.setUserEntity(userEntity);
-				purchaseDAO.updatePurchaseObject(dbPurchaseEntity);
-				return serviceUtil.getResponse(StatusCode.MER_OK, "updated");
+			
+			PurchaseEntity dbPurchaseEntity = new PurchaseEntity();
+			
+			dbPurchaseEntity.setPurchaseDateTime(Long.valueOf(purchaseJson.getDateTime()));
+			dbPurchaseEntity.setMerchantEntity(merchantEntity);
+			dbPurchaseEntity.setUserEntity(userEntity);
+			dbPurchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAIED);
+			// Json obj to Entity
+			populatePurchaseData(dbPurchaseEntity, purchaseJson);
+			//Create New Record
+			purchaseDAO.createPurchaseObject(dbPurchaseEntity);
+			//Send Push Notification
+			CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(userEntity);
+			if(cloudMessageEntity != null){
+				NotificationJson notificationJson = new NotificationJson();
+				notificationJson.setNotificationType(NotificationType.PURCHASE);
+				notificationJson.setMessage("You have Purhcased in  Saravana Stores.Total Cost : 520000."); // TODO
+				notificationJson.setPurchaseGuid(dbPurchaseEntity.getPurchaseGuid());
+				serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
 			}
+			//Response
+			return serviceUtil.getResponse(StatusCode.MER_OK, dbPurchaseEntity.getPurchaseGuid());
 			
 		}catch(ValidationException e){
 			logger.error("Error in ValidationException", e);
@@ -372,6 +369,8 @@ public class PurchaseServices {
 	
 	private void populatePurchaseData(PurchaseEntity purchaseEntity,in.tn.mobilepay.request.model.PurchaseJson purchaseJson){
 		purchaseEntity.loadValue(purchaseJson);
+		purchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAIED);
+		purchaseEntity.setPurchaseGuid(serviceUtil.uuid());
 		String purchaseData = serviceUtil.toJson(purchaseJson.getPurchaseDetails());
 		purchaseEntity.setPurchaseData(purchaseData);
 		String amountDetails = serviceUtil.toJson(purchaseJson.getAmountDetails());
@@ -485,7 +484,7 @@ public class PurchaseServices {
 	 * @return
 	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> getLuggageList(String requestData){
+	public ResponseEntity<String> getOrderStatusList(String requestData){
 		try{
 			//Json to Object
 			GetLuggageList getLuggageList =	serviceUtil.fromJson(requestData, GetLuggageList.class);
@@ -495,11 +494,11 @@ public class PurchaseServices {
 			List<PurchaseEntity> purchaseList = null;
 			// Get Luggage Details and Purchase with Luggage Details
 			if(getLuggageList.getStartTime() > 0){
-				List<LuggageJson> luggageJsons = purchaseDAO.getLuggageList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
+				List<OrderStatusJson> luggageJsons = purchaseDAO.getOrderStatusList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
 				luggagesListJson.setLuggageJsons(luggageJsons);
-				purchaseList = purchaseDAO.getLuggageWithPurchaseList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
+				purchaseList = purchaseDAO.getOrderStatusWithPurchaseList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
 			}else{ // Get  Purchase with Luggage Full List
-				purchaseList = purchaseDAO.getLuggageWithPurchaseList(userEntity);
+				purchaseList = purchaseDAO.getOrderStatusWithPurchaseList(userEntity);
 			}
 			
 			// Entity to Json Object
@@ -527,16 +526,6 @@ public class PurchaseServices {
 	}
 	
 	
-	public ResponseEntity<String> getUnPayedPurchase(String requestData){
-		try{
-			UnPayedMerchantPurchaseJson payedMerchantPurchaseJson = serviceUtil.fromJson(requestData, UnPayedMerchantPurchaseJson.class);
-			MerchantEntity merchantEntity = validateToken(payedMerchantPurchaseJson.getAccessToken(), payedMerchantPurchaseJson.getServerToken());
-			List<PurchaseEntity> purchaseEntities = purchaseDAO.getUnPayedPurchase(payedMerchantPurchaseJson, merchantEntity);
-			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal Server Error.");
-	}
+	
 
 }

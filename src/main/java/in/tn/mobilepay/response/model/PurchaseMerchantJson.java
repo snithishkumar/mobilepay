@@ -1,19 +1,24 @@
 package in.tn.mobilepay.response.model;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.request.model.DiscardJson;
 
-public class PurchaseJson {
-
+public class PurchaseMerchantJson {
+	
 	private String purchaseId;
 	private long purchaseDate;
 	private String billNumber;
 	private MerchantJson merchants;
 	private UserJson users;
-	private String productDetails;
-	private String amountDetails;
+	private JsonElement productDetails;
+	private JsonElement amountDetails;
 	private String category;
 	private boolean isEditable;
 	private boolean isDelivered;
@@ -26,27 +31,27 @@ public class PurchaseJson {
 	private String totalAmount;
 	private DiscardJson discardJson;
 	private AddressJson addressJson;
-
-	public PurchaseJson() {
-
+	
+	public PurchaseMerchantJson(){
+		
 	}
-
-	public PurchaseJson(PurchaseEntity purchaseEntity) {
+	
+	public PurchaseMerchantJson(PurchaseEntity purchaseEntity,Gson gson){
 		this.purchaseId = purchaseEntity.getPurchaseGuid();
 		this.purchaseDate = purchaseEntity.getPurchaseDateTime();
 		this.billNumber = purchaseEntity.getBillNumber();
-		this.productDetails = purchaseEntity.getPurchaseData();
-		this.amountDetails = purchaseEntity.getAmountDetails();
+		this.productDetails = gson.fromJson(purchaseEntity.getPurchaseData(), JsonArray.class);
+		this.amountDetails =  gson.fromJson(purchaseEntity.getAmountDetails(), JsonObject.class);
 		this.isEditable = purchaseEntity.isEditable();
 		this.isDelivered = purchaseEntity.isDeliverable();
 		this.category = purchaseEntity.getMerchantEntity().getCategory();
 		this.lastModifiedDateTime = purchaseEntity.getUpdatedDateTime();
 		this.serverDateTime = purchaseEntity.getServerDateTime();
-		this.isDiscard = purchaseEntity.isDiscard();
-		this.paymentStatus = purchaseEntity.getPaymentStatus();
-		this.orderStatus = purchaseEntity.getOrderStatus();
-		this.deliveryOptions = purchaseEntity.getDeliveryOptions();
-		this.totalAmount = purchaseEntity.getTotalAmount();
+		 this.isDiscard = purchaseEntity.isDiscard();
+		 this.paymentStatus = purchaseEntity.getPaymentStatus();
+		 this.orderStatus = purchaseEntity.getOrderStatus();
+		 this.deliveryOptions = purchaseEntity.getDeliveryOptions();
+		 this.totalAmount = purchaseEntity.getTotalAmount();
 	}
 
 	public String getPurchaseId() {
@@ -89,19 +94,19 @@ public class PurchaseJson {
 		this.users = users;
 	}
 
-	public String getProductDetails() {
+	public JsonElement getProductDetails() {
 		return productDetails;
 	}
 
-	public void setProductDetails(String productDetails) {
+	public void setProductDetails(JsonElement productDetails) {
 		this.productDetails = productDetails;
 	}
 
-	public String getAmountDetails() {
+	public JsonElement getAmountDetails() {
 		return amountDetails;
 	}
 
-	public void setAmountDetails(String amountDetails) {
+	public void setAmountDetails(JsonElement amountDetails) {
 		this.amountDetails = amountDetails;
 	}
 
@@ -145,6 +150,8 @@ public class PurchaseJson {
 		this.serverDateTime = serverDateTime;
 	}
 
+	
+
 	public boolean isDiscard() {
 		return isDiscard;
 	}
@@ -153,6 +160,7 @@ public class PurchaseJson {
 		this.isDiscard = isDiscard;
 	}
 
+	
 	public PaymentStatus getPaymentStatus() {
 		return paymentStatus;
 	}
@@ -172,6 +180,8 @@ public class PurchaseJson {
 	public DeliveryOptions getDeliveryOptions() {
 		return deliveryOptions;
 	}
+	
+	
 
 	public String getTotalAmount() {
 		return totalAmount;
@@ -192,6 +202,8 @@ public class PurchaseJson {
 	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
 		this.deliveryOptions = deliveryOptions;
 	}
+	
+	
 
 	public AddressJson getAddressJson() {
 		return addressJson;
@@ -203,7 +215,7 @@ public class PurchaseJson {
 
 	@Override
 	public String toString() {
-		return "PurchaseJson [purchaseId=" + purchaseId + ", purchaseDate=" + purchaseDate + ", billNumber="
+		return "PurchaseMerchantJson [purchaseId=" + purchaseId + ", purchaseDate=" + purchaseDate + ", billNumber="
 				+ billNumber + ", merchants=" + merchants + ", users=" + users + ", productDetails=" + productDetails
 				+ ", amountDetails=" + amountDetails + ", category=" + category + ", isEditable=" + isEditable
 				+ ", isDelivered=" + isDelivered + ", lastModifiedDateTime=" + lastModifiedDateTime
@@ -211,5 +223,11 @@ public class PurchaseJson {
 				+ ", orderStatus=" + orderStatus + ", deliveryOptions=" + deliveryOptions + ", totalAmount="
 				+ totalAmount + ", discardJson=" + discardJson + ", addressJson=" + addressJson + "]";
 	}
+
+	
+
+	
+
+	
 
 }

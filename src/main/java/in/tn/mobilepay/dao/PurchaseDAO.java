@@ -13,29 +13,19 @@ import org.springframework.stereotype.Repository;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
+import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.OrderStatus;
+import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.request.model.MerchantOrderStatusJson;
 import in.tn.mobilepay.request.model.UnPayedMerchantPurchaseJson;
-import in.tn.mobilepay.response.model.LuggageJson;
+import in.tn.mobilepay.response.model.OrderStatusJson;
 import in.tn.mobilepay.util.MessageConstants;
 
 @Repository
 public class PurchaseDAO extends BaseDAO{
 	
-	/**
-	 * Get List of Purchase 
-	 * @param purchaseId
-	 * @return
-	 */
-	public List<PurchaseEntity> gePurchase(int purchaseId){
-		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
-		if(purchaseId > 0){
-			criteria.add(Restrictions.gt(PurchaseEntity.PURCHASE_ID, purchaseId));
-		}
-		return criteria.list();
-	}
+	
 	
 	/**
 	 * Get Current Purchase UUIDs List
@@ -45,9 +35,8 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public List<String> gePurchaseList(UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_DISCARD, false));
-		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
+		applyUnPayedCriteria(criteria, userEntity);
+		
 		criteria.addOrder(Order.asc(PurchaseEntity.SERVER_DATE_TIME));
 		criteria.setProjection(Projections.property(PurchaseEntity.PURCHASE_GUID));
 		return criteria.list();
@@ -81,7 +70,7 @@ public class PurchaseDAO extends BaseDAO{
 		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
 		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
 		criteria.setProjection(Projections.property(PurchaseEntity.PURCHASE_GUID));
-		criteria.addOrder(Order.desc(PurchaseEntity.SERVER_DATE_TIME));
+		criteria.addOrder(Order.asc(PurchaseEntity.SERVER_DATE_TIME));
 		criteria.setMaxResults(25);
 		return criteria.list();
 	}
@@ -92,19 +81,13 @@ public class PurchaseDAO extends BaseDAO{
 	 * @param userEntity
 	 * @return
 	 */
-	public List<PurchaseEntity> getLuggageWithPurchaseList(UserEntity userEntity){
+	public List<PurchaseEntity> getOrderStatusWithPurchaseList(UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		defaultLuggFilter(userEntity, criteria);
+		applyOrderStatusCriteria(criteria, userEntity);
 		return criteria.list();
 	}
 	
-	private void defaultLuggFilter(UserEntity userEntity,Criteria criteria){
-		
-		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
-	}
+	
 	
 	/**
 	 * Get Luggage List
@@ -112,19 +95,21 @@ public class PurchaseDAO extends BaseDAO{
 	 * @param userEntity
 	 * @return
 	 */
-	public List<LuggageJson> getLuggageList(long startTime,long endTime,UserEntity userEntity){
+	public List<OrderStatusJson> getOrderStatusList(long startTime,long endTime,UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.ge(PurchaseEntity.PURCHASE_DATE_TIME, startTime));
 		criteria.add(Restrictions.le(PurchaseEntity.PURCHASE_DATE_TIME, endTime));
-		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
+		
+		applyOrderStatusCriteria(criteria, userEntity);
+		
+		
 		ProjectionList projectionList = Projections.projectionList();
 		projectionList.add(Projections.property(PurchaseEntity.SERVER_DATE_TIME),PurchaseEntity.SERVER_DATE_TIME);
 		projectionList.add(Projections.property(PurchaseEntity.PURCHASE_GUID),PurchaseEntity.PURCHASE_GUID);
 		projectionList.add(Projections.property(PurchaseEntity.ORDER_STATUS),PurchaseEntity.ORDER_STATUS);
 		projectionList.add(Projections.property(PurchaseEntity.UPDATED_DATE_TIME),PurchaseEntity.UPDATED_DATE_TIME);
 		criteria.setProjection(projectionList);
-		criteria.setResultTransformer(Transformers.aliasToBean(LuggageJson.class));
+		criteria.setResultTransformer(Transformers.aliasToBean(OrderStatusJson.class));
 		return criteria.list();
 	}
 	
@@ -135,11 +120,11 @@ public class PurchaseDAO extends BaseDAO{
 	 * @param userEntity
 	 * @return
 	 */
-	public List<PurchaseEntity> getLuggageWithPurchaseList(long startTime,long endTime,UserEntity userEntity){
+	public List<PurchaseEntity> getOrderStatusWithPurchaseList(long startTime,long endTime,UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.lt(PurchaseEntity.PURCHASE_DATE_TIME, startTime));
 		criteria.add(Restrictions.gt(PurchaseEntity.PURCHASE_DATE_TIME, endTime));
-		defaultLuggFilter(userEntity, criteria);
+		applyOrderStatusCriteria(criteria, userEntity);
 		return criteria.list();
 	}
 	
@@ -170,13 +155,41 @@ public class PurchaseDAO extends BaseDAO{
 		return (PurchaseEntity) criteria.uniqueResult();
 	}
 	
-	public PurchaseEntity getPurchaseEntity(String purchaseGuid,MerchantEntity merchantEntity){
+	
+	public PurchaseEntity getDiscardablePurchaseEntity(String purchaseGuid,MerchantEntity merchantEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_GUID, purchaseGuid));
+		applyDiscardableCriteria(criteria, merchantEntity);
+		return (PurchaseEntity) criteria.uniqueResult();
+	}
+	
+	private void applyDiscardableCriteria(Criteria criteria,MerchantEntity merchantEntity){
+		applyUnPayedCriteria(criteria, merchantEntity);
+		
+	}
+	
+	private void applyOrderStatusCriteria(Criteria criteria,MerchantEntity merchantEntity){
 		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
+		applyOrderStatusCriteria(criteria);
+	}
+	
+	
+	private void applyOrderStatusCriteria(Criteria criteria,UserEntity userEntity){
+		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
+		applyOrderStatusCriteria(criteria);
+	}
+	
+	
+	private void applyOrderStatusCriteria(Criteria criteria){
+		criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAIED));
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
+	}
+	
+	public PurchaseEntity getOrderStatusPurchaseEntity(String purchaseGuid,MerchantEntity merchantEntity){
+		Criteria criteria =  createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_GUID, purchaseGuid));
+		applyOrderStatusCriteria(criteria, merchantEntity);
 		return (PurchaseEntity) criteria.uniqueResult();
 	}
 	
@@ -195,6 +208,23 @@ public class PurchaseDAO extends BaseDAO{
 		return (DiscardEntity) criteria.uniqueResult();
 	}
 	
+	
+	private void applyUnPayedCriteria(Criteria criteria, MerchantEntity merchantEntity) {
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		applyUnPayedCriteria(criteria);
+	}
+	
+	private void applyUnPayedCriteria(Criteria criteria){
+		criteria.add(Restrictions.ne(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAIED));
+		criteria.add(Restrictions.eq(PurchaseEntity.IS_DISCARD, false));
+	}
+	
+	
+	private void applyUnPayedCriteria(Criteria criteria, UserEntity userEntity) {
+		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
+		applyUnPayedCriteria(criteria);
+	}
+	
 	/**
 	 * Returns list of PurchaseEntity which are not payed.
 	 * @param merchantPurchaseJson
@@ -204,9 +234,8 @@ public class PurchaseDAO extends BaseDAO{
 	public List<PurchaseEntity> getUnPayedPurchase(UnPayedMerchantPurchaseJson merchantPurchaseJson,MerchantEntity merchantEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
 		// Add Merchant Restriction
-		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		applyUnPayedCriteria(criteria, merchantEntity);
 		
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
 		// If ServerSyncTime is > 0, then send after those record.
 		if(merchantPurchaseJson.getServerSyncTime() > 0){
 			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, merchantPurchaseJson.getServerSyncTime()));
@@ -232,8 +261,7 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public long getUnPayedPurchaseCount(MerchantEntity merchantEntity) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
+		applyUnPayedCriteria(criteria, merchantEntity);
 		// set projection to be Purchase count
 		criteria.setProjection(Projections.rowCount());
 
@@ -248,8 +276,7 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public long getUnPayedPurchaseCount(MerchantEntity merchantEntity,long serverSyncTime) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, false));
+		applyUnPayedCriteria(criteria, merchantEntity);
 		if(serverSyncTime > 0){
 			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverSyncTime));
 		}
@@ -269,12 +296,8 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public List<PurchaseEntity> getPurchaseOrderStatusList(MerchantOrderStatusJson merchantOrderStatusJson,MerchantEntity merchantEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		// Add Merchant Restriction
-		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
 		
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
+		applyOrderStatusCriteria(criteria, merchantEntity);
 		
 		// If ServerSyncTime is > 0, then send after those record.
 		if(merchantOrderStatusJson.getPurchaseDateTime() > 0){
@@ -301,10 +324,8 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public long getPurchaseOrderStatusListCount(MerchantEntity merchantEntity) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
+		applyOrderStatusCriteria(criteria, merchantEntity);
+		
 		// set projection to be Purchase count
 		criteria.setProjection(Projections.rowCount());
 
@@ -319,10 +340,7 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public long getPurchaseOrderStatusListCount(MerchantEntity merchantEntity,long purchaseDateTime) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_PAYED, true));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
+		applyOrderStatusCriteria(criteria, merchantEntity);
 		if(purchaseDateTime > 0){
 			criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_DATE_TIME, purchaseDateTime));
 		}
@@ -349,7 +367,7 @@ public class PurchaseDAO extends BaseDAO{
 		
 		// If ServerSyncTime is > 0, then send after those record.
 		if(merchantPurchaseJson.getServerSyncTime() > 0){
-			criteria.add(Restrictions.gt(PurchaseEntity.PURCHASE_DATE_TIME, merchantPurchaseJson.getServerSyncTime()));
+			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, merchantPurchaseJson.getServerSyncTime()));
 		}
 		//OffSet -  Offset for lists of records
 		if(merchantPurchaseJson.getOffSet() > 0){
@@ -404,7 +422,13 @@ public class PurchaseDAO extends BaseDAO{
 		return (Long) criteria.uniqueResult();
 	}
 	
-	
+	/**
+	 * Create Transaction
+	 * @param transactionalDetailsEntity
+	 */
+	public void createTransactions(TransactionalDetailsEntity transactionalDetailsEntity){
+		saveObject(transactionalDetailsEntity);
+	}
 	
 	
 

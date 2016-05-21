@@ -1,5 +1,9 @@
 package in.tn.mobilepay.request.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.response.model.AddressJson;
 
@@ -11,7 +15,8 @@ public class PayedPurchaseDetailsJson {
 	private DeliveryOptions deliveryOptions;
 	private long payemetTime;
 	 private AddressJson addressJson;
-	    private String addressGuid;
+	 private String addressGuid;
+	 private List<TransactionalDetailsEntity> transactions = new ArrayList<>();
 	    
 	public String getPurchaseId() {
 		return purchaseId;
@@ -57,11 +62,20 @@ public class PayedPurchaseDetailsJson {
 	public void setAddressGuid(String addressGuid) {
 		this.addressGuid = addressGuid;
 	}
+	
+	
+	public List<TransactionalDetailsEntity> getTransactions() {
+		return transactions;
+	}
+	public void setTransactions(List<TransactionalDetailsEntity> transactions) {
+		this.transactions = transactions;
+	}
 	@Override
 	public String toString() {
 		return "PayedPurchaseDetailsJson [purchaseId=" + purchaseId + ", productDetails=" + productDetails
 				+ ", amountDetails=" + amountDetails + ", deliveryOptions=" + deliveryOptions + ", payemetTime="
-				+ payemetTime + ", addressJson=" + addressJson + ", addressGuid=" + addressGuid + "]";
+				+ payemetTime + ", addressJson=" + addressJson + ", addressGuid=" + addressGuid + ", transactions="
+				+ transactions + "]";
 	}
 	
 	
