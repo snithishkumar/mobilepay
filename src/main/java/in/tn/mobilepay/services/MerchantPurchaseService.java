@@ -125,7 +125,7 @@ public class MerchantPurchaseService {
 					Collection<AddressEntity> collections = purchaseEntity.getAddressEntities();
 					for(AddressEntity addressEntity : collections){
 						AddressJson addressJson = new AddressJson(addressEntity);
-						purchaseJson.setAddressJson(addressJson);
+						purchaseJson.setAddressDetails(addressJson);
 						break;
 					}
 				}
@@ -157,6 +157,7 @@ public class MerchantPurchaseService {
 	 * @param requestData
 	 * @return
 	 */
+	@Transactional(readOnly = true)
 	public ResponseEntity<String> getPurchaseHistoryList(String requestData){
 		try{
 			//Json to object
@@ -165,10 +166,10 @@ public class MerchantPurchaseService {
 			MerchantEntity merchantEntity = validateToken(unPayedMerchantPurchaseJson.getAccessToken(), unPayedMerchantPurchaseJson.getServerToken());
 			// Get UnPayed Data 
 			List<PurchaseEntity>  purchaseEntities = purchaseDAO.getPurchaseHistoryList(unPayedMerchantPurchaseJson, merchantEntity);
-			List<PurchaseJson> purchaseJsons = new ArrayList<>();
+			List<PurchaseMerchantJson> purchaseJsons = new ArrayList<>();
 			// Entity to Json
 			for(PurchaseEntity purchaseEntity : purchaseEntities){
-				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
+				PurchaseMerchantJson purchaseJson = new PurchaseMerchantJson(purchaseEntity,gson);
 				//Add User Details
 				UserJson userJson = new UserJson(purchaseEntity.getUserEntity());
 				purchaseJson.setUsers(userJson);
@@ -180,23 +181,23 @@ public class MerchantPurchaseService {
 					purchaseJson.setDiscardJson(discardJson);
 				}
 				// If its home delivery, then we need to send Home delivery address
-				if(purchaseEntity.getDeliveryOptions().toString().equals(DeliveryOptions.HOME.toString())){
+				if(purchaseEntity.getDeliveryOptions() != null && purchaseEntity.getDeliveryOptions().toString().equals(DeliveryOptions.HOME.toString())){
 					Collection<AddressEntity> collections = purchaseEntity.getAddressEntities();
 					for(AddressEntity addressEntity : collections){
 						AddressJson addressJson = new AddressJson(addressEntity);
-						purchaseJson.setAddressJson(addressJson);
+						purchaseJson.setAddressDetails(addressJson);
 						break;
 					}
 				}
 				
 				purchaseJsons.add(purchaseJson);
 			}
-			String response = serviceUtil.toJson(purchaseJsons);
+			//String response = serviceUtil.toJson(purchaseJsons);
 			// Get Total Count
 			long totalCount = purchaseDAO.getPurchaseHistoryListCount(merchantEntity);
 			// Get Count (After ServerSyncTime)
 			long count = purchaseDAO.getPurchaseHistoryListCount(merchantEntity,unPayedMerchantPurchaseJson.getServerSyncTime());
-			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200, response);
+			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200, purchaseJsons);
 		//	responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
 		//	responseEntity.getHeaders().add(COUNT, String.valueOf(count));
 			return responseEntity;

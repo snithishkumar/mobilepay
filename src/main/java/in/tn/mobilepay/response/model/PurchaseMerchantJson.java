@@ -30,7 +30,7 @@ public class PurchaseMerchantJson {
 	private DeliveryOptions deliveryOptions;
 	private String totalAmount;
 	private DiscardJson discardJson;
-	private AddressJson addressJson;
+	private AddressJson addressDetails;
 	
 	public PurchaseMerchantJson(){
 		
@@ -205,12 +205,12 @@ public class PurchaseMerchantJson {
 	
 	
 
-	public AddressJson getAddressJson() {
-		return addressJson;
+	public AddressJson getAddressDetails() {
+		return addressDetails;
 	}
 
-	public void setAddressJson(AddressJson addressJson) {
-		this.addressJson = addressJson;
+	public void setAddressDetails(AddressJson addressDetails) {
+		this.addressDetails = addressDetails;
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class PurchaseMerchantJson {
 				+ ", isDelivered=" + isDelivered + ", lastModifiedDateTime=" + lastModifiedDateTime
 				+ ", serverDateTime=" + serverDateTime + ", isDiscard=" + isDiscard + ", paymentStatus=" + paymentStatus
 				+ ", orderStatus=" + orderStatus + ", deliveryOptions=" + deliveryOptions + ", totalAmount="
-				+ totalAmount + ", discardJson=" + discardJson + ", addressJson=" + addressJson + "]";
+				+ totalAmount + ", discardJson=" + discardJson + ", addressJson=" + addressDetails + "]";
 	}
 
 	

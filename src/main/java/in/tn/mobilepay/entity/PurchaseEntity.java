@@ -101,7 +101,7 @@ public class PurchaseEntity {
 		this.totalAmount = purchaseJson.getTotalAmount();
 		this.billNumber = purchaseJson.getBillNumber();
 		this.purchaseGuid = purchaseJson.getPurchaseUuid();
-		this.purchaseDateTime = Long.valueOf(purchaseJson.getDateTime());
+		this.purchaseDateTime = Long.valueOf(purchaseJson.getPurchaseDateTime());
 		this.isDeliverable = purchaseJson.getIsHomeDeliver() != null ? purchaseJson.getIsHomeDeliver() : false;
 		this.updatedDateTime = ServiceUtil.getCurrentGmtTime();
 		this.serverDateTime = updatedDateTime;

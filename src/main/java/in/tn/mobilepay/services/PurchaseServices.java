@@ -298,7 +298,7 @@ public class PurchaseServices {
 			
 			PurchaseEntity dbPurchaseEntity = new PurchaseEntity();
 			
-			dbPurchaseEntity.setPurchaseDateTime(Long.valueOf(purchaseJson.getDateTime()));
+			dbPurchaseEntity.setPurchaseDateTime(Long.valueOf(purchaseJson.getPurchaseDateTime()));
 			dbPurchaseEntity.setMerchantEntity(merchantEntity);
 			dbPurchaseEntity.setUserEntity(userEntity);
 			dbPurchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAIED);
@@ -322,6 +322,7 @@ public class PurchaseServices {
 			logger.error("Error in ValidationException", e);
 			return serviceUtil.getResponse(e.getCode(), e.getMessage());
 		}catch(Exception e){
+			e.printStackTrace();
 			logger.error("Error in createPurchase", e);
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");

@@ -7,7 +7,7 @@ public class PurchaseJson extends TokenJson {
 
 	private String billNumber;
 	private String purchaseUuid;
-	private String dateTime;
+	private String purchaseDateTime;
 	private String userMobile;
 	private Boolean isHomeDeliver;
 	private List<PurchaseDetailsJson> purchaseDetails = new ArrayList<PurchaseDetailsJson>();
@@ -30,12 +30,13 @@ public class PurchaseJson extends TokenJson {
 		this.purchaseUuid = purchaseUuid;
 	}
 
-	public String getDateTime() {
-		return dateTime;
+	
+	public String getPurchaseDateTime() {
+		return purchaseDateTime;
 	}
 
-	public void setDateTime(String dateTime) {
-		this.dateTime = dateTime;
+	public void setPurchaseDateTime(String purchaseDateTime) {
+		this.purchaseDateTime = purchaseDateTime;
 	}
 
 	public String getUserMobile() {
@@ -82,9 +83,12 @@ public class PurchaseJson extends TokenJson {
 
 	@Override
 	public String toString() {
-		return "PurchaseJson [billNumber=" + billNumber + ", purchaseUuid=" + purchaseUuid + ", dateTime=" + dateTime
-				+ ", userMobile=" + userMobile + ", isHomeDeliver=" + isHomeDeliver + ", purchaseDetails="
-				+ purchaseDetails + ", amountDetails=" + amountDetails + ", totalAmount=" + totalAmount + "]";
+		return "PurchaseJson [billNumber=" + billNumber + ", purchaseUuid=" + purchaseUuid + ", purchaseDateTime="
+				+ purchaseDateTime + ", userMobile=" + userMobile + ", isHomeDeliver=" + isHomeDeliver
+				+ ", purchaseDetails=" + purchaseDetails + ", amountDetails=" + amountDetails + ", totalAmount="
+				+ totalAmount + "]";
 	}
+
+	
 
 }
