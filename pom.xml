@@ -10,6 +10,7 @@
 
 	<properties>
 		<spring.version>4.2.2.RELEASE</spring.version>
+		<springsecurity.version>4.1.0.RELEASE</springsecurity.version>
 		<hibernate.version>5.0.2.Final</hibernate.version>
 	</properties>
 	<dependencies>
@@ -120,6 +121,18 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<version>${spring.version}</version>
+		</dependency>
+		
+		<!-- Spring Security -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>${springsecurity.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${springsecurity.version}</version>
 		</dependency>
 
 		<dependency>

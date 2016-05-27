@@ -55,7 +55,7 @@ public class PurchaseCntrl {
 	}
 	
 
-	@RequestMapping(value="/mobile/getPurchaseList")
+	@RequestMapping(value="/rest/mobile/getPurchaseList")
 	public ResponseEntity<String> getPurchaseList(@RequestBody String requestData){
 		return purchaseServices.getPurchaseList(requestData);
 	}

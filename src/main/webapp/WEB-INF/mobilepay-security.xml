@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.1.xsd ">
+
+	<http create-session="never" entry-point-ref="basicAuthenticationEntryPoin">
+		<intercept-url pattern="/rest/**" access="hasRole('ROLE_USER')" />
+		 <custom-filter position="BASIC_AUTH_FILTER" ref="mobilePayAuthenticationFilter"  />
+		<!-- <http-basic  authentication-details-source-ref="mobilePayAuthenticationFilter"/> -->
+
+	</http>
+
+
+	<authentication-manager alias="authenticationManager"
+		xmlns="http://www.springframework.org/schema/security">
+		<authentication-provider ref="authenticationProvider" />
+
+	</authentication-manager>
+
+
+	 <beans:bean id="mobilePayAuthenticationFilter" class="in.tn.mobilepay.security.MobilePayAuthenticationFilter" > 
+		<beans:constructor-arg index="0" ref="authenticationManager" 
+		/>
+		<beans:constructor-arg index="1" ref="basicAuthenticationEntryPoin" 
+		/>
+		 </beans:bean>
+		
+		<beans:bean id="basicAuthenticationEntryPoin" class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+		<beans:property name="realmName" value="mobilepay"></beans:property>
+		</beans:bean>
+
+
+</beans:beans>

@@ -10,6 +10,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 
+import in.tn.mobilepay.entity.CounterDetailsEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
@@ -428,6 +429,11 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public void createTransactions(TransactionalDetailsEntity transactionalDetailsEntity){
 		saveObject(transactionalDetailsEntity);
+	}
+	
+	
+	public void createCounterStatus(CounterDetailsEntity counterDetailsEntity){
+		saveObject(counterDetailsEntity);
 	}
 	
 	

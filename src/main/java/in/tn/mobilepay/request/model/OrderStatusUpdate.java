@@ -1,8 +1,20 @@
 package in.tn.mobilepay.request.model;
 
-public class OrderStatusUpdate {
+public class OrderStatusUpdate extends TokenJson{
 	private String purchaseUUID;
 	private String orderStatus;
+	private String orderStatusDesc;
+	
+	
+
+
+	public String getOrderStatusDesc() {
+		return orderStatusDesc;
+	}
+
+	public void setOrderStatusDesc(String orderStatusDesc) {
+		this.orderStatusDesc = orderStatusDesc;
+	}
 
 	public String getPurchaseUUID() {
 		return purchaseUUID;
@@ -22,7 +34,11 @@ public class OrderStatusUpdate {
 
 	@Override
 	public String toString() {
-		return "OrderStatusUpdate [purchaseUUID=" + purchaseUUID + ", orderStatus=" + orderStatus + "]";
+		return "OrderStatusUpdate [purchaseUUID=" + purchaseUUID + ", orderStatus=" + orderStatus + ", orderStatusDesc="
+				+ orderStatusDesc + "]";
 	}
+
+	
+	
 
 }

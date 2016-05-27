@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.JsonObject;
 
-import in.tn.mobilepay.dao.CardDAO;
 import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
@@ -36,8 +35,7 @@ public class UserServices {
 	@Autowired
 	private UserDAO userDao;
 	
-	@Autowired
-	private CardDAO cardDao;
+	
 	
 	@Autowired
 	private ServiceUtil serviceUtil;
@@ -173,9 +171,7 @@ public class UserServices {
 				dbUserEntity.toUser(registerJson);
 				userDao.createUser(dbUserEntity);
 			}else{
-				if(registerJson.isPasswordForget()){
-					cardDao.removeCard(dbUserEntity);
-				}
+				
 				dbUserEntity.toUser(registerJson);
 				userDao.updateUser(dbUserEntity);
 			}

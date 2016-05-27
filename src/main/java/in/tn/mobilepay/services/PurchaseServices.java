@@ -21,6 +21,7 @@ import in.tn.mobilepay.dao.PurchaseDAO;
 import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
+import in.tn.mobilepay.entity.CounterDetailsEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
@@ -36,14 +37,13 @@ import in.tn.mobilepay.request.model.DiscardJsonList;
 import in.tn.mobilepay.request.model.GetLuggageList;
 import in.tn.mobilepay.request.model.GetPurchaseDetailsList;
 import in.tn.mobilepay.request.model.OrderStatusUpdate;
-import in.tn.mobilepay.request.model.OrderStatusUpdateJsonList;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsJson;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsList;
 import in.tn.mobilepay.request.model.TokenJson;
-import in.tn.mobilepay.response.model.OrderStatusJson;
 import in.tn.mobilepay.response.model.LuggagesListJson;
 import in.tn.mobilepay.response.model.MerchantJson;
 import in.tn.mobilepay.response.model.NotificationJson;
+import in.tn.mobilepay.response.model.OrderStatusJson;
 import in.tn.mobilepay.response.model.PurchaseJson;
 import in.tn.mobilepay.response.model.UserJson;
 import in.tn.mobilepay.util.StatusCode;
@@ -73,13 +73,13 @@ public class PurchaseServices {
 	public ResponseEntity<String> discardPurchase(String requestData){
 		try{
 			// Json to Object
-			DiscardJsonList discardJsonList = serviceUtil.fromJson(requestData, DiscardJsonList.class);
-			for(DiscardJson discardJson : discardJsonList.getDiscardJsons()){
-				
+			//DiscardJsonList discardJsonList = serviceUtil.fromJson(requestData, DiscardJsonList.class);
+			//for(DiscardJson discardJson : discardJsonList.getDiscardJsons()){
+			DiscardJson discardJson = serviceUtil.fromJson(requestData, DiscardJson.class);
 				// Validate Merchant Authorize
 				MerchantEntity merchantEntity = validateToken(discardJson.getAccessToken(), discardJson.getServerToken());
 				//  Validate User Mobile
-				UserEntity userEntity = validateMobile(discardJson.getUserMobile());
+				//UserEntity userEntity = validateMobile(discardJson.getUserMobile());
 				// Get Purchase Data
 				PurchaseEntity purchaseEntity  = purchaseDAO.getDiscardablePurchaseEntity(discardJson.getPurchaseGuid(),merchantEntity);
 				
@@ -87,7 +87,7 @@ public class PurchaseServices {
 				DiscardEntity discardEntity = new DiscardEntity();
 				discardEntity.setDiscardGuid(serviceUtil.uuid());
 				discardEntity.setMerchantEntity(merchantEntity);
-				discardEntity.setUserEntity(userEntity);
+				discardEntity.setUserEntity(purchaseEntity.getUserEntity());
 				discardEntity.setReason(discardJson.getReason());
 				discardEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
 				discardEntity.setPurchaseEntity(purchaseEntity);
@@ -108,7 +108,7 @@ public class PurchaseServices {
 					notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
 					serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
 				}
-			}
+			//}
 			
 			return serviceUtil.getResponse(StatusCode.MER_OK, "success");
 		}catch(ValidationException e){
@@ -246,12 +246,22 @@ public class PurchaseServices {
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
 	}
 	
+	private void updateCounterStatus(PurchaseEntity purchaseEntity,OrderStatusUpdate orderStatusUpdate){
+		CounterDetailsEntity counterDetailsEntity = new CounterDetailsEntity();
+		counterDetailsEntity.setCounterNumber(orderStatusUpdate.getOrderStatus());
+		counterDetailsEntity.setCreatedDateTime(purchaseEntity.getServerDateTime());
+		counterDetailsEntity.setMessage(orderStatusUpdate.getOrderStatusDesc());
+		counterDetailsEntity.setPurchaseEntity(purchaseEntity);
+		purchaseDAO.createCounterStatus(counterDetailsEntity);
+	}
+	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> updateOrderStatus(String requestData){
 		try{
-			OrderStatusUpdateJsonList orderStatusUpdateJsonList =	serviceUtil.fromJson(requestData, OrderStatusUpdateJsonList.class);
-			MerchantEntity merchantEntity = validateToken(orderStatusUpdateJsonList.getAccessToken(), orderStatusUpdateJsonList.getServerToken());
-			for(OrderStatusUpdate orderStatusUpdate : orderStatusUpdateJsonList.getOrderStatusUpdates()){
+			//OrderStatusUpdateJsonList orderStatusUpdateJsonList =	serviceUtil.fromJson(requestData, OrderStatusUpdateJsonList.class);
+			OrderStatusUpdate orderStatusUpdate =	serviceUtil.fromJson(requestData, OrderStatusUpdate.class);
+			MerchantEntity merchantEntity = validateToken(orderStatusUpdate.getAccessToken(), orderStatusUpdate.getServerToken());
+			//for(OrderStatusUpdate orderStatusUpdate : orderStatusUpdateJsonList.getOrderStatusUpdates()){
 				PurchaseEntity purchaseEntity = purchaseDAO.getOrderStatusPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),merchantEntity);
 				if(purchaseEntity != null){
 					purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
@@ -269,7 +279,7 @@ public class PurchaseServices {
 						serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
 					}
 				}
-			}
+			//}
 			return serviceUtil.getResponse(200, "success");
 		}catch(ValidationException e){
 			logger.error("Error in updateOrderStatus", e);
