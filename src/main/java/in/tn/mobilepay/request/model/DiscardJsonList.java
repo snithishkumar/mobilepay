@@ -3,7 +3,7 @@ package in.tn.mobilepay.request.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiscardJsonList extends TokenJson{
+public class DiscardJsonList{
 	private List<DiscardJson> discardJsons = new ArrayList<>();
 
 	public List<DiscardJson> getDiscardJsons() {

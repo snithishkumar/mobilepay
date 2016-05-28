@@ -4,8 +4,9 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
     http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.1.xsd ">
 
-	<http create-session="never" entry-point-ref="basicAuthenticationEntryPoin">
-		<intercept-url pattern="/rest/**" access="hasRole('ROLE_USER')" />
+	<http pattern="/mobilePayUser/**" create-session="never" entry-point-ref="basicAuthenticationEntryPoin">
+		<intercept-url pattern="/mobilePayUser/**" access="hasRole('ROLE_USER')" />
+		<csrf disabled="true"/>
 		 <custom-filter position="BASIC_AUTH_FILTER" ref="mobilePayAuthenticationFilter"  />
 		<!-- <http-basic  authentication-details-source-ref="mobilePayAuthenticationFilter"/> -->
 

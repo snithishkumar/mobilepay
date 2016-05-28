@@ -3,7 +3,9 @@ package in.tn.mobilepay.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 
 import in.tn.mobilepay.entity.AddressEntity;
@@ -33,6 +35,11 @@ public class UserDAO extends BaseDAO{
 		return (UserEntity) criteria.uniqueResult();
 	}
 	
+	public UserEntity getUserEntity(int userId){
+		Criteria criteria = createCriteria(UserEntity.class);
+		criteria.add(Restrictions.eq(UserEntity.USER_ID, userId));
+		return (UserEntity) criteria.uniqueResult();
+	}
 	
 	public UserEntity getUserEnity(String imeiNumber,String password){
 		Criteria criteria = createCriteria(UserEntity.class);
@@ -41,11 +48,12 @@ public class UserDAO extends BaseDAO{
 		return (UserEntity) criteria.uniqueResult();
 	}
 	
-	public UserEntity getUserEnityByToken(String clientToken,String serverToken){
+	public Integer getUserEnityByToken(String clientToken,String serverToken){
 		Criteria criteria = createCriteria(UserEntity.class);
 		criteria.add(Restrictions.eq(UserEntity.ACCESS_TOKEN, clientToken));
 		criteria.add(Restrictions.eq(UserEntity.SERVER_TOKEN, serverToken));
-		return (UserEntity) criteria.uniqueResult();
+		criteria.setProjection(Projections.property(UserEntity.USER_ID));
+		return (Integer) criteria.uniqueResult();
 	}
 	
 	
@@ -121,17 +129,7 @@ public class UserDAO extends BaseDAO{
 	}
 	
 	
-	/**
-	 * Get CloudMessageEntity by IMEI
-	 * @param imeiNumber
-	 * @return
-	 */
-	public CloudMessageEntity getCloudMessageEntity(String  imeiNumber,UserEntity userEntity){
-		Criteria criteria = createCriteria(CloudMessageEntity.class);
-		criteria.add(Restrictions.eq(CloudMessageEntity.IMEI_NUMBER, imeiNumber));
-		criteria.add(Restrictions.ne(CloudMessageEntity.USER_ENTITY, userEntity));
-		return (CloudMessageEntity)criteria.uniqueResult();
-	}
+	
 	
 	/**
 	 * Every device must only single record. so remove CloudMessageEntity

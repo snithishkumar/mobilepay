@@ -3,7 +3,7 @@ package in.tn.mobilepay.request.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetPurchaseDetailsList extends TokenJson{
+public class GetPurchaseDetailsList{
 	
 	private List<String> purchaseUUIDs = new ArrayList<>();
 

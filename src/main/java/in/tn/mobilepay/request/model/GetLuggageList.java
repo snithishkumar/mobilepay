@@ -1,6 +1,6 @@
 package in.tn.mobilepay.request.model;
 
-public class GetLuggageList extends TokenJson {
+public class GetLuggageList{
 
 	private long startTime;
 	private long endTime;

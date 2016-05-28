@@ -1,5 +1,7 @@
 package in.tn.mobilepay.controller;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,9 +22,9 @@ public class AccountCntrl {
 		return userServices.userRegisteration(requestData);
 	}
 	
-	@RequestMapping(value="/mobile/updateProfile")
-	public ResponseEntity<String> updateProfile(@RequestBody String requestData){
-		return userServices.updateUserProfile(requestData);
+	@RequestMapping(value="/mobilePayUser/mobile/updateProfile")
+	public ResponseEntity<String> updateProfile(@RequestBody String requestData,Principal principal){
+		return userServices.updateUserProfile(requestData,principal);
 	}
 	
 	@RequestMapping(value="/mobile/verifyMobileNo")
@@ -46,14 +48,14 @@ public class AccountCntrl {
 		return userServices.loginByMobileNumber(requestData);
 	}
 	
-	@RequestMapping(value="/mobile/syncUserDeliveryAddress")
-	public ResponseEntity<String> syncUserDeliveryAddress(@RequestBody String requestData){
-		return userServices.syncUserDeliveryAddress(requestData);
+	@RequestMapping(value="/mobilePayUser/mobile/syncUserDeliveryAddress")
+	public ResponseEntity<String> syncUserDeliveryAddress(@RequestBody String requestData,Principal principal){
+		return userServices.syncUserDeliveryAddress(requestData,principal);
 	}
 	
 	
-	@RequestMapping(value="/mobile/addCloudId")
-	public ResponseEntity<String> addCloudId(@RequestBody String requestData){
-		return userServices.addCloudToken(requestData);
+	@RequestMapping(value="/mobilePayUser/mobile/addCloudId")
+	public ResponseEntity<String> addCloudId(@RequestBody String requestData,Principal principal){
+		return userServices.addCloudToken(requestData,principal);
 	}
 }

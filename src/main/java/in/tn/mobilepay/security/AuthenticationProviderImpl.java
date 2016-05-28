@@ -42,15 +42,15 @@ public class AuthenticationProviderImpl  implements AuthenticationProvider {
 			throws AuthenticationException {
 		String name = authentication.getName();
         String password = authentication.getCredentials().toString();
-        UserEntity userEntity = userDao.getUserEnityByToken(name, password);
-        logger.info("userEntity db:"+userEntity);
-        if (userEntity == null)
+        Integer userId = userDao.getUserEnityByToken(name, password);
+        logger.info("userEntity db:"+userId);
+        if (userId == null)
 		      throw new UsernameNotFoundException("Invalid User");
 		 
        
         List<GrantedAuthority> grantedAuths = new ArrayList<>();
         grantedAuths.add(new SimpleGrantedAuthority("ROLE_USER"));
-        Authentication auth = new UsernamePasswordAuthenticationToken(name, password, grantedAuths);
+        Authentication auth = new UsernamePasswordAuthenticationToken(userId, password, grantedAuths);
         return auth;
         
 	

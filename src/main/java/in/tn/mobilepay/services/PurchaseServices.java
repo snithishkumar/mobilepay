@@ -1,6 +1,7 @@
 package in.tn.mobilepay.services;
 
 import java.lang.reflect.Type;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,10 +123,12 @@ public class PurchaseServices {
 	}
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> syncPayedData(String requestData){
+	public ResponseEntity<String> syncPayedData(String requestData,Principal principal){
 		try{
 			PayedPurchaseDetailsList payedPurchaseDetailsJsons = serviceUtil.fromJson(requestData,PayedPurchaseDetailsList.class);
-			UserEntity userEntity = validateUserToken(payedPurchaseDetailsJsons.getAccessToken(), payedPurchaseDetailsJsons.getServerToken());
+			UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
+			UserEntity userEntity =(UserEntity)authenticationToken.getPrincipal();
+			userEntity = userDAO.getUserEntity(userEntity.getUserId());
 			List<PurchaseJson> purchaseJsons = new ArrayList<>();
 			Map<String, AddressEntity> addressList = new HashMap<>();
 			for (PayedPurchaseDetailsJson payedPurchaseDetailsJson : payedPurchaseDetailsJsons.getPurchaseDetailsJsons()) {
@@ -208,11 +212,13 @@ public class PurchaseServices {
 	
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> discardPurchaseByUser(String requestData){
+	public ResponseEntity<String> discardPurchaseByUser(String requestData,Principal principal){
 		try {
 			// Json to Object
 			DiscardJsonList discardJsonList = serviceUtil.fromJson(requestData,DiscardJsonList.class);
-			UserEntity userEntity = validateUserToken(discardJsonList.getAccessToken(), discardJsonList.getServerToken());
+			UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
+			UserEntity userEntity =(UserEntity)authenticationToken.getPrincipal();
+			userEntity = userDAO.getUserEntity(userEntity.getUserId());
 			List<PurchaseJson> purchaseJsons = new ArrayList<>();
 			for (DiscardJson discardJson : discardJsonList.getDiscardJsons()) {
 				PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
@@ -355,14 +361,14 @@ public class PurchaseServices {
 	}
 	
 	
-	private UserEntity validateUserToken(String client,String serverToken) throws ValidationException{
+	/*private UserEntity validateUserToken(String client,String serverToken) throws ValidationException{
 		UserEntity userEntity = userDAO.getUserEnityByToken(client, serverToken);
 		if(userEntity == null){
 			throw new ValidationException(10, "Invalid User", null);
 		}
 		return userEntity;
 		
-	}
+	}*/
 	
 	/**
 	 * Validate User Details
@@ -396,12 +402,13 @@ public class PurchaseServices {
 	 * @return
 	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> getPurchaseDetailsList(String requestData) {
+	public ResponseEntity<String> getPurchaseDetailsList(String requestData,Principal principal) {
 		try {
 			// Json to Object
 			GetPurchaseDetailsList getPurchaseList =	serviceUtil.fromJson(requestData, GetPurchaseDetailsList.class);
-			// Validate User Details
-			UserEntity userEntity = validateUserToken(getPurchaseList.getAccessToken(), getPurchaseList.getServerToken());
+			
+			UserEntity userEntity = serviceUtil.getUserEntity(principal);
+			
 			// Get Current Purchase List
 			List<PurchaseEntity> purchaseList = purchaseDAO.getPurchaseDetails(getPurchaseList.getPurchaseUUIDs(), userEntity);
 			// Entity to Json Object
@@ -439,22 +446,15 @@ public class PurchaseServices {
 	 * @return
 	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> getPurchaseList(String requestData) {
+	public ResponseEntity<String> getPurchaseList(Principal principal) {
 		try {
-			// Json to Object
-			TokenJson tokenJson =	serviceUtil.fromJson(requestData, TokenJson.class);
-			// Validate User Details
-			UserEntity userEntity = validateUserToken(tokenJson.getAccessToken(), tokenJson.getServerToken());
+			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			// Get Current Purchase List
 			List<String> purchaseList = purchaseDAO.gePurchaseList(userEntity);
 			String responseJson = serviceUtil.toJson(purchaseList);
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
-		}catch(ValidationException e){
-			logger.error("Error in ValidationException",e);
-			return serviceUtil.getResponse(e.getCode(), e.getMessage());
-			
-		} catch (Exception e) {
+		}catch (Exception e) {
 			logger.error("Error in getPurchaseList",e);
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal ServerError");
@@ -466,21 +466,14 @@ public class PurchaseServices {
 	 * @return
 	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> getPurchaseHistoryList(String requestData) {
+	public ResponseEntity<String> getPurchaseHistoryList(Principal principal) {
 		try {
-			//Json to Object
-			TokenJson tokenJson =	serviceUtil.fromJson(requestData, TokenJson.class);
-			// Validate User Details
-			UserEntity userEntity = validateUserToken(tokenJson.getAccessToken(), tokenJson.getServerToken());
+			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			
 			// Get Current Purchase List
 			List<String> purchaseUUIDsList = purchaseDAO.getPurchaseHistoryList(userEntity);
 			String responseJson = serviceUtil.toJson(purchaseUUIDsList);	
 			return serviceUtil.getResponse(300, responseJson);
-		}catch(ValidationException e){
-			logger.error("Error in ValidationException",e);
-			return serviceUtil.getResponse(e.getCode(), e.getMessage());
-			
 		}catch (Exception e) {
 			logger.error("Error in getPurchaseHistoryList",e);
 		}
@@ -495,12 +488,13 @@ public class PurchaseServices {
 	 * @return
 	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> getOrderStatusList(String requestData){
+	public ResponseEntity<String> getOrderStatusList(String requestData,Principal principal){
 		try{
 			//Json to Object
 			GetLuggageList getLuggageList =	serviceUtil.fromJson(requestData, GetLuggageList.class);
-			// Validate User Details
-			UserEntity userEntity = validateUserToken(getLuggageList.getAccessToken(), getLuggageList.getServerToken());
+			
+			UserEntity userEntity = serviceUtil.getUserEntity(principal);
+			
 			LuggagesListJson luggagesListJson = new LuggagesListJson();
 			List<PurchaseEntity> purchaseList = null;
 			// Get Luggage Details and Purchase with Luggage Details
@@ -526,11 +520,7 @@ public class PurchaseServices {
 			String responseJson = serviceUtil.toJson(luggagesListJson);
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
-		}catch(ValidationException e){
-			logger.error("Error in ValidationException",e);
-			return serviceUtil.getResponse(e.getCode(), e.getMessage());
-			
-		} catch(Exception e){
+		}catch(Exception e){
 			logger.error("Error in getLuggageList",e);
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal Server Error.");

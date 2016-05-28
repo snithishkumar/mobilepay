@@ -2,6 +2,7 @@ package in.tn.mobilepay.services;
 
 import java.lang.reflect.Type;
 import java.security.Key;
+import java.security.Principal;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.util.Random;
@@ -18,12 +19,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import in.tn.mobilepay.dao.UserDAO;
+import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.NotificationType;
 import in.tn.mobilepay.response.model.NotificationJson;
 import in.tn.mobilepay.response.model.ResponseData;
@@ -33,6 +37,9 @@ public class ServiceUtil {
 
 	@Autowired
 	private Gson gson;
+	
+	@Autowired
+	private UserDAO userDAO;
 	
 	private Random random = new Random();
 	
@@ -162,5 +169,13 @@ public class ServiceUtil {
 		ResponseEntity<String> responseEntity = restTemplate.exchange("https://gcm-http.googleapis.com/gcm/send", HttpMethod.POST, request, String.class);
 		System.out.println(responseEntity.getBody());
 		
+	}
+	
+	public UserEntity getUserEntity(Principal principal){
+		//Validate User token
+		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
+		Integer userId =(Integer)authenticationToken.getPrincipal();
+		UserEntity userEntity = userDAO.getUserEntity(userId);
+		return userEntity;
 	}
 }

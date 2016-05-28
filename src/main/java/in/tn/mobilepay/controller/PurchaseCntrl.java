@@ -1,12 +1,16 @@
 package in.tn.mobilepay.controller;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.services.MerchantPurchaseService;
 import in.tn.mobilepay.services.PurchaseServices;
 
@@ -55,39 +59,39 @@ public class PurchaseCntrl {
 	}
 	
 
-	@RequestMapping(value="/rest/mobile/getPurchaseList")
-	public ResponseEntity<String> getPurchaseList(@RequestBody String requestData){
-		return purchaseServices.getPurchaseList(requestData);
+	@RequestMapping(value="/mobilePayUser/mobile/getPurchaseList")
+	public ResponseEntity<String> getPurchaseList(Principal principal){
+		return purchaseServices.getPurchaseList(principal);
 	}
 	
-	@RequestMapping(value="/mobile/getPurchaseHistoryList")
-	public ResponseEntity<String> getPurchaseHistoryList(@RequestBody String requestData){
-		return purchaseServices.getPurchaseHistoryList(requestData);
-	}
-	
-
-	
-	@RequestMapping(value="/mobile/getOrderStatusList")
-	public ResponseEntity<String> getOrderStatusList(@RequestBody String requestData){
-		return purchaseServices.getOrderStatusList(requestData);
+	@RequestMapping(value="/mobilePayUser/mobile/getPurchaseHistoryList")
+	public ResponseEntity<String> getPurchaseHistoryList(Principal principal){
+		return purchaseServices.getPurchaseHistoryList(principal);
 	}
 	
 
-	@RequestMapping(value="/mobile/getPurchaseDetails")
-	public ResponseEntity<String> getPurchaseDetails(@RequestBody String requestData){
-		return purchaseServices.getPurchaseDetailsList(requestData);
+	
+	@RequestMapping(value="/mobilePayUser/mobile/getOrderStatusList")
+	public ResponseEntity<String> getOrderStatusList(@RequestBody String requestData,Principal principal){
+		return purchaseServices.getOrderStatusList(requestData,principal);
+	}
+	
+
+	@RequestMapping(value="/mobilePayUser/mobile/getPurchaseDetails")
+	public ResponseEntity<String> getPurchaseDetails(@RequestBody String requestData,Principal principal){
+		return purchaseServices.getPurchaseDetailsList(requestData,principal);
 	}
 	
 	
-	@RequestMapping(value="/mobile/syncDiscardData")
-	public ResponseEntity<String> discardPurchaseByUser(@RequestBody String requestData){
-		return purchaseServices.discardPurchaseByUser(requestData);
+	@RequestMapping(value="/mobilePayUser/mobile/syncDiscardData")
+	public ResponseEntity<String> discardPurchaseByUser(@RequestBody String requestData,Principal principal){
+		return purchaseServices.discardPurchaseByUser(requestData,principal);
 	}
 	
 	
-	@RequestMapping(value="/mobile/syncPayedData")
-	public ResponseEntity<String> syncPayedData(@RequestBody String requestData){
-		return purchaseServices.syncPayedData(requestData);
+	@RequestMapping(value="/mobilePayUser/mobile/syncPayedData")
+	public ResponseEntity<String> syncPayedData(@RequestBody String requestData,Principal principal){
+		return purchaseServices.syncPayedData(requestData,principal);
 	}
 	
 	@RequestMapping(value="/mobile/{purchaseUUID}/syncTransactions")

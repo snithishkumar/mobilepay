@@ -1,11 +1,13 @@
 package in.tn.mobilepay.services;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ import in.tn.mobilepay.request.model.OtpJson;
 import in.tn.mobilepay.request.model.RegisterJson;
 import in.tn.mobilepay.response.model.AddressBookJson;
 import in.tn.mobilepay.response.model.AddressJson;
+import in.tn.mobilepay.response.model.OTPData;
 import in.tn.mobilepay.response.model.OTPResponse;
 import in.tn.mobilepay.util.StatusCode;
 
@@ -88,7 +91,7 @@ public class UserServices {
 	
 	
 	private OTPResponse sendOtpPassword(String mobileNumber){
-		JsonObject jsonObject = new JsonObject();
+		/*JsonObject jsonObject = new JsonObject();
 		jsonObject.addProperty("countryCode", "91");
 		jsonObject.addProperty("mobileNumber", "9942320690");
 		jsonObject.addProperty("getGeneratedOTP", true);
@@ -100,6 +103,13 @@ public class UserServices {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<JsonObject> request = new HttpEntity<>(jsonObject, headers);
 		OTPResponse otpResponse = restTemplate.postForObject("https://sendotp.msg91.com/api/generateOTP", request, OTPResponse.class);
+		return otpResponse;*/
+		OTPResponse otpResponse = new OTPResponse();
+		otpResponse.setStatus("success");
+		OTPData otpData = new OTPData();
+		otpData.setCode("OTP_SENT_SUCCESSFULLY");
+		otpData.setOneTimePassword("123");
+		otpResponse.setResponse(otpData);
 		return otpResponse;
 	}
 	
@@ -127,22 +137,24 @@ public class UserServices {
 		return serviceUtil.getResponse(StatusCode.OTP_INTERNAL_ERROR, "Failure");
 	}
 	
-	private UserEntity validateUserToken(String client,String serverToken) throws ValidationException{
+	/*private UserEntity validateUserToken(String client,String serverToken) throws ValidationException{
 		UserEntity userEntity = userDao.getUserEnityByToken(client, serverToken);
 		if(userEntity == null){
 			throw new ValidationException(10, "Invalid User", null);
 		}
 		return userEntity;
 		
-	}
+	}*/
 	
 	
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
-	public ResponseEntity<String> updateUserProfile(String registerData){
+	public ResponseEntity<String> updateUserProfile(String registerData,Principal principal){
 		try{
 			//String register = serviceUtil.netDecryption(registerData);
 			RegisterJson registerJson = serviceUtil.fromJson(registerData, RegisterJson.class);
-			UserEntity dbUserEntity = validateUserToken(registerJson.getAccessToken(), registerJson.getServerToken());
+			
+			UserEntity dbUserEntity = serviceUtil.getUserEntity(principal);
+			
 			dbUserEntity.setName(registerJson.getName());
 			dbUserEntity.setMobileNumber(registerJson.getMobileNumber());
 			if(registerJson.getPassword() != null && !registerJson.getPassword().trim().isEmpty()){
@@ -152,8 +164,6 @@ public class UserServices {
 			userDao.updateUser(dbUserEntity);
 			
 			return serviceUtil.getResponse(StatusCode.REG_OK, "Success");
-		}catch(ValidationException e){
-			return serviceUtil.getResponse(e.getCode(), e.getMessage());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -235,15 +245,12 @@ public class UserServices {
 	 * @return
 	 */
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
-	public ResponseEntity<String> syncUserDeliveryAddress(String requestData){
+	public ResponseEntity<String> syncUserDeliveryAddress(String requestData,Principal principal){
 		try{
 			// Json to  Obj
 			AddressBookJson addressBookJson = serviceUtil.fromJson(requestData, AddressBookJson.class);
-			// Validate User Request
-			UserEntity userEntity = validateUserToken(addressBookJson.getAccessToken(), addressBookJson.getServerToken());
-			if(userEntity == null){
-				return serviceUtil.getResponse(StatusCode.LOGIN_INVALID_MOBILE, "You are not yet register. Please register");
-			}
+			
+			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			
 			//Get Address List to send back to device
 			List<AddressEntity>  dbAddressList =	userDao.getAddressList(addressBookJson.getLastModifiedTime(), userEntity);
@@ -287,18 +294,14 @@ public class UserServices {
 	 * @return
 	 */
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
-	public ResponseEntity<String> addCloudToken(String requestData){
+	public ResponseEntity<String> addCloudToken(String requestData,Principal principal){
 		try{
 			//Json to Object
 			CloudMessageJson cloudMessageJson = serviceUtil.fromJson(requestData, CloudMessageJson.class);
-			//Validate User token
-			UserEntity userEntity =	userDao.getUserEnityByToken(cloudMessageJson.getAccessToken(), cloudMessageJson.getServerToken());
-			// Check same imei number is present in any other user
-			CloudMessageEntity dbCloudMessageEntity =  userDao.getCloudMessageEntity(cloudMessageJson.getImeiNumber(),userEntity);
-			// If its present, then need to delete
-			if(dbCloudMessageEntity != null){
-				userDao.removeCloudMessageEntity(dbCloudMessageEntity);
-			}
+			
+			UserEntity userEntity = serviceUtil.getUserEntity(principal);
+			
+			
 			// Get CloudMessageEntity for this user
 			CloudMessageEntity cloudMessageEntity = 	userDao.getCloudMessageEntity(userEntity);
 			// If its present, then update otherwise need to create

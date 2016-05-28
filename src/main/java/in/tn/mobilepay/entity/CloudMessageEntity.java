@@ -1,5 +1,6 @@
 package in.tn.mobilepay.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -28,8 +29,6 @@ public class CloudMessageEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "CloudMessageId")
 	private int cloudMessageId;
-	@Column(name = "ImeiNumber",unique=true)
-	private String imeiNumber;
 	@Column(name = "CloudId")
 	private String cloudId;
 	@Enumerated(EnumType.STRING)
@@ -49,7 +48,6 @@ public class CloudMessageEntity {
 	}
 	
 	public void toCloudMessageEntity(CloudMessageJson cloudMessageJson){
-		this.imeiNumber = cloudMessageJson.getImeiNumber();
 		this.cloudId = cloudMessageJson.getCloudId();
 		this.deviceType = cloudMessageJson.getDeviceType();
 	}
@@ -62,13 +60,7 @@ public class CloudMessageEntity {
 		this.cloudMessageId = cloudMessageId;
 	}
 
-	public String getImeiNumber() {
-		return imeiNumber;
-	}
-
-	public void setImeiNumber(String imeiNumber) {
-		this.imeiNumber = imeiNumber;
-	}
+	
 
 	public String getCloudId() {
 		return cloudId;
@@ -96,8 +88,9 @@ public class CloudMessageEntity {
 
 	@Override
 	public String toString() {
-		return "CloudMessageEntity [cloudMessageId=" + cloudMessageId + ", imeiNumber=" + imeiNumber + ", cloudId="
-				+ cloudId + ", deviceType=" + deviceType + ", userEntity=" + userEntity + "]";
+		return "CloudMessageEntity [cloudMessageId=" + cloudMessageId + ", cloudId=" + cloudId + ", deviceType="
+				+ deviceType + ", userEntity=" + userEntity + "]";
 	}
 
+	
 }

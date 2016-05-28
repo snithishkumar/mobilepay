@@ -36,7 +36,7 @@ public class MobilePayAuthenticationFilter extends BasicAuthenticationFilter {
 		String serverToken = request.getHeader("serverToken");
 		
 		try {
-			if(header != null && accessToken != null && serverToken != null){
+			if(header != null && accessToken != null && !accessToken.isEmpty() && serverToken != null && !serverToken.isEmpty()){
 				
 				
 				if (authenticationIsRequired(accessToken)) {

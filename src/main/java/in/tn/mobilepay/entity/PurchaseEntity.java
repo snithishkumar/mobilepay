@@ -2,6 +2,7 @@ package in.tn.mobilepay.entity;
 
 import java.util.Collection;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -45,7 +46,7 @@ public class PurchaseEntity {
 	private String purchaseGuid;
 	@Column(name = "PurchaseDateTime")
 	private long purchaseDateTime;
-	@ManyToOne
+	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name = "UserId", referencedColumnName = "UserId")
 	private UserEntity userEntity;
 	@ManyToOne
