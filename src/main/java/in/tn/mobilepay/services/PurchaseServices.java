@@ -126,9 +126,7 @@ public class PurchaseServices {
 	public ResponseEntity<String> syncPayedData(String requestData,Principal principal){
 		try{
 			PayedPurchaseDetailsList payedPurchaseDetailsJsons = serviceUtil.fromJson(requestData,PayedPurchaseDetailsList.class);
-			UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
-			UserEntity userEntity =(UserEntity)authenticationToken.getPrincipal();
-			userEntity = userDAO.getUserEntity(userEntity.getUserId());
+			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			List<PurchaseJson> purchaseJsons = new ArrayList<>();
 			Map<String, AddressEntity> addressList = new HashMap<>();
 			for (PayedPurchaseDetailsJson payedPurchaseDetailsJson : payedPurchaseDetailsJsons.getPurchaseDetailsJsons()) {
@@ -216,9 +214,7 @@ public class PurchaseServices {
 		try {
 			// Json to Object
 			DiscardJsonList discardJsonList = serviceUtil.fromJson(requestData,DiscardJsonList.class);
-			UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
-			UserEntity userEntity =(UserEntity)authenticationToken.getPrincipal();
-			userEntity = userDAO.getUserEntity(userEntity.getUserId());
+			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			List<PurchaseJson> purchaseJsons = new ArrayList<>();
 			for (DiscardJson discardJson : discardJsonList.getDiscardJsons()) {
 				PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
