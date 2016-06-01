@@ -49,7 +49,7 @@ public class PurchaseMerchantJson {
 		this.serverDateTime = purchaseEntity.getServerDateTime();
 		 this.isDiscard = purchaseEntity.isDiscard();
 		 this.paymentStatus = purchaseEntity.getPaymentStatus();
-		 this.orderStatus = purchaseEntity.getOrderStatus();
+		 this.orderStatus = purchaseEntity.getOrderStatus().toString();
 		 this.deliveryOptions = purchaseEntity.getDeliveryOptions();
 		 this.totalAmount = purchaseEntity.getTotalAmount();
 	}

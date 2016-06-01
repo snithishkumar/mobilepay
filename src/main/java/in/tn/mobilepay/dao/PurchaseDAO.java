@@ -7,6 +7,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 
@@ -68,7 +69,7 @@ public class PurchaseDAO extends BaseDAO{
 	 */
 	public List<String> getPurchaseHistoryList(UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
 		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
 		criteria.setProjection(Projections.property(PurchaseEntity.PURCHASE_GUID));
 		criteria.addOrder(Order.asc(PurchaseEntity.SERVER_DATE_TIME));
@@ -107,6 +108,7 @@ public class PurchaseDAO extends BaseDAO{
 		ProjectionList projectionList = Projections.projectionList();
 		projectionList.add(Projections.property(PurchaseEntity.SERVER_DATE_TIME),PurchaseEntity.SERVER_DATE_TIME);
 		projectionList.add(Projections.property(PurchaseEntity.PURCHASE_GUID),PurchaseEntity.PURCHASE_GUID);
+		projectionList.add(Projections.property(PurchaseEntity.PURCHASE_ID),PurchaseEntity.PURCHASE_ID);
 		projectionList.add(Projections.property(PurchaseEntity.ORDER_STATUS),PurchaseEntity.ORDER_STATUS);
 		projectionList.add(Projections.property(PurchaseEntity.UPDATED_DATE_TIME),PurchaseEntity.UPDATED_DATE_TIME);
 		criteria.setProjection(projectionList);
@@ -183,8 +185,8 @@ public class PurchaseDAO extends BaseDAO{
 	
 	private void applyOrderStatusCriteria(Criteria criteria){
 		criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAIED));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED.toString()));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED));
 	}
 	
 	public PurchaseEntity getOrderStatusPurchaseEntity(String purchaseGuid,MerchantEntity merchantEntity){
@@ -364,7 +366,7 @@ public class PurchaseDAO extends BaseDAO{
 		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
 		
 		//CANCELED or DELIVERED
-		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
 		
 		// If ServerSyncTime is > 0, then send after those record.
 		if(merchantPurchaseJson.getServerSyncTime() > 0){
@@ -393,7 +395,7 @@ public class PurchaseDAO extends BaseDAO{
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
 		//CANCELED or DELIVERED
-		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
 				
 		// set projection to be Purchase count
 		criteria.setProjection(Projections.rowCount());
@@ -412,7 +414,7 @@ public class PurchaseDAO extends BaseDAO{
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
 		//CANCELED or DELIVERED
-		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED.toString()), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED.toString())));
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
 				
 		if(serverSyncTime > 0){
 			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverSyncTime));

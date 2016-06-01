@@ -2,6 +2,7 @@ package in.tn.mobilepay.response.model;
 
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
+import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.request.model.DiscardJson;
 
@@ -21,11 +22,12 @@ public class PurchaseJson {
 	private long serverDateTime;
 	private boolean isDiscard;
 	private PaymentStatus paymentStatus;
-	private String orderStatus;
+	private OrderStatus orderStatus;
 	private DeliveryOptions deliveryOptions;
 	private String totalAmount;
 	private DiscardJson discardJson;
 	private AddressJson addressJson;
+	private CounterDetailsJson counterDetails;
 
 	public PurchaseJson() {
 
@@ -161,11 +163,11 @@ public class PurchaseJson {
 		this.paymentStatus = paymentStatus;
 	}
 
-	public String getOrderStatus() {
+	public OrderStatus getOrderStatus() {
 		return orderStatus;
 	}
 
-	public void setOrderStatus(String orderStatus) {
+	public void setOrderStatus(OrderStatus orderStatus) {
 		this.orderStatus = orderStatus;
 	}
 
@@ -200,6 +202,16 @@ public class PurchaseJson {
 	public void setAddressJson(AddressJson addressJson) {
 		this.addressJson = addressJson;
 	}
+	
+	
+
+	public CounterDetailsJson getCounterDetails() {
+		return counterDetails;
+	}
+
+	public void setCounterDetails(CounterDetailsJson counterDetails) {
+		this.counterDetails = counterDetails;
+	}
 
 	@Override
 	public String toString() {
@@ -209,7 +221,10 @@ public class PurchaseJson {
 				+ ", isDelivered=" + isDelivered + ", lastModifiedDateTime=" + lastModifiedDateTime
 				+ ", serverDateTime=" + serverDateTime + ", isDiscard=" + isDiscard + ", paymentStatus=" + paymentStatus
 				+ ", orderStatus=" + orderStatus + ", deliveryOptions=" + deliveryOptions + ", totalAmount="
-				+ totalAmount + ", discardJson=" + discardJson + ", addressJson=" + addressJson + "]";
+				+ totalAmount + ", discardJson=" + discardJson + ", addressJson=" + addressJson + ", counterDetails="
+				+ counterDetails + "]";
 	}
+
+	
 
 }

@@ -18,17 +18,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.reflect.TypeToken;
 
+import in.tn.mobilepay.dao.DeliveryDAO;
 import in.tn.mobilepay.dao.MerchantDAO;
 import in.tn.mobilepay.dao.PurchaseDAO;
 import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.CounterDetailsEntity;
+import in.tn.mobilepay.entity.DeliveryDetailsEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.entity.UserEntity;
+import in.tn.mobilepay.enumeration.DeliveryStatus;
 import in.tn.mobilepay.enumeration.DiscardBy;
 import in.tn.mobilepay.enumeration.NotificationType;
 import in.tn.mobilepay.enumeration.OrderStatus;
@@ -42,6 +45,7 @@ import in.tn.mobilepay.request.model.OrderStatusUpdate;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsJson;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsList;
 import in.tn.mobilepay.request.model.TokenJson;
+import in.tn.mobilepay.response.model.CounterDetailsJson;
 import in.tn.mobilepay.response.model.LuggagesListJson;
 import in.tn.mobilepay.response.model.MerchantJson;
 import in.tn.mobilepay.response.model.NotificationJson;
@@ -61,6 +65,9 @@ public class PurchaseServices {
 	private MerchantDAO merchantDAO;
 	@Autowired
 	private ServiceUtil serviceUtil;
+	
+	@Autowired
+	private DeliveryDAO deliveryDAO;
 	
 	private static final Logger logger = Logger.getLogger(PurchaseServices.class);
 
@@ -95,7 +102,7 @@ public class PurchaseServices {
 				discardEntity.setPurchaseEntity(purchaseEntity);
 				discardEntity.setDiscardBy(DiscardBy.MERCHANT);
 				purchaseEntity.setDiscard(true);
-				purchaseEntity.setOrderStatus(OrderStatus.CANCELED.toString());
+				purchaseEntity.setOrderStatus(OrderStatus.CANCELED);
 				purchaseEntity.setServerDateTime(discardEntity.getCreatedDateTime());
 				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
 				purchaseDAO.updatePurchaseObject(purchaseEntity);
@@ -135,13 +142,13 @@ public class PurchaseServices {
 					purchaseEntity.setDeliveryOptions(payedPurchaseDetailsJson.getDeliveryOptions());
 					switch (payedPurchaseDetailsJson.getDeliveryOptions()) {
 					case NONE:
-						purchaseEntity.setOrderStatus(OrderStatus.DELIVERED.toString());
-						break;
+						purchaseEntity.setOrderStatus(OrderStatus.DELIVERED);
 					case LUGGAGE:
-						purchaseEntity.setOrderStatus(OrderStatus.PACKING.toString());
+						purchaseEntity.setOrderStatus(OrderStatus.PACKING);
 						break;
+					
 					case HOME:
-						purchaseEntity.setOrderStatus(OrderStatus.PACKING.toString());
+						purchaseEntity.setOrderStatus(OrderStatus.PACKING);
 						if(payedPurchaseDetailsJson.getAddressGuid() != null){
 							AddressEntity addressEntity = userDAO.getAddressEntity(payedPurchaseDetailsJson.getAddressGuid());
 							purchaseEntity.getAddressEntities().add(addressEntity);
@@ -227,7 +234,7 @@ public class PurchaseServices {
 					discardEntity.setPurchaseEntity(purchaseEntity);
 					discardEntity.setDiscardBy(DiscardBy.USER);
 					purchaseEntity.setDiscard(true);
-					purchaseEntity.setOrderStatus(OrderStatus.CANCELED.toString());
+					purchaseEntity.setOrderStatus(OrderStatus.CANCELED);
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
 					purchaseDAO.updatePurchaseObject(purchaseEntity);
@@ -249,12 +256,38 @@ public class PurchaseServices {
 	}
 	
 	private void updateCounterStatus(PurchaseEntity purchaseEntity,OrderStatusUpdate orderStatusUpdate){
-		CounterDetailsEntity counterDetailsEntity = new CounterDetailsEntity();
-		counterDetailsEntity.setCounterNumber(orderStatusUpdate.getOrderStatus());
-		counterDetailsEntity.setCreatedDateTime(purchaseEntity.getServerDateTime());
-		counterDetailsEntity.setMessage(orderStatusUpdate.getOrderStatusDesc());
-		counterDetailsEntity.setPurchaseEntity(purchaseEntity);
-		purchaseDAO.createCounterStatus(counterDetailsEntity);
+		List<String> orderStatus = new ArrayList<>();
+		orderStatus.add(OrderStatus.CANCELED.toString());
+		orderStatus.add(OrderStatus.DELIVERED.toString());
+		orderStatus.add(OrderStatus.OUT_FOR_DELIVERY.toString());
+		orderStatus.add(OrderStatus.READY_TO_SHIPPING.toString());
+		orderStatus.add(OrderStatus.FAILED_TO_DELIVER.toString());
+		String counterNumber = orderStatusUpdate.getOrderStatus();
+		if(!orderStatus.contains(counterNumber)){
+			CounterDetailsEntity counterDetailsEntity = new CounterDetailsEntity();
+			counterDetailsEntity.setCounterNumber(orderStatusUpdate.getOrderStatus());
+			counterDetailsEntity.setCreatedDateTime(purchaseEntity.getServerDateTime());
+			counterDetailsEntity.setMessage(orderStatusUpdate.getOrderStatusDesc());
+			counterDetailsEntity.setPurchaseEntity(purchaseEntity);
+			purchaseEntity.setOrderStatus(OrderStatus.READY_TO_COLLECT);
+			purchaseDAO.createCounterStatus(counterDetailsEntity);
+		}else if(orderStatus.equals(OrderStatus.OUT_FOR_DELIVERY)){
+			DeliveryDetailsEntity deliveryDetailsEntity = deliveryDAO.getDeliveryDetailsEntity(purchaseEntity);
+			if(deliveryDetailsEntity == null){
+				deliveryDetailsEntity = new DeliveryDetailsEntity();
+				deliveryDetailsEntity.setOutForDeliveryDate(purchaseEntity.getServerDateTime());
+				deliveryDetailsEntity.setPurchaseEntity(purchaseEntity);
+				deliveryDAO.createDeliveryDetails(deliveryDetailsEntity);
+			}
+		}else if(orderStatus.equals(OrderStatus.DELIVERED)){
+			DeliveryDetailsEntity deliveryDetailsEntity = deliveryDAO.getDeliveryDetailsEntity(purchaseEntity);
+			if(deliveryDetailsEntity != null){
+				deliveryDetailsEntity.setDeliveredDate(purchaseEntity.getServerDateTime());
+				deliveryDetailsEntity.setDeliveryStatus(DeliveryStatus.SUCCESS);
+				deliveryDAO.updateDeliveryDetails(deliveryDetailsEntity);
+			}
+		}
+		
 	}
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -266,7 +299,8 @@ public class PurchaseServices {
 			//for(OrderStatusUpdate orderStatusUpdate : orderStatusUpdateJsonList.getOrderStatusUpdates()){
 				PurchaseEntity purchaseEntity = purchaseDAO.getOrderStatusPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),merchantEntity);
 				if(purchaseEntity != null){
-					purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
+					updateCounterStatus(purchaseEntity, orderStatusUpdate);
+					//purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(purchaseEntity.getServerDateTime());
 					purchaseDAO.updatePurchaseObject(purchaseEntity);
@@ -496,6 +530,16 @@ public class PurchaseServices {
 			// Get Luggage Details and Purchase with Luggage Details
 			if(getLuggageList.getStartTime() > 0){
 				List<OrderStatusJson> luggageJsons = purchaseDAO.getOrderStatusList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
+				for(OrderStatusJson orderStatusJson : luggageJsons){
+					if(orderStatusJson.getOrderStatus().equals(OrderStatus.READY_TO_COLLECT.toString())){
+						CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(orderStatusJson.getPurchaseId());
+						if(counterDetailsEntity != null){
+							CounterDetailsJson counterDetailsJson = new CounterDetailsJson(counterDetailsEntity);
+							orderStatusJson.setCounterDetails(counterDetailsJson);
+						}
+					}
+					
+				}
 				luggagesListJson.setLuggageJsons(luggageJsons);
 				purchaseList = purchaseDAO.getOrderStatusWithPurchaseList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
 			}else{ // Get  Purchase with Luggage Full List
@@ -507,6 +551,13 @@ public class PurchaseServices {
 			luggagesListJson.setPurchaseJsons(purchaseJsons);
 			for (PurchaseEntity purchaseEntity : purchaseList) {
 				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
+				if(purchaseEntity.getOrderStatus().toString().equals(OrderStatus.READY_TO_COLLECT.toString())){
+					CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(purchaseEntity.getPurchaseId());
+					if(counterDetailsEntity != null){
+						CounterDetailsJson counterDetailsJson = new CounterDetailsJson(counterDetailsEntity);
+						purchaseJson.setCounterDetails(counterDetailsJson);
+					}
+				}
 				UserJson userJson = new UserJson(userEntity);
 				purchaseJson.setUsers(userJson);
 				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());

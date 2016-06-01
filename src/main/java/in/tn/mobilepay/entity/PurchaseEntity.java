@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import in.tn.mobilepay.enumeration.DeliveryOptions;
+import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.request.model.PurchaseJson;
 import in.tn.mobilepay.services.ServiceUtil;
@@ -83,8 +84,9 @@ public class PurchaseEntity {
 	@Column(name = "DeliveryOptions")
 	private DeliveryOptions deliveryOptions;
 
+	@Enumerated
 	@Column(name = "OrderStatus") // ORDER_STATUS any one of status
-	private String orderStatus;
+	private OrderStatus orderStatus;
 
 	@Column(name = "TotalAmount")
 	private String totalAmount;
@@ -236,11 +238,11 @@ public class PurchaseEntity {
 		this.deliveryOptions = deliveryOptions;
 	}
 
-	public String getOrderStatus() {
+	public OrderStatus getOrderStatus() {
 		return orderStatus;
 	}
 
-	public void setOrderStatus(String orderStatus) {
+	public void setOrderStatus(OrderStatus orderStatus) {
 		this.orderStatus = orderStatus;
 	}
 

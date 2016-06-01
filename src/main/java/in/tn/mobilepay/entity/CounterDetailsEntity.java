@@ -28,8 +28,10 @@ public class CounterDetailsEntity {
 	private String counterNumber;
 	@Column(name = "Message")
 	private String message;
-	@Column(name = "CreatedDateTime")
+	@Column(name = "CreatedDateime")
 	private long createdDateTime;
+	@Column(name = "CounterGuid")
+	private String counterGuid;
 	
 	@ManyToOne
 	@JoinColumn(name = "PurchaseId", referencedColumnName = "PurchaseId")
@@ -76,11 +78,24 @@ public class CounterDetailsEntity {
 	public void setPurchaseEntity(PurchaseEntity purchaseEntity) {
 		this.purchaseEntity = purchaseEntity;
 	}
+	
+	
+
+	public String getCounterGuid() {
+		return counterGuid;
+	}
+
+	public void setCounterGuid(String counterGuid) {
+		this.counterGuid = counterGuid;
+	}
 
 	@Override
 	public String toString() {
 		return "CounterDetailsEntity [counterDetailsId=" + counterDetailsId + ", counterNumber=" + counterNumber
-				+ ", message=" + message + ", createdDateTime=" + createdDateTime + "]";
+				+ ", message=" + message + ", createdDateTime=" + createdDateTime + ", counterGuid=" + counterGuid
+				+ ", purchaseEntity=" + purchaseEntity + "]";
 	}
+
+	
 
 }
