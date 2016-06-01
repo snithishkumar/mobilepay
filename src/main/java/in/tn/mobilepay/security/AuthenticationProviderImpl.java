@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import in.tn.mobilepay.dao.UserDAOImpl;
+import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.services.ServiceUtil;
 

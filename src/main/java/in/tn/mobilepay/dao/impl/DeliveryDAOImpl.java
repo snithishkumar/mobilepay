@@ -1,4 +1,4 @@
-package in.tn.mobilepay.dao;
+package in.tn.mobilepay.dao.impl;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;

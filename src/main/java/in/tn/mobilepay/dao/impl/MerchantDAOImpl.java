@@ -1,4 +1,4 @@
-package in.tn.mobilepay.dao;
+package in.tn.mobilepay.dao.impl;
 
 import java.io.InputStream;
 import java.sql.Blob;

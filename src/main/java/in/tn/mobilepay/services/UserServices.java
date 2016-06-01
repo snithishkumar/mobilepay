@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.JsonObject;
 
-import in.tn.mobilepay.dao.UserDAOImpl;
+import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.OtpEntity;

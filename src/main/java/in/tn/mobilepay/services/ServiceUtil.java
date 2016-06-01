@@ -26,7 +26,7 @@ import org.springframework.web.client.RestTemplate;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import in.tn.mobilepay.dao.UserDAOImpl;
+import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.NotificationType;
 import in.tn.mobilepay.response.model.NotificationJson;

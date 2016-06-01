@@ -18,10 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.reflect.TypeToken;
 
-import in.tn.mobilepay.dao.DeliveryDAOImpl;
-import in.tn.mobilepay.dao.MerchantDAOImpl;
-import in.tn.mobilepay.dao.PurchaseDAOImpl;
-import in.tn.mobilepay.dao.UserDAOImpl;
+import in.tn.mobilepay.dao.impl.DeliveryDAOImpl;
+import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
+import in.tn.mobilepay.dao.impl.PurchaseDAOImpl;
+import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.CounterDetailsEntity;

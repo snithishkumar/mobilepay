@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 
-import in.tn.mobilepay.dao.MerchantDAOImpl;
-import in.tn.mobilepay.dao.PurchaseDAOImpl;
+import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
+import in.tn.mobilepay.dao.impl.PurchaseDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
