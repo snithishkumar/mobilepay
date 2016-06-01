@@ -11,14 +11,13 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.reflect.TypeToken;
 
-import in.tn.mobilepay.dao.impl.DeliveryDAOImpl;
+import in.tn.mobilepay.dao.DeliveryDAO;
 import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
 import in.tn.mobilepay.dao.impl.PurchaseDAOImpl;
 import in.tn.mobilepay.dao.impl.UserDAOImpl;
@@ -44,7 +43,6 @@ import in.tn.mobilepay.request.model.GetPurchaseDetailsList;
 import in.tn.mobilepay.request.model.OrderStatusUpdate;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsJson;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsList;
-import in.tn.mobilepay.request.model.TokenJson;
 import in.tn.mobilepay.response.model.CounterDetailsJson;
 import in.tn.mobilepay.response.model.LuggagesListJson;
 import in.tn.mobilepay.response.model.MerchantJson;
@@ -67,7 +65,7 @@ public class PurchaseServices {
 	private ServiceUtil serviceUtil;
 	
 	@Autowired
-	private DeliveryDAOImpl deliveryDAO;
+	private DeliveryDAO deliveryDAO;
 	
 	private static final Logger logger = Logger.getLogger(PurchaseServices.class);
 
