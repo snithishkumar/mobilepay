@@ -6,7 +6,7 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class BaseDAO {
+public abstract class BaseDAOImpl {
 
 	@Autowired
 	protected SessionFactory sessionFactory;

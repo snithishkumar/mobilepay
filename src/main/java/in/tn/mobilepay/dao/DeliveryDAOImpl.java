@@ -9,7 +9,7 @@ import in.tn.mobilepay.entity.DeliveryDetailsEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 
 @Repository
-public class DeliveryDAO extends BaseDAO{
+public class DeliveryDAOImpl extends BaseDAOImpl{
 	
 	/**
 	 * Get Delivery Entity based on PurchaseEntity

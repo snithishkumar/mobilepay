@@ -18,10 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.reflect.TypeToken;
 
-import in.tn.mobilepay.dao.DeliveryDAO;
-import in.tn.mobilepay.dao.MerchantDAO;
-import in.tn.mobilepay.dao.PurchaseDAO;
-import in.tn.mobilepay.dao.UserDAO;
+import in.tn.mobilepay.dao.DeliveryDAOImpl;
+import in.tn.mobilepay.dao.MerchantDAOImpl;
+import in.tn.mobilepay.dao.PurchaseDAOImpl;
+import in.tn.mobilepay.dao.UserDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.CounterDetailsEntity;
@@ -58,16 +58,16 @@ import in.tn.mobilepay.util.StatusCode;
 public class PurchaseServices {
 
 	@Autowired
-	private PurchaseDAO purchaseDAO;
+	private PurchaseDAOImpl purchaseDAO;
 	@Autowired
-	private UserDAO userDAO;
+	private UserDAOImpl userDAO;
 	@Autowired
-	private MerchantDAO merchantDAO;
+	private MerchantDAOImpl merchantDAO;
 	@Autowired
 	private ServiceUtil serviceUtil;
 	
 	@Autowired
-	private DeliveryDAO deliveryDAO;
+	private DeliveryDAOImpl deliveryDAO;
 	
 	private static final Logger logger = Logger.getLogger(PurchaseServices.class);
 

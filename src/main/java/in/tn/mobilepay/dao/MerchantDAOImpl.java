@@ -11,7 +11,7 @@ import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.MerchantProfile;
 
 @Repository
-public class MerchantDAO extends BaseDAO{
+public class MerchantDAOImpl extends BaseDAOImpl{
 	
 	public void createMerchant(MerchantEntity merchantEntity){
 		saveObject(merchantEntity);

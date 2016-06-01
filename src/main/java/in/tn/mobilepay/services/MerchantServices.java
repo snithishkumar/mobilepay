@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import in.tn.mobilepay.dao.MerchantDAO;
+import in.tn.mobilepay.dao.MerchantDAOImpl;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.MerchantProfile;
 import in.tn.mobilepay.request.model.MerchantLoginJson;
@@ -27,7 +27,7 @@ public class MerchantServices {
 	@Autowired
 	private Gson gson;
 	@Autowired
-	private MerchantDAO merchantDAO;
+	private MerchantDAOImpl merchantDAO;
 	@Autowired
 	private ServiceUtil serviceUtil;
 	

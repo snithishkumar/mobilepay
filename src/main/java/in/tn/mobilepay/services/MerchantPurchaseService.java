@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 
-import in.tn.mobilepay.dao.MerchantDAO;
-import in.tn.mobilepay.dao.PurchaseDAO;
+import in.tn.mobilepay.dao.MerchantDAOImpl;
+import in.tn.mobilepay.dao.PurchaseDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
@@ -39,11 +39,11 @@ public class MerchantPurchaseService {
 	private static final String COUNT = "X-Count";
 	
 	@Autowired
-	private PurchaseDAO purchaseDAO;
+	private PurchaseDAOImpl purchaseDAO;
 	@Autowired
 	private ServiceUtil serviceUtil;
 	@Autowired
-	private MerchantDAO merchantDAO;
+	private MerchantDAOImpl merchantDAO;
 	@Autowired
 	private Gson gson;
 	

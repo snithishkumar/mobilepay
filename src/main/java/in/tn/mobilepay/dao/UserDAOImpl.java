@@ -14,7 +14,7 @@ import in.tn.mobilepay.entity.OtpEntity;
 import in.tn.mobilepay.entity.UserEntity;
 
 @Repository
-public class UserDAO extends BaseDAO{
+public class UserDAOImpl extends BaseDAOImpl{
 
 	
 	public void createUser(UserEntity userEntity){

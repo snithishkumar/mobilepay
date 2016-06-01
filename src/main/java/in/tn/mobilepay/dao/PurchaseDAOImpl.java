@@ -25,7 +25,7 @@ import in.tn.mobilepay.response.model.OrderStatusJson;
 import in.tn.mobilepay.util.MessageConstants;
 
 @Repository
-public class PurchaseDAO extends BaseDAO{
+public class PurchaseDAOImpl extends BaseDAOImpl{
 	
 	
 	

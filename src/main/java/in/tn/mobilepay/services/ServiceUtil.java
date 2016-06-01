@@ -26,7 +26,7 @@ import org.springframework.web.client.RestTemplate;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import in.tn.mobilepay.dao.UserDAO;
+import in.tn.mobilepay.dao.UserDAOImpl;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.NotificationType;
 import in.tn.mobilepay.response.model.NotificationJson;
@@ -39,7 +39,7 @@ public class ServiceUtil {
 	private Gson gson;
 	
 	@Autowired
-	private UserDAO userDAO;
+	private UserDAOImpl userDAO;
 	
 	private Random random = new Random();
 	
