@@ -7,6 +7,7 @@ public class RegisterJson{
 	private String mobileNumber;
 	private String imei;
 	 private boolean isPasswordForget;
+	 private String email;
 
 	public String getName() {
 		return name;
@@ -48,6 +49,16 @@ public class RegisterJson{
 
 	public void setPasswordForget(boolean isPasswordForget) {
 		this.isPasswordForget = isPasswordForget;
+	}
+	
+	
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Override

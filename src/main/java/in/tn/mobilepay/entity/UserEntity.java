@@ -20,6 +20,7 @@ public class UserEntity {
 	public static final String IMEI_NUMBER = "imeiNumber";
 	public static final String ACCESS_TOKEN = "accessToken";
 	public static final String SERVER_TOKEN = "serverToken";
+	public static final String E_MAIL = "email";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,7 +28,7 @@ public class UserEntity {
 	private int userId;
 	@Column(name = "Name")
 	private String name;
-	@Column(name = "MobileNumber")
+	@Column(name = "MobileNumber",unique=true)
 	private String mobileNumber;
 	@Column(name = "LoginId")
 	private int loginId;
@@ -39,6 +40,8 @@ public class UserEntity {
 	private String accessToken;
 	@Column(name = "ServerToken")
 	private String serverToken;
+	@Column(name = "Email")
+	private String email;
 	
 	public void toUser(RegisterJson registerJson){
 		this.setLoginId(Integer.valueOf(registerJson.getPassword()));
@@ -46,6 +49,7 @@ public class UserEntity {
 		this.setName(registerJson.getName());
 		this.setImeiNumber(registerJson.getImei());
 		this.setActive(true);
+		this.email = registerJson.getEmail();
 	}
 
 	public int getUserId() {

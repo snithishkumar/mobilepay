@@ -91,9 +91,9 @@ public class UserServices {
 	
 	
 	private OTPResponse sendOtpPassword(String mobileNumber){
-		/*JsonObject jsonObject = new JsonObject();
+		JsonObject jsonObject = new JsonObject();
 		jsonObject.addProperty("countryCode", "91");
-		jsonObject.addProperty("mobileNumber", "9942320690");
+		jsonObject.addProperty("mobileNumber", mobileNumber);
 		jsonObject.addProperty("getGeneratedOTP", true);
 		
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
@@ -103,14 +103,14 @@ public class UserServices {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<JsonObject> request = new HttpEntity<>(jsonObject, headers);
 		OTPResponse otpResponse = restTemplate.postForObject("https://sendotp.msg91.com/api/generateOTP", request, OTPResponse.class);
-		return otpResponse;*/
-		OTPResponse otpResponse = new OTPResponse();
+		return otpResponse;
+		/*OTPResponse otpResponse = new OTPResponse();
 		otpResponse.setStatus("success");
 		OTPData otpData = new OTPData();
 		otpData.setCode("OTP_SENT_SUCCESSFULLY");
 		otpData.setOneTimePassword("123");
 		otpResponse.setResponse(otpData);
-		return otpResponse;
+		return otpResponse;*/
 	}
 	
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)

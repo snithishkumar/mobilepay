@@ -17,7 +17,7 @@ public class CounterDetailsEntity {
 	public static final String COUNTER_NUMBER = "counterNumber";
 	public static final String MESSAGE = "message";
 	public static final String CREATED_DATE_TIME = "createdDateTime";
-	public static final String PURCHASE_ID = "purchaseId";
+	public static final String PURCHASE_ID = "purchaseEntity";
 	
 
 	@Id

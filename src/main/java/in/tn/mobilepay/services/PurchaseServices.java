@@ -262,14 +262,28 @@ public class PurchaseServices {
 		orderStatus.add(OrderStatus.FAILED_TO_DELIVER.toString());
 		String counterNumber = orderStatusUpdate.getOrderStatus();
 		if(!orderStatus.contains(counterNumber)){
-			CounterDetailsEntity counterDetailsEntity = new CounterDetailsEntity();
+			CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(purchaseEntity.getPurchaseId());
+			boolean isCreate = false;
+			if(counterDetailsEntity == null){
+				 counterDetailsEntity = new CounterDetailsEntity();
+				 counterDetailsEntity.setCounterGuid(serviceUtil.uuid());
+				 isCreate = true;
+			}
+			
 			counterDetailsEntity.setCounterNumber(orderStatusUpdate.getOrderStatus());
 			counterDetailsEntity.setCreatedDateTime(purchaseEntity.getServerDateTime());
 			counterDetailsEntity.setMessage(orderStatusUpdate.getOrderStatusDesc());
+			
 			counterDetailsEntity.setPurchaseEntity(purchaseEntity);
 			purchaseEntity.setOrderStatus(OrderStatus.READY_TO_COLLECT);
-			purchaseDAO.createCounterStatus(counterDetailsEntity);
-		}else if(orderStatus.equals(OrderStatus.OUT_FOR_DELIVERY)){
+			if(isCreate){
+				purchaseDAO.createCounterStatus(counterDetailsEntity);
+			}else{
+				purchaseDAO.updateCounterStatus(counterDetailsEntity);
+			}
+			
+		}else if(counterNumber.equals(OrderStatus.OUT_FOR_DELIVERY.toString())){
+			purchaseEntity.setOrderStatus(OrderStatus.OUT_FOR_DELIVERY);
 			DeliveryDetailsEntity deliveryDetailsEntity = deliveryDAO.getDeliveryDetailsEntity(purchaseEntity);
 			if(deliveryDetailsEntity == null){
 				deliveryDetailsEntity = new DeliveryDetailsEntity();
@@ -277,13 +291,16 @@ public class PurchaseServices {
 				deliveryDetailsEntity.setPurchaseEntity(purchaseEntity);
 				deliveryDAO.createDeliveryDetails(deliveryDetailsEntity);
 			}
-		}else if(orderStatus.equals(OrderStatus.DELIVERED)){
+		}else if(counterNumber.equals(OrderStatus.DELIVERED.toString())){
+			purchaseEntity.setOrderStatus(OrderStatus.DELIVERED);
 			DeliveryDetailsEntity deliveryDetailsEntity = deliveryDAO.getDeliveryDetailsEntity(purchaseEntity);
 			if(deliveryDetailsEntity != null){
 				deliveryDetailsEntity.setDeliveredDate(purchaseEntity.getServerDateTime());
 				deliveryDetailsEntity.setDeliveryStatus(DeliveryStatus.SUCCESS);
 				deliveryDAO.updateDeliveryDetails(deliveryDetailsEntity);
 			}
+		}else{
+			purchaseEntity.setOrderStatus(OrderStatus.valueOf(orderStatusUpdate.getOrderStatus()));
 		}
 		
 	}
@@ -297,10 +314,11 @@ public class PurchaseServices {
 			//for(OrderStatusUpdate orderStatusUpdate : orderStatusUpdateJsonList.getOrderStatusUpdates()){
 				PurchaseEntity purchaseEntity = purchaseDAO.getOrderStatusPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),merchantEntity);
 				if(purchaseEntity != null){
-					updateCounterStatus(purchaseEntity, orderStatusUpdate);
-					//purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(purchaseEntity.getServerDateTime());
+					updateCounterStatus(purchaseEntity, orderStatusUpdate);
+					//purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
+					
 					purchaseDAO.updatePurchaseObject(purchaseEntity);
 					
 					//Send Push Notification
@@ -308,7 +326,27 @@ public class PurchaseServices {
 					if(cloudMessageEntity != null){
 						NotificationJson notificationJson = new NotificationJson();
 						notificationJson.setNotificationType(NotificationType.STATUS);
-						notificationJson.setMessage("Your order has been Packed. You can collect from Saravana Stores."); // TODO
+						switch (purchaseEntity.getOrderStatus()) {
+						case CANCELED:
+							notificationJson.setMessage("Your order has been Canceled by merchant."); // TODO
+							break;
+						case READY_TO_COLLECT:
+							notificationJson.setMessage("Your order has been Ready.You can collect it from "+merchantEntity.getMerchantName()); // TODO
+							break;
+						case DELIVERED:
+							notificationJson.setMessage("Your order has been Deliverd. Thanks for Shopping!!!"); // TODO
+							break;
+							
+						case FAILED_TO_DELIVER:
+							notificationJson.setMessage("Your order has been not Deliverd."); // TODO
+							break;
+							
+						case READY_TO_SHIPPING:
+						case OUT_FOR_DELIVERY:
+							notificationJson.setMessage("Your order has been Ready. It will be dispatched shortly."); // TODO
+							break;
+						}
+						
 						notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
 						serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
 					}
@@ -529,7 +567,7 @@ public class PurchaseServices {
 			if(getLuggageList.getStartTime() > 0){
 				List<OrderStatusJson> luggageJsons = purchaseDAO.getOrderStatusList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
 				for(OrderStatusJson orderStatusJson : luggageJsons){
-					if(orderStatusJson.getOrderStatus().equals(OrderStatus.READY_TO_COLLECT.toString())){
+					if(orderStatusJson.getOrderStatus().toString().equals(OrderStatus.READY_TO_COLLECT.toString())){
 						CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(orderStatusJson.getPurchaseId());
 						if(counterDetailsEntity != null){
 							CounterDetailsJson counterDetailsJson = new CounterDetailsJson(counterDetailsEntity);

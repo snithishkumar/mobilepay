@@ -439,5 +439,10 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 	}
 	
 	
+	public void updateCounterStatus(CounterDetailsEntity counterDetailsEntity){
+		updateCounterStatus(counterDetailsEntity);
+	}
+	
+	
 
 }
