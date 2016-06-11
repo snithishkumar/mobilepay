@@ -15,6 +15,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import in.tn.mobilepay.dao.impl.UserDAOImpl;
@@ -37,6 +38,9 @@ public class UserServices {
 	
 	@Autowired
 	private UserDAOImpl userDao;
+	
+	@Autowired
+	private Gson gson;
 	
 	
 	
@@ -91,7 +95,7 @@ public class UserServices {
 	
 	
 	private OTPResponse sendOtpPassword(String mobileNumber){
-		JsonObject jsonObject = new JsonObject();
+		/*JsonObject jsonObject = new JsonObject();
 		jsonObject.addProperty("countryCode", "91");
 		jsonObject.addProperty("mobileNumber", mobileNumber);
 		jsonObject.addProperty("getGeneratedOTP", true);
@@ -103,14 +107,14 @@ public class UserServices {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpEntity<JsonObject> request = new HttpEntity<>(jsonObject, headers);
 		OTPResponse otpResponse = restTemplate.postForObject("https://sendotp.msg91.com/api/generateOTP", request, OTPResponse.class);
-		return otpResponse;
-		/*OTPResponse otpResponse = new OTPResponse();
+		return otpResponse;*/
+		OTPResponse otpResponse = new OTPResponse();
 		otpResponse.setStatus("success");
 		OTPData otpData = new OTPData();
 		otpData.setCode("OTP_SENT_SUCCESSFULLY");
 		otpData.setOneTimePassword("123");
 		otpResponse.setResponse(otpData);
-		return otpResponse;*/
+		return otpResponse;
 	}
 	
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
@@ -169,12 +173,31 @@ public class UserServices {
 		}
 		return serviceUtil.getResponse(StatusCode.INTERNAL_ERROR, "Failure");
 	}
+	
+	
+	
+	@Transactional(readOnly = true,propagation=Propagation.REQUIRED)
+	public ResponseEntity<String> getUserProfile(Principal principal){
+		try{
+			UserEntity dbUserEntity = serviceUtil.getUserEntity(principal);
+			RegisterJson registerJson = new RegisterJson();
+			registerJson.setEmail(dbUserEntity.getEmail());
+			registerJson.setName(dbUserEntity.getName());
+			registerJson.setImei(dbUserEntity.getImeiNumber());
+			registerJson.setMobileNumber(dbUserEntity.getMobileNumber());
+			String profileData = gson.toJson(registerJson);
+			return serviceUtil.getResponse(StatusCode.PROFILE_OK, profileData);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return serviceUtil.getResponse(StatusCode.INTERNAL_ERROR, "Failure");
+	}
 
 	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
 	public ResponseEntity<String> userRegisteration(String registerData){
 		try{
-			String register = serviceUtil.netDecryption(registerData);
-			RegisterJson registerJson = serviceUtil.fromJson(register, RegisterJson.class);
+			//String register = serviceUtil.netDecryption(registerData);
+			RegisterJson registerJson = serviceUtil.fromJson(registerData, RegisterJson.class);
 			UserEntity dbUserEntity =	userDao.getUserEntity(registerJson.getMobileNumber());
 			if(dbUserEntity ==  null){
 				dbUserEntity = new UserEntity();
@@ -187,8 +210,6 @@ public class UserServices {
 			}
 			
 			return serviceUtil.getResponse(StatusCode.REG_OK, "Success");
-		}catch(ValidationException e){
-			return serviceUtil.getResponse(e.getCode(), e.getMessage());
 		}catch(Exception e){
 			e.printStackTrace();
 		}

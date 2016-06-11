@@ -44,7 +44,10 @@ public class UserEntity {
 	private String email;
 	
 	public void toUser(RegisterJson registerJson){
-		this.setLoginId(Integer.valueOf(registerJson.getPassword()));
+		if(registerJson.getPassword() != null && !registerJson.getPassword().trim().isEmpty()){
+			this.setLoginId(Integer.valueOf(registerJson.getPassword()));
+		}
+		
 		this.setMobileNumber(registerJson.getMobileNumber());
 		this.setName(registerJson.getName());
 		this.setImeiNumber(registerJson.getImei());
@@ -118,6 +121,16 @@ public class UserEntity {
 
 	public void setAccessToken(String accessToken) {
 		this.accessToken = accessToken;
+	}
+	
+	
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Override

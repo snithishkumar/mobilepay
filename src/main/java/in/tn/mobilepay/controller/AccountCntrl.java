@@ -27,6 +27,13 @@ public class AccountCntrl {
 		return userServices.updateUserProfile(requestData,principal);
 	}
 	
+	@RequestMapping(value="/mobilePayUser/mobile/getUserProfile")
+	public ResponseEntity<String> getUserProfile(Principal principal){
+		return userServices.getUserProfile(principal);
+	}
+	
+	
+	
 	@RequestMapping(value="/mobile/verifyMobileNo")
 	public ResponseEntity<String> verifyMobileNumber(@RequestBody String requestData){
 		return userServices.sendOtp(requestData);

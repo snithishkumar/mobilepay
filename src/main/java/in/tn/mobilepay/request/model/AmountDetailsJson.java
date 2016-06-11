@@ -5,9 +5,9 @@ import in.tn.mobilepay.enumeration.DiscountType;
 public class AmountDetailsJson {
 
 	private float taxAmount;
-	private double discount;
+	private String discount;
 	private DiscountType discountType;
-	private double discountMiniVal;
+	private String discountMiniVal;
 
 	public float getTaxAmount() {
 		return taxAmount;
@@ -17,11 +17,11 @@ public class AmountDetailsJson {
 		this.taxAmount = taxAmount;
 	}
 
-	public double getDiscount() {
+	public String getDiscount() {
 		return discount;
 	}
 
-	public void setDiscount(double discount) {
+	public void setDiscount(String discount) {
 		this.discount = discount;
 	}
 
@@ -33,11 +33,11 @@ public class AmountDetailsJson {
 		this.discountType = discountType;
 	}
 
-	public double getDiscountMiniVal() {
+	public String getDiscountMiniVal() {
 		return discountMiniVal;
 	}
 
-	public void setDiscountMiniVal(double discountMiniVal) {
+	public void setDiscountMiniVal(String discountMiniVal) {
 		this.discountMiniVal = discountMiniVal;
 	}
 

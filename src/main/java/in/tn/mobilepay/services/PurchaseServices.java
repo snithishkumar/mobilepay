@@ -384,6 +384,7 @@ public class PurchaseServices {
 			dbPurchaseEntity.setMerchantEntity(merchantEntity);
 			dbPurchaseEntity.setUserEntity(userEntity);
 			dbPurchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAIED);
+			dbPurchaseEntity.setOrderStatus(OrderStatus.PURCHASE);
 			// Json obj to Entity
 			populatePurchaseData(dbPurchaseEntity, purchaseJson);
 			//Create New Record

@@ -107,6 +107,7 @@ public class PurchaseEntity {
 		this.purchaseDateTime = Long.valueOf(purchaseJson.getPurchaseDateTime());
 		this.isDeliverable = purchaseJson.getIsHomeDeliver() != null ? purchaseJson.getIsHomeDeliver() : false;
 		this.updatedDateTime = ServiceUtil.getCurrentGmtTime();
+		this.isEditable = purchaseJson.getIsEditable();
 		this.serverDateTime = updatedDateTime;
 	}
 

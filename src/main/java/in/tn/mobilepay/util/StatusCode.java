@@ -39,6 +39,10 @@ public class StatusCode {
 	/** Card 2^7 **/
     public static final int CARD_LIST_SUCCESS = 128;
     public static final int CARD_LIST_FAILURE = 12801;
+    
+    
+    /** Profile 2^8 **/
+    public static final int PROFILE_OK = 25601;
 	
 
 }

@@ -10,6 +10,7 @@ public class PurchaseJson extends TokenJson {
 	private String purchaseDateTime;
 	private String userMobile;
 	private Boolean isHomeDeliver;
+	private Boolean isEditable;
 	private List<PurchaseDetailsJson> purchaseDetails = new ArrayList<PurchaseDetailsJson>();
 	private AmountDetailsJson amountDetails;
 	private String totalAmount;
@@ -75,6 +76,16 @@ public class PurchaseJson extends TokenJson {
 
 	public String getTotalAmount() {
 		return totalAmount;
+	}
+
+	
+	
+	public Boolean getIsEditable() {
+		return isEditable;
+	}
+
+	public void setIsEditable(Boolean isEditable) {
+		this.isEditable = isEditable;
 	}
 
 	public void setTotalAmount(String totalAmount) {
