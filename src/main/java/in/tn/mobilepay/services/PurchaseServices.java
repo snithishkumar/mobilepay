@@ -171,6 +171,7 @@ public class PurchaseServices {
 					purchaseEntity.setUnModifiedPurchaseData(purchaseEntity.getPurchaseData());
 					purchaseEntity.setAmountDetails(payedPurchaseDetailsJson.getAmountDetails());
 					purchaseEntity.setPurchaseData(payedPurchaseDetailsJson.getProductDetails());
+					purchaseEntity.setTotalAmount(payedPurchaseDetailsJson.getTotalAmount());
 					purchaseDAO.updatePurchaseObject(purchaseEntity);
 					processTransactions(purchaseEntity, payedPurchaseDetailsJson.getTransactions());
 					PurchaseJson purchaseJson = new PurchaseJson();

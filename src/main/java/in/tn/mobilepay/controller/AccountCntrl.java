@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,12 @@ public class AccountCntrl {
 	@RequestMapping(value="/mobilePayUser/mobile/getUserProfile")
 	public ResponseEntity<String> getUserProfile(Principal principal){
 		return userServices.getUserProfile(principal);
+	}
+	
+	
+	@RequestMapping(value="/mobile/getUserProfile/{mobileNumber}")
+	public ResponseEntity<String> getUserProfile(@PathVariable("mobileNumber")String mobileNumber){
+		return userServices.getUserProfile(mobileNumber);
 	}
 	
 	

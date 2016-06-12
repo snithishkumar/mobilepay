@@ -174,6 +174,23 @@ public class UserServices {
 		return serviceUtil.getResponse(StatusCode.INTERNAL_ERROR, "Failure");
 	}
 	
+	@Transactional(readOnly = true,propagation=Propagation.REQUIRED)
+	public ResponseEntity<String> getUserProfile(String mobileNumber){
+		try{
+			UserEntity dbUserEntity  = userDao.getUserEntity(mobileNumber);
+			RegisterJson registerJson = new RegisterJson();
+			registerJson.setEmail(dbUserEntity.getEmail());
+			registerJson.setName(dbUserEntity.getName());
+			registerJson.setImei(dbUserEntity.getImeiNumber());
+			registerJson.setMobileNumber(dbUserEntity.getMobileNumber());
+			String profileData = gson.toJson(registerJson);
+			return serviceUtil.getResponse(StatusCode.PROFILE_OK, profileData);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return serviceUtil.getResponse(StatusCode.INTERNAL_ERROR, "Failure");
+	}
+	
 	
 	
 	@Transactional(readOnly = true,propagation=Propagation.REQUIRED)

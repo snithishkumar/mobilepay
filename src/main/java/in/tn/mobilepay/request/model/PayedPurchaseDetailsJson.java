@@ -16,6 +16,7 @@ public class PayedPurchaseDetailsJson {
 	private long payemetTime;
 	 private AddressJson addressJson;
 	 private String addressGuid;
+	 private String totalAmount;
 	 private List<TransactionalDetailsEntity> transactions = new ArrayList<>();
 	    
 	public String getPurchaseId() {
@@ -50,6 +51,12 @@ public class PayedPurchaseDetailsJson {
 	}
 	
 	
+	public String getTotalAmount() {
+		return totalAmount;
+	}
+	public void setTotalAmount(String totalAmount) {
+		this.totalAmount = totalAmount;
+	}
 	public AddressJson getAddressJson() {
 		return addressJson;
 	}
