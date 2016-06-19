@@ -69,7 +69,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 	 */
 	public List<String> getPurchaseHistoryList(UserEntity userEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
 		criteria.add(Restrictions.eq(PurchaseEntity.USER_ID, userEntity));
 		criteria.setProjection(Projections.property(PurchaseEntity.PURCHASE_GUID));
 		criteria.addOrder(Order.asc(PurchaseEntity.SERVER_DATE_TIME));
@@ -185,13 +185,13 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 	
 	private void applyOrderStatusCriteria(Criteria criteria){
 		criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAIED));
-		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED));
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED));
 	}
 	
 	public PurchaseEntity getOrderStatusPurchaseEntity(String purchaseGuid,MerchantEntity merchantEntity){
 		Criteria criteria =  createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_GUID, purchaseGuid));
+		criteria.add(Restrictions.eq(PurchaseEntity.BILL_NUMBER, purchaseGuid));
 		applyOrderStatusCriteria(criteria, merchantEntity);
 		return (PurchaseEntity) criteria.uniqueResult();
 	}
@@ -366,7 +366,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
 		
 		//CANCELED or DELIVERED
-		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
 		
 		// If ServerSyncTime is > 0, then send after those record.
 		if(merchantPurchaseJson.getServerSyncTime() > 0){
@@ -395,7 +395,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
 		//CANCELED or DELIVERED
-		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
 				
 		// set projection to be Purchase count
 		criteria.setProjection(Projections.rowCount());
@@ -414,7 +414,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
 		//CANCELED or DELIVERED
-		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED), Restrictions.eq(PurchaseEntity.ORDER_STATUS,OrderStatus.DELIVERED)));
 				
 		if(serverSyncTime > 0){
 			criteria.add(Restrictions.gt(PurchaseEntity.SERVER_DATE_TIME, serverSyncTime));

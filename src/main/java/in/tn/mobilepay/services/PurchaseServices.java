@@ -100,7 +100,7 @@ public class PurchaseServices {
 				discardEntity.setPurchaseEntity(purchaseEntity);
 				discardEntity.setDiscardBy(DiscardBy.MERCHANT);
 				purchaseEntity.setDiscard(true);
-				purchaseEntity.setOrderStatus(OrderStatus.CANCELED);
+				purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
 				purchaseEntity.setServerDateTime(discardEntity.getCreatedDateTime());
 				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
 				purchaseDAO.updatePurchaseObject(purchaseEntity);
@@ -233,7 +233,7 @@ public class PurchaseServices {
 					discardEntity.setPurchaseEntity(purchaseEntity);
 					discardEntity.setDiscardBy(DiscardBy.USER);
 					purchaseEntity.setDiscard(true);
-					purchaseEntity.setOrderStatus(OrderStatus.CANCELED);
+					purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
 					purchaseDAO.updatePurchaseObject(purchaseEntity);
@@ -256,7 +256,7 @@ public class PurchaseServices {
 	
 	private void updateCounterStatus(PurchaseEntity purchaseEntity,OrderStatusUpdate orderStatusUpdate){
 		List<String> orderStatus = new ArrayList<>();
-		orderStatus.add(OrderStatus.CANCELED.toString());
+		orderStatus.add(OrderStatus.CANCELLED.toString());
 		orderStatus.add(OrderStatus.DELIVERED.toString());
 		orderStatus.add(OrderStatus.OUT_FOR_DELIVERY.toString());
 		orderStatus.add(OrderStatus.READY_TO_SHIPPING.toString());
@@ -328,7 +328,7 @@ public class PurchaseServices {
 						NotificationJson notificationJson = new NotificationJson();
 						notificationJson.setNotificationType(NotificationType.STATUS);
 						switch (purchaseEntity.getOrderStatus()) {
-						case CANCELED:
+						case CANCELLED:
 							notificationJson.setMessage("Your order has been Canceled by merchant."); // TODO
 							break;
 						case READY_TO_COLLECT:

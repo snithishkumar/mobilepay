@@ -339,6 +339,7 @@ public class UserServices {
 			
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			
+			userDao.removeCloudMessageEntity(userEntity, cloudMessageJson.getImeiNumber());
 			
 			// Get CloudMessageEntity for this user
 			CloudMessageEntity cloudMessageEntity = 	userDao.getCloudMessageEntity(userEntity);

@@ -127,15 +127,29 @@ public class UserDAOImpl extends BaseDAOImpl{
 		return (CloudMessageEntity)criteria.uniqueResult();
 	}
 	
-	
+	/**
+	 * Get CloudMessageEntity by Imei
+	 * @param userEntity
+	 * @return
+	 */
+	public CloudMessageEntity getCloudMessageEntity(UserEntity userEntity,String imeiNumber){
+		Criteria criteria = createCriteria(CloudMessageEntity.class);
+		criteria.add(Restrictions.ne(CloudMessageEntity.USER_ENTITY, userEntity));
+		criteria.add(Restrictions.eq(CloudMessageEntity.IMEI_NUMBER, imeiNumber));
+		return (CloudMessageEntity)criteria.uniqueResult();
+	}
 	
 	
 	/**
 	 * Every device must only single record. so remove CloudMessageEntity
 	 * @param cloudMessageEntity
 	 */
-	public void removeCloudMessageEntity(CloudMessageEntity cloudMessageEntity){
-		sessionFactory.getCurrentSession().delete(cloudMessageEntity);
+	public void removeCloudMessageEntity(UserEntity userEntity,String imeiNumber){
+		CloudMessageEntity cloudMessageEntity = getCloudMessageEntity(userEntity,imeiNumber);
+		if(cloudMessageEntity != null){
+			sessionFactory.getCurrentSession().delete(cloudMessageEntity);
+		}
+		
 	}
 	
 	/**
