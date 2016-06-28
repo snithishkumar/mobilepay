@@ -4,7 +4,6 @@ import java.lang.reflect.Type;
 import java.security.Key;
 import java.security.Principal;
 import java.security.SecureRandom;
-import java.time.Clock;
 import java.util.Random;
 import java.util.UUID;
 
@@ -28,7 +27,6 @@ import com.google.gson.JsonObject;
 
 import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.UserEntity;
-import in.tn.mobilepay.enumeration.NotificationType;
 import in.tn.mobilepay.response.model.NotificationJson;
 import in.tn.mobilepay.response.model.ResponseData;
 
@@ -161,9 +159,9 @@ public class ServiceUtil {
 		headers.set("Authorization", "key=AIzaSyBuFk_OddMviHfKLK7eilEw3P5v0KEG7tc");
 		headers.set("Content-Type", "application/json");
 		JsonObject mainJson = new JsonObject();
-		
 		mainJson.add("data", gson.toJsonTree(notificationJson));
 		mainJson.addProperty("to", deviceToken);
+		mainJson.addProperty("priority", "high");
 		//mainJson.addProperty("collapse_key", "terragoedge");
 		HttpEntity<String> request = new HttpEntity<>(mainJson.toString(),headers);
 		ResponseEntity<String> responseEntity = restTemplate.exchange("https://gcm-http.googleapis.com/gcm/send", HttpMethod.POST, request, String.class);

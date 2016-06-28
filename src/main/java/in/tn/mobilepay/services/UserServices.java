@@ -178,13 +178,16 @@ public class UserServices {
 	public ResponseEntity<String> getUserProfile(String mobileNumber){
 		try{
 			UserEntity dbUserEntity  = userDao.getUserEntity(mobileNumber);
-			RegisterJson registerJson = new RegisterJson();
-			registerJson.setEmail(dbUserEntity.getEmail());
-			registerJson.setName(dbUserEntity.getName());
-			registerJson.setImei(dbUserEntity.getImeiNumber());
-			registerJson.setMobileNumber(dbUserEntity.getMobileNumber());
-			String profileData = gson.toJson(registerJson);
-			return serviceUtil.getResponse(StatusCode.PROFILE_OK, profileData);
+			if(dbUserEntity != null){
+				RegisterJson registerJson = new RegisterJson();
+				registerJson.setEmail(dbUserEntity.getEmail());
+				registerJson.setName(dbUserEntity.getName());
+				registerJson.setImei(dbUserEntity.getImeiNumber());
+				registerJson.setMobileNumber(dbUserEntity.getMobileNumber());
+				String profileData = gson.toJson(registerJson);
+				return serviceUtil.getResponse(StatusCode.PROFILE_OK, profileData);
+			}
+			return serviceUtil.getResponse(StatusCode.INVALID_MOBILE, "");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -197,13 +200,17 @@ public class UserServices {
 	public ResponseEntity<String> getUserProfile(Principal principal){
 		try{
 			UserEntity dbUserEntity = serviceUtil.getUserEntity(principal);
-			RegisterJson registerJson = new RegisterJson();
-			registerJson.setEmail(dbUserEntity.getEmail());
-			registerJson.setName(dbUserEntity.getName());
-			registerJson.setImei(dbUserEntity.getImeiNumber());
-			registerJson.setMobileNumber(dbUserEntity.getMobileNumber());
-			String profileData = gson.toJson(registerJson);
-			return serviceUtil.getResponse(StatusCode.PROFILE_OK, profileData);
+			if(dbUserEntity != null){
+				RegisterJson registerJson = new RegisterJson();
+				registerJson.setEmail(dbUserEntity.getEmail());
+				registerJson.setName(dbUserEntity.getName());
+				registerJson.setImei(dbUserEntity.getImeiNumber());
+				registerJson.setMobileNumber(dbUserEntity.getMobileNumber());
+				String profileData = gson.toJson(registerJson);
+				return serviceUtil.getResponse(StatusCode.PROFILE_OK, profileData);
+			}
+			return serviceUtil.getResponse(StatusCode.INVALID_MOBILE, "");
+			
 		}catch(Exception e){
 			e.printStackTrace();
 		}

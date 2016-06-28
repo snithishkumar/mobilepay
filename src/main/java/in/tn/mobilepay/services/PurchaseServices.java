@@ -395,7 +395,7 @@ public class PurchaseServices {
 			if(cloudMessageEntity != null){
 				NotificationJson notificationJson = new NotificationJson();
 				notificationJson.setNotificationType(NotificationType.PURCHASE);
-				notificationJson.setMessage("You have Purhcased in  Saravana Stores.Total Cost : 520000."); // TODO
+				notificationJson.setMessage("You have Purchased in"+ merchantEntity.getMerchantName()+".Total Cost : "+dbPurchaseEntity.getTotalAmount()+"."); // TODO
 				notificationJson.setPurchaseGuid(dbPurchaseEntity.getPurchaseGuid());
 				serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
 			}
