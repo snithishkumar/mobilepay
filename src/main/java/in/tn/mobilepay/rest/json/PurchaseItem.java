@@ -4,11 +4,20 @@ public class PurchaseItem {
 	private String itemNo;
 	private String name;
 	private String quantity;
+	private String amount;
 	private String totalAmount;
 	private float rating;
 
 	public String getItemNo() {
 		return itemNo;
+	}
+
+	public String getAmount() {
+		return amount;
+	}
+
+	public void setAmount(String amount) {
+		this.amount = amount;
 	}
 
 	public void setItemNo(String itemNo) {
@@ -38,8 +47,6 @@ public class PurchaseItem {
 	public void setTotalAmount(String totalAmount) {
 		this.totalAmount = totalAmount;
 	}
-	
-	
 
 	public float getRating() {
 		return rating;

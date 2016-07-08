@@ -33,7 +33,7 @@ public class AddressEntity {
 	private String name;
 	@Column(name = "MobileNumber")
 	private String mobileNumber;
-	@Column(name = "AddressUUID")
+	@Column(name = "AddressUUID",unique = true)
 	private String addressUUID;
 	@Column(name = "Street")
 	private String street;

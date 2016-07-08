@@ -1,6 +1,7 @@
 package in.tn.mobilepay.entity;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,7 +29,7 @@ public class UserEntity {
 	private int userId;
 	@Column(name = "Name")
 	private String name;
-	@Column(name = "MobileNumber",unique=true)
+	@Column(name = "MobileNumber", unique = true)
 	private String mobileNumber;
 	@Column(name = "LoginId")
 	private int loginId;
@@ -36,18 +37,21 @@ public class UserEntity {
 	private String imeiNumber;
 	@Column(name = "IsActive")
 	private boolean isActive;
-	@Column(name = "AccessToken")
-	private String accessToken;
-	@Column(name = "ServerToken")
-	private String serverToken;
+	/*
+	 * @Column(name = "AccessToken") private String accessToken;
+	 * 
+	 * @Column(name = "ServerToken") private String serverToken;
+	 */
+	@EmbeddedId
+	private UserTokenEntity userToken;
 	@Column(name = "Email")
 	private String email;
-	
-	public void toUser(RegisterJson registerJson){
-		if(registerJson.getPassword() != null && !registerJson.getPassword().trim().isEmpty()){
+
+	public void toUser(RegisterJson registerJson) {
+		if (registerJson.getPassword() != null && !registerJson.getPassword().trim().isEmpty()) {
 			this.setLoginId(Integer.valueOf(registerJson.getPassword()));
 		}
-		
+
 		this.setMobileNumber(registerJson.getMobileNumber());
 		this.setName(registerJson.getName());
 		this.setImeiNumber(registerJson.getImei());
@@ -94,8 +98,6 @@ public class UserEntity {
 	public void setImeiNumber(String imeiNumber) {
 		this.imeiNumber = imeiNumber;
 	}
-	
-	
 
 	public boolean isActive() {
 		return isActive;
@@ -105,25 +107,13 @@ public class UserEntity {
 		this.isActive = isActive;
 	}
 
-	
-
-	public String getServerToken() {
-		return serverToken;
+	public UserTokenEntity getUserToken() {
+		return userToken;
 	}
 
-	public void setServerToken(String serverToken) {
-		this.serverToken = serverToken;
+	public void setUserToken(UserTokenEntity userToken) {
+		this.userToken = userToken;
 	}
-
-	public String getAccessToken() {
-		return accessToken;
-	}
-
-	public void setAccessToken(String accessToken) {
-		this.accessToken = accessToken;
-	}
-	
-	
 
 	public String getEmail() {
 		return email;
@@ -136,12 +126,8 @@ public class UserEntity {
 	@Override
 	public String toString() {
 		return "UserEntity [userId=" + userId + ", name=" + name + ", mobileNumber=" + mobileNumber + ", loginId="
-				+ loginId + ", imeiNumber=" + imeiNumber + ", isActive=" + isActive + ", accessToken=" + accessToken
-				+ ", serverToken=" + serverToken + "]";
+				+ loginId + ", imeiNumber=" + imeiNumber + ", isActive=" + isActive + ", userToken=" + userToken
+				+ ", email=" + email + "]";
 	}
 
-	
-	
-
-	
 }

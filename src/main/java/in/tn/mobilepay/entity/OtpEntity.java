@@ -16,7 +16,7 @@ public class OtpEntity {
 	public static final String VALIDATION_TIME = "validationTime";
 	public static final String CREATED_DATE = "createdDateTime";
 	
-	@Column(name = "MobileNumber")
+	@Column(name = "MobileNumber",unique = true)
 	private String mobileNumber;
 	@Column(name = OTP_NUMBER)
 	private String optNumber;

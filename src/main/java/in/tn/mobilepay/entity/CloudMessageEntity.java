@@ -33,7 +33,7 @@ public class CloudMessageEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "DeviceType")
 	private DeviceType deviceType;
-	@Column(name = "ImeiNumber")
+	@Column(name = "ImeiNumber",unique =true)
 	private String imeiNumber;
 
 	@ManyToOne
