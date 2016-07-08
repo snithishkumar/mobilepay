@@ -7,27 +7,30 @@ import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.enumeration.DiscardBy;
 
-public class DiscardJson extends TokenJson{
-	
+public class DiscardJson extends TokenJson {
+
 	private String userMobile;
 	private String purchaseGuid;
 	private String reason;
 	private long createdDateTime;
-	
+
+	private String productDetails;
+	private String amountDetails;
+	private String totalAmount;
+
 	private DiscardBy discardBy;
-	
-	 private List<TransactionalDetailsEntity> transactions = new ArrayList<>();
-	
-	public DiscardJson(){
-		
+
+	private List<TransactionalDetailsEntity> transactions = new ArrayList<>();
+
+	public DiscardJson() {
+
 	}
-	
-	public DiscardJson(DiscardEntity discardEntity){
+
+	public DiscardJson(DiscardEntity discardEntity) {
 		this.reason = discardEntity.getReason();
 		this.discardBy = discardEntity.getDiscardBy();
-		
+
 	}
-	
 
 	public long getCreatedDateTime() {
 		return createdDateTime;
@@ -60,8 +63,6 @@ public class DiscardJson extends TokenJson{
 	public void setReason(String reason) {
 		this.reason = reason;
 	}
-	
-	
 
 	public DiscardBy getDiscardBy() {
 		return discardBy;
@@ -70,8 +71,30 @@ public class DiscardJson extends TokenJson{
 	public void setDiscardBy(DiscardBy discardBy) {
 		this.discardBy = discardBy;
 	}
-	
-	
+
+	public String getProductDetails() {
+		return productDetails;
+	}
+
+	public void setProductDetails(String productDetails) {
+		this.productDetails = productDetails;
+	}
+
+	public String getAmountDetails() {
+		return amountDetails;
+	}
+
+	public void setAmountDetails(String amountDetails) {
+		this.amountDetails = amountDetails;
+	}
+
+	public String getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(String totalAmount) {
+		this.totalAmount = totalAmount;
+	}
 
 	public List<TransactionalDetailsEntity> getTransactions() {
 		return transactions;
@@ -84,8 +107,9 @@ public class DiscardJson extends TokenJson{
 	@Override
 	public String toString() {
 		return "DiscardJson [userMobile=" + userMobile + ", purchaseGuid=" + purchaseGuid + ", reason=" + reason
-				+ ", createdDateTime=" + createdDateTime + ", discardBy=" + discardBy + ", transactions=" + transactions
-				+ "]";
+				+ ", createdDateTime=" + createdDateTime + ", productDetails=" + productDetails + ", amountDetails="
+				+ amountDetails + ", totalAmount=" + totalAmount + ", discardBy=" + discardBy + ", transactions="
+				+ transactions + "]";
 	}
 
 }

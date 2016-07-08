@@ -34,6 +34,13 @@ public class MerchantDAOImpl extends BaseDAOImpl{
 	}
 	
 	
+	public MerchantEntity getMerchant(int merchantId){
+		Criteria criteria = createCriteria(MerchantEntity.class);
+		criteria.add(Restrictions.eq(MerchantEntity.MERCHANT_ID, merchantId));
+		return (MerchantEntity)criteria.uniqueResult();
+	}
+	
+	
 	public MerchantEntity getMerchant(String merchantToken,String serverToken){
 		Criteria criteria = createCriteria(MerchantEntity.class);
 		criteria.add(Restrictions.eq(MerchantEntity.MERCHANT_TOKEN, merchantToken));

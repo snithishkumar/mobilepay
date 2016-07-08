@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.gson.reflect.TypeToken;
 
 import in.tn.mobilepay.dao.DeliveryDAO;
+import in.tn.mobilepay.dao.PurchaseDAO;
 import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
 import in.tn.mobilepay.dao.impl.PurchaseDAOImpl;
 import in.tn.mobilepay.dao.impl.UserDAOImpl;
@@ -56,7 +57,7 @@ import in.tn.mobilepay.util.StatusCode;
 public class PurchaseServices {
 
 	@Autowired
-	private PurchaseDAOImpl purchaseDAO;
+	private PurchaseDAOImpl purchaseDAOImpl;
 	@Autowired
 	private UserDAOImpl userDAO;
 	@Autowired
@@ -88,7 +89,7 @@ public class PurchaseServices {
 				//  Validate User Mobile
 				//UserEntity userEntity = validateMobile(discardJson.getUserMobile());
 				// Get Purchase Data
-				PurchaseEntity purchaseEntity  = purchaseDAO.getDiscardablePurchaseEntity(discardJson.getPurchaseGuid(),merchantEntity);
+				PurchaseEntity purchaseEntity  = purchaseDAOImpl.getDiscardablePurchaseEntity(discardJson.getPurchaseGuid(),merchantEntity);
 				
 				// Discard
 				DiscardEntity discardEntity = new DiscardEntity();
@@ -103,8 +104,8 @@ public class PurchaseServices {
 				purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
 				purchaseEntity.setServerDateTime(discardEntity.getCreatedDateTime());
 				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
-				purchaseDAO.updatePurchaseObject(purchaseEntity);
-				purchaseDAO.createDiscard(discardEntity);
+				purchaseDAOImpl.updatePurchaseObject(purchaseEntity);
+				purchaseDAOImpl.createDiscard(discardEntity);
 				
 				//Send Push Notification
 				CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(purchaseEntity.getUserEntity());
@@ -129,18 +130,22 @@ public class PurchaseServices {
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> syncPayedData(String requestData,Principal principal){
+		logger.info("----------Request Data------------");
+		logger.info(requestData);
+		logger.info("----------Request Data End------------");
 		try{
 			PayedPurchaseDetailsList payedPurchaseDetailsJsons = serviceUtil.fromJson(requestData,PayedPurchaseDetailsList.class);
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			List<PurchaseJson> purchaseJsons = new ArrayList<>();
 			Map<String, AddressEntity> addressList = new HashMap<>();
 			for (PayedPurchaseDetailsJson payedPurchaseDetailsJson : payedPurchaseDetailsJsons.getPurchaseDetailsJsons()) {
-				PurchaseEntity purchaseEntity = purchaseDAO.getNonDiscardPurchaseEntity(payedPurchaseDetailsJson.getPurchaseId());
+				PurchaseEntity purchaseEntity = purchaseDAOImpl.getNonDiscardPurchaseEntity(payedPurchaseDetailsJson.getPurchaseId());
 				if(purchaseEntity != null){
 					purchaseEntity.setDeliveryOptions(payedPurchaseDetailsJson.getDeliveryOptions());
 					switch (payedPurchaseDetailsJson.getDeliveryOptions()) {
-					case NONE:
+					case BILLING:
 						purchaseEntity.setOrderStatus(OrderStatus.DELIVERED);
+						break;
 					case LUGGAGE:
 						purchaseEntity.setOrderStatus(OrderStatus.PACKING);
 						break;
@@ -172,7 +177,7 @@ public class PurchaseServices {
 					purchaseEntity.setAmountDetails(payedPurchaseDetailsJson.getAmountDetails());
 					purchaseEntity.setPurchaseData(payedPurchaseDetailsJson.getProductDetails());
 					purchaseEntity.setTotalAmount(payedPurchaseDetailsJson.getTotalAmount());
-					purchaseDAO.updatePurchaseObject(purchaseEntity);
+					purchaseDAOImpl.updatePurchaseObject(purchaseEntity);
 					processTransactions(purchaseEntity, payedPurchaseDetailsJson.getTransactions());
 					PurchaseJson purchaseJson = new PurchaseJson();
 					purchaseJson.setPurchaseId(purchaseEntity.getPurchaseGuid());
@@ -192,7 +197,7 @@ public class PurchaseServices {
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> syncTransactionData(String purchaseUUID, String requestData) {
 		try {
-			PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(purchaseUUID);
+			PurchaseEntity purchaseEntity = purchaseDAOImpl.getPurchaseEntity(purchaseUUID);
 			if (purchaseEntity != null) {
 				Type listType = new TypeToken<ArrayList<TransactionalDetailsEntity>>() {
 				}.getType();
@@ -210,7 +215,7 @@ public class PurchaseServices {
 	private void processTransactions(PurchaseEntity purchaseEntity,List<TransactionalDetailsEntity> transactions){
 		for(TransactionalDetailsEntity transactionalDetailsEntity : transactions){
 			transactionalDetailsEntity.setPurchaseEntity(purchaseEntity);
-			purchaseDAO.createTransactions(transactionalDetailsEntity);
+			purchaseDAOImpl.createTransactions(transactionalDetailsEntity);
 		}
 	}
 	
@@ -223,7 +228,7 @@ public class PurchaseServices {
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			List<PurchaseJson> purchaseJsons = new ArrayList<>();
 			for (DiscardJson discardJson : discardJsonList.getDiscardJsons()) {
-				PurchaseEntity purchaseEntity = purchaseDAO.getPurchaseEntity(discardJson.getPurchaseGuid());
+				PurchaseEntity purchaseEntity = purchaseDAOImpl.getPurchaseEntity(discardJson.getPurchaseGuid());
 				if(purchaseEntity != null && !purchaseEntity.isDiscard()){
 					DiscardEntity discardEntity = new DiscardEntity();
 					discardEntity.setDiscardGuid(serviceUtil.uuid());
@@ -233,12 +238,20 @@ public class PurchaseServices {
 					discardEntity.setPurchaseEntity(purchaseEntity);
 					discardEntity.setDiscardBy(DiscardBy.USER);
 					purchaseEntity.setDiscard(true);
+					
+					purchaseEntity.setUnModifiedAmountDetails(purchaseEntity.getAmountDetails());
+					purchaseEntity.setUnModifiedPurchaseData(purchaseEntity.getPurchaseData());
+					purchaseEntity.setAmountDetails(discardJson.getAmountDetails());
+					purchaseEntity.setPurchaseData(discardJson.getProductDetails());
+					purchaseEntity.setTotalAmount(discardJson.getTotalAmount());
+					
+					
 					purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
-					purchaseDAO.updatePurchaseObject(purchaseEntity);
+					purchaseDAOImpl.updatePurchaseObject(purchaseEntity);
 					processTransactions(purchaseEntity, discardJson.getTransactions());
-					purchaseDAO.createDiscard(discardEntity);
+					purchaseDAOImpl.createDiscard(discardEntity);
 					PurchaseJson purchaseJson = new PurchaseJson();
 					purchaseJson.setPurchaseId(purchaseEntity.getPurchaseGuid());
 					purchaseJson.setServerDateTime(purchaseEntity.getPurchaseDateTime());
@@ -278,9 +291,9 @@ public class PurchaseServices {
 			counterDetailsEntity.setPurchaseEntity(purchaseEntity);
 			purchaseEntity.setOrderStatus(OrderStatus.READY_TO_COLLECT);
 			if(isCreate){
-				purchaseDAO.createCounterStatus(counterDetailsEntity);
+				purchaseDAOImpl.createCounterStatus(counterDetailsEntity);
 			}else{
-				purchaseDAO.updateCounterStatus(counterDetailsEntity);
+				purchaseDAOImpl.updateCounterStatus(counterDetailsEntity);
 			}
 			
 		}else if(counterNumber.equals(OrderStatus.OUT_FOR_DELIVERY.toString())){
@@ -313,14 +326,14 @@ public class PurchaseServices {
 			OrderStatusUpdate orderStatusUpdate =	serviceUtil.fromJson(requestData, OrderStatusUpdate.class);
 			MerchantEntity merchantEntity = validateToken(orderStatusUpdate.getAccessToken(), orderStatusUpdate.getServerToken());
 			//for(OrderStatusUpdate orderStatusUpdate : orderStatusUpdateJsonList.getOrderStatusUpdates()){
-				PurchaseEntity purchaseEntity = purchaseDAO.getOrderStatusPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),merchantEntity);
+				PurchaseEntity purchaseEntity = purchaseDAOImpl.getOrderStatusPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),merchantEntity);
 				if(purchaseEntity != null){
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(purchaseEntity.getServerDateTime());
 					updateCounterStatus(purchaseEntity, orderStatusUpdate);
 					//purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
 					
-					purchaseDAO.updatePurchaseObject(purchaseEntity);
+					purchaseDAOImpl.updatePurchaseObject(purchaseEntity);
 					
 					//Send Push Notification
 					CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(purchaseEntity.getUserEntity());
@@ -389,7 +402,7 @@ public class PurchaseServices {
 			// Json obj to Entity
 			populatePurchaseData(dbPurchaseEntity, purchaseJson);
 			//Create New Record
-			purchaseDAO.createPurchaseObject(dbPurchaseEntity);
+			purchaseDAOImpl.createPurchaseObject(dbPurchaseEntity);
 			//Send Push Notification
 			CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(userEntity);
 			if(cloudMessageEntity != null){
@@ -478,7 +491,7 @@ public class PurchaseServices {
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			
 			// Get Current Purchase List
-			List<PurchaseEntity> purchaseList = purchaseDAO.getPurchaseDetails(getPurchaseList.getPurchaseUUIDs(), userEntity);
+			List<PurchaseEntity> purchaseList = purchaseDAOImpl.getPurchaseDetails(getPurchaseList.getPurchaseUUIDs(), userEntity);
 			// Entity to Json Object
 			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
 			for (PurchaseEntity purchaseEntity : purchaseList) {
@@ -490,7 +503,7 @@ public class PurchaseServices {
 				purchaseJson.setMerchants(merchantJson);
 				
 				if(purchaseEntity.isDiscard()){
-					DiscardEntity discardEntity = purchaseDAO.getDiscardEntity(purchaseEntity);
+					DiscardEntity discardEntity = purchaseDAOImpl.getDiscardEntity(purchaseEntity);
 					DiscardJson discardJson = new DiscardJson(discardEntity);
 					purchaseJson.setDiscardJson(discardJson);
 				}
@@ -518,7 +531,7 @@ public class PurchaseServices {
 		try {
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			// Get Current Purchase List
-			List<String> purchaseList = purchaseDAO.gePurchaseList(userEntity);
+			List<String> purchaseList = purchaseDAOImpl.gePurchaseList(userEntity);
 			String responseJson = serviceUtil.toJson(purchaseList);
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
@@ -539,7 +552,7 @@ public class PurchaseServices {
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 			
 			// Get Current Purchase List
-			List<String> purchaseUUIDsList = purchaseDAO.getPurchaseHistoryList(userEntity);
+			List<String> purchaseUUIDsList = purchaseDAOImpl.getPurchaseHistoryList(userEntity);
 			String responseJson = serviceUtil.toJson(purchaseUUIDsList);	
 			return serviceUtil.getResponse(300, responseJson);
 		}catch (Exception e) {
@@ -567,7 +580,7 @@ public class PurchaseServices {
 			List<PurchaseEntity> purchaseList = null;
 			// Get Luggage Details and Purchase with Luggage Details
 			if(getLuggageList.getStartTime() > 0){
-				List<OrderStatusJson> luggageJsons = purchaseDAO.getOrderStatusList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
+				List<OrderStatusJson> luggageJsons = purchaseDAOImpl.getOrderStatusList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
 				for(OrderStatusJson orderStatusJson : luggageJsons){
 					if(orderStatusJson.getOrderStatus().toString().equals(OrderStatus.READY_TO_COLLECT.toString())){
 						CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(orderStatusJson.getPurchaseId());
@@ -579,9 +592,9 @@ public class PurchaseServices {
 					
 				}
 				luggagesListJson.setLuggageJsons(luggageJsons);
-				purchaseList = purchaseDAO.getOrderStatusWithPurchaseList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
+				purchaseList = purchaseDAOImpl.getOrderStatusWithPurchaseList(getLuggageList.getStartTime() , getLuggageList.getEndTime(), userEntity);
 			}else{ // Get  Purchase with Luggage Full List
-				purchaseList = purchaseDAO.getOrderStatusWithPurchaseList(userEntity);
+				purchaseList = purchaseDAOImpl.getOrderStatusWithPurchaseList(userEntity);
 			}
 			
 			// Entity to Json Object

@@ -1,22 +1,42 @@
 package in.tn.mobilepay.rest.json;
 
+import java.util.List;
+
+import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.request.model.DiscardJson;
 import in.tn.mobilepay.response.model.AddressBookJson;
+import in.tn.mobilepay.response.model.AddressJson;
 
 public class PurchaseDetails {
 
 	private String purchaseUUID;
 	private String billNumber;
-	private String purchaseDate;
-	private PurchaseItem purchaseItem;
+	private long purchaseDate;
+	private List<PurchaseItem> purchaseItem;
 	private OrderStatus orderStatus;
 	private DeliveryOptions deliveryOptions;
 	private String totalAmount;
 	private boolean isDiscard;
-	private AddressBookJson addressDetails;
+	private AddressJson addressDetails;
 	private DiscardJson discardDetails;
+	//private AmountDetailsJson amountDetails;
+	
+	public PurchaseDetails(){
+		
+	}
+	
+	public PurchaseDetails(PurchaseEntity purchaseEntity){
+		this.purchaseUUID = purchaseEntity.getPurchaseGuid();
+		this.billNumber = purchaseEntity.getBillNumber();
+		this.purchaseDate = purchaseEntity.getPurchaseDateTime();
+		this.orderStatus = purchaseEntity.getOrderStatus();
+		this.deliveryOptions = purchaseEntity.getDeliveryOptions();
+		this.totalAmount = purchaseEntity.getTotalAmount();
+		this.isDiscard = purchaseEntity.isDiscard();
+		
+	}
 
 	public String getPurchaseUUID() {
 		return purchaseUUID;
@@ -34,19 +54,19 @@ public class PurchaseDetails {
 		this.billNumber = billNumber;
 	}
 
-	public String getPurchaseDate() {
+	public long getPurchaseDate() {
 		return purchaseDate;
 	}
 
-	public void setPurchaseDate(String purchaseDate) {
+	public void setPurchaseDate(long purchaseDate) {
 		this.purchaseDate = purchaseDate;
 	}
 
-	public PurchaseItem getPurchaseItem() {
+	public List<PurchaseItem> getPurchaseItem() {
 		return purchaseItem;
 	}
 
-	public void setPurchaseItem(PurchaseItem purchaseItem) {
+	public void setPurchaseItem(List<PurchaseItem> purchaseItem) {
 		this.purchaseItem = purchaseItem;
 	}
 
@@ -82,11 +102,11 @@ public class PurchaseDetails {
 		this.isDiscard = isDiscard;
 	}
 
-	public AddressBookJson getAddressDetails() {
+	public AddressJson getAddressDetails() {
 		return addressDetails;
 	}
 
-	public void setAddressDetails(AddressBookJson addressDetails) {
+	public void setAddressDetails(AddressJson addressDetails) {
 		this.addressDetails = addressDetails;
 	}
 
@@ -97,6 +117,16 @@ public class PurchaseDetails {
 	public void setDiscardDetails(DiscardJson discardDetails) {
 		this.discardDetails = discardDetails;
 	}
+	
+	
+
+	/*public AmountDetailsJson getAmountDetails() {
+		return amountDetails;
+	}
+
+	public void setAmountDetails(AmountDetailsJson amountDetails) {
+		this.amountDetails = amountDetails;
+	}*/
 
 	@Override
 	public String toString() {

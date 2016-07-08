@@ -4,6 +4,12 @@ public class ResponseData {
 
 	private int statusCode;
 	private Object data;
+	private Boolean success;
+	
+	public ResponseData(boolean success, Object data) {
+		this.success = success;
+		this.data = data;
+	}
 
 	public ResponseData(int statusCode, Object data) {
 		this.statusCode = statusCode;

@@ -25,7 +25,9 @@ import org.springframework.web.client.RestTemplate;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
 import in.tn.mobilepay.dao.impl.UserDAOImpl;
+import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.response.model.NotificationJson;
 import in.tn.mobilepay.response.model.ResponseData;
@@ -38,6 +40,9 @@ public class ServiceUtil {
 	
 	@Autowired
 	private UserDAOImpl userDAO;
+	
+	@Autowired
+	private MerchantDAOImpl merchantDAO;
 	
 	private Random random = new Random();
 	
@@ -56,6 +61,14 @@ public class ServiceUtil {
 	
 	public ResponseEntity<String> getSuccessResponse(HttpStatus code,Object object){
 		ResponseEntity<String> responseEntity = new ResponseEntity<String>(gson.toJson(object), code);
+		return responseEntity;
+	}
+	
+	
+	public ResponseEntity<String> getRestResponse(boolean success,Object object){
+		ResponseData responseData = new ResponseData(success, object);
+		String temp = gson.toJson(responseData);
+		ResponseEntity<String> responseEntity = new ResponseEntity<String>(temp, HttpStatus.OK);
 		return responseEntity;
 	}
 	
@@ -175,5 +188,14 @@ public class ServiceUtil {
 		Integer userId =(Integer)authenticationToken.getPrincipal();
 		UserEntity userEntity = userDAO.getUserEntity(userId);
 		return userEntity;
+	}
+	
+	
+	
+	public MerchantEntity getMerchantEntity(Principal principal){
+		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) principal;
+		Integer merchantId =(Integer)authenticationToken.getPrincipal();
+		MerchantEntity merchantEntity = merchantDAO.getMerchant(merchantId);
+		return merchantEntity;
 	}
 }
