@@ -5,15 +5,10 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -23,7 +18,6 @@ import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.OtpEntity;
 import in.tn.mobilepay.entity.UserEntity;
-import in.tn.mobilepay.entity.UserTokenEntity;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.CloudMessageJson;
 import in.tn.mobilepay.request.model.OtpJson;
@@ -331,10 +325,8 @@ public class UserServices {
 				// Generate Access token
 				String accessToken = serviceUtil.generateLoginToken();
 				String serverToken = serviceUtil.generateLoginToken();
-				UserTokenEntity userTokenEntity = new UserTokenEntity();
-				userTokenEntity.setAccessToken(accessToken);
-				userTokenEntity.setServerToken(serverToken);
-				dbUserEntity.setUserToken(userTokenEntity);
+				dbUserEntity.setAccessToken(accessToken);
+				dbUserEntity.setServerToken(serverToken);
 				
 				userDao.updateUser(dbUserEntity);
 				JsonObject res = new JsonObject();

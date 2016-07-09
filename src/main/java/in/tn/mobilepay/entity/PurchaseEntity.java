@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -60,8 +61,10 @@ public class PurchaseEntity {
 	private String billNumber;
 	// Product Number,Product Name,Quantity and Amount as a json array
 	@Column(name = "PurchaseData")
+	@Lob
 	private String purchaseData;
 	@Column(name = "UnModifiedPurchaseData")
+	@Lob
 	private String unModifiedPurchaseData;
 	@Column(name = "IsEditable")
 	private boolean isEditable;

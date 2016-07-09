@@ -7,11 +7,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import in.tn.mobilepay.request.model.RegisterJson;
 
 @Entity
-@Table(name = "UserDetails")
+@Table(name = "UserDetails",uniqueConstraints=@UniqueConstraint(columnNames={"accessToken","serverToken"}))
 public class UserEntity {
 
 	public static final String USER_ID = "userId";
@@ -37,13 +38,14 @@ public class UserEntity {
 	private String imeiNumber;
 	@Column(name = "IsActive")
 	private boolean isActive;
-	/*
-	 * @Column(name = "AccessToken") private String accessToken;
-	 * 
-	 * @Column(name = "ServerToken") private String serverToken;
-	 */
-	@EmbeddedId
-	private UserTokenEntity userToken;
+	
+	 @Column(name = "AccessToken") 
+	 private String accessToken;
+	  
+	 @Column(name = "ServerToken") 
+	 private String serverToken;
+	 
+	
 	@Column(name = "Email")
 	private String email;
 
@@ -107,12 +109,21 @@ public class UserEntity {
 		this.isActive = isActive;
 	}
 
-	public UserTokenEntity getUserToken() {
-		return userToken;
+	
+	public String getAccessToken() {
+		return accessToken;
 	}
 
-	public void setUserToken(UserTokenEntity userToken) {
-		this.userToken = userToken;
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	public String getServerToken() {
+		return serverToken;
+	}
+
+	public void setServerToken(String serverToken) {
+		this.serverToken = serverToken;
 	}
 
 	public String getEmail() {
@@ -126,8 +137,10 @@ public class UserEntity {
 	@Override
 	public String toString() {
 		return "UserEntity [userId=" + userId + ", name=" + name + ", mobileNumber=" + mobileNumber + ", loginId="
-				+ loginId + ", imeiNumber=" + imeiNumber + ", isActive=" + isActive + ", userToken=" + userToken
-				+ ", email=" + email + "]";
+				+ loginId + ", imeiNumber=" + imeiNumber + ", isActive=" + isActive + ", accessToken=" + accessToken
+				+ ", serverToken=" + serverToken + ", email=" + email + "]";
 	}
+
+	
 
 }
