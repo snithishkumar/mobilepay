@@ -16,17 +16,29 @@
 	<context:component-scan base-package="in.tn.mobilepay" />
 	<mvc:annotation-driven />
 	<tx:annotation-driven />
-	
+
 	<bean id="dataSource" class="org.apache.tomcat.dbcp.dbcp.BasicDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://localhost/mobilepay" />
+		<property name="url"
+			value="jdbc:mysql://localhost/mobilepay?allowMultiQueries=true" />
 		<property name="username" value="root" />
 		<property name="password" value="Dec302013@" />
-		<property name="initialSize" value="1" />
-		<property name="maxActive" value="10" />
+		<property name="initialSize" value="34" />
+		<property name="maxActive" value="377" />
+        <!-- Production Conf // http://www.codingpedia.org/ama/tomcat-jdbc-connection-pool-configuration-for-production-and-development/ -->
+		<property name="maxIdle" value="233"/>
+		<property name="minIdle" value="89" />
+		<property name="timeBetweenEvictionRunsMillis" value="34000" />
+		<property name="minEvictableIdleTimeMillis" value="55000" />
+		<property name="validationQuery" value="SELECT 1" />
+		<property name="validationInterval" value="34000" />
+		<property name="testOnBorrow" value="true" />
+		<property name="removeAbandoned" value="true" />
+		<property name="removeAbandonedTimeout" value="55" />
+
 	</bean>
-	
-	
+
+
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
@@ -34,15 +46,16 @@
 		<property name="hibernateProperties">
 			<props>
 				<prop key="hibernate.show_sql">true</prop>
-                     <prop key="hibernate.hbm2ddl.auto">update</prop>
-				<prop key="hibernate.dialect" >org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect
+				</prop>
 
 			</props>
 		</property>
 
 	</bean>
-	
-	
+
+
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory" />
@@ -53,18 +66,18 @@
 
 	<bean id="gson" class="com.google.gson.Gson"></bean>
 	<bean id="jsonParser" class="com.google.gson.JsonParser"></bean>
-	
-	
-		<bean id="multipartResolver"
-        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-        <property name="maxUploadSize" value="600971520" /> <!-- 600MB -->
 
-        <property name="maxInMemorySize" value="600971520" /> <!-- 600MB -->
 
-    </bean>
-    
-    
-    
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="600971520" /> <!-- 600MB -->
+
+		<property name="maxInMemorySize" value="600971520" /> <!-- 600MB -->
+
+	</bean>
+
+
+
 
 
 </beans>

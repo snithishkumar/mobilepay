@@ -10,7 +10,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 
-import in.tn.mobilepay.dao.PurchaseDAO;
 import in.tn.mobilepay.entity.CounterDetailsEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;

@@ -130,9 +130,6 @@ public class PurchaseServices {
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> syncPayedData(String requestData,Principal principal){
-		logger.info("----------Request Data------------");
-		logger.info(requestData);
-		logger.info("----------Request Data End------------");
 		try{
 			PayedPurchaseDetailsList payedPurchaseDetailsJsons = serviceUtil.fromJson(requestData,PayedPurchaseDetailsList.class);
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
@@ -189,7 +186,8 @@ public class PurchaseServices {
 			String responseJson = serviceUtil.toJson(purchaseJsons);
 			return serviceUtil.getResponse(200, responseJson);
 		}catch(Exception e){
-			logger.error("Error in discardPurchaseByUser", e);
+			logger.error("Raw Data[" + requestData + "],["+principal+"]");
+			logger.error("Error in syncPayedData", e);
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
 	}
@@ -261,7 +259,7 @@ public class PurchaseServices {
 			String responseJson = serviceUtil.toJson(purchaseJsons);
 			return serviceUtil.getResponse(200, responseJson);
 		}catch(Exception e){
-			e.printStackTrace();
+			logger.error("Raw Data[" + requestData + "],["+principal+"]");
 			logger.error("Error in discardPurchaseByUser", e);
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "failure");
@@ -514,7 +512,8 @@ public class PurchaseServices {
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
 		} catch (Exception e) {
-			logger.error("Error in getPurchaseList",e);
+			logger.error("Raw Data[" + requestData + "],["+principal+"]");
+			logger.error("Error in getPurchaseList", e);
 		}
 		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
 	}
@@ -536,7 +535,8 @@ public class PurchaseServices {
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
 		}catch (Exception e) {
-			logger.error("Error in getPurchaseList",e);
+			logger.error("Raw Data[" + principal + "]");
+			logger.error("Error in getPurchaseList", e);
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal ServerError");
 	}
@@ -550,13 +550,13 @@ public class PurchaseServices {
 	public ResponseEntity<String> getPurchaseHistoryList(Principal principal) {
 		try {
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
-			
 			// Get Current Purchase List
 			List<String> purchaseUUIDsList = purchaseDAOImpl.getPurchaseHistoryList(userEntity);
 			String responseJson = serviceUtil.toJson(purchaseUUIDsList);	
 			return serviceUtil.getResponse(300, responseJson);
 		}catch (Exception e) {
-			logger.error("Error in getPurchaseHistoryList",e);
+			logger.error("Raw Data[" + principal + "]");
+			logger.error("Error in getPurchaseHistoryList", e);
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal ServerError");
 	}
@@ -619,7 +619,8 @@ public class PurchaseServices {
 		//	String responseEncrypt = serviceUtil.netEncryption(responseJson);
 			return serviceUtil.getResponse(300, responseJson);
 		}catch(Exception e){
-			logger.error("Error in getLuggageList",e);
+			logger.error("Raw Data[" + requestData + "],["+principal+"]");
+			logger.error("Error in getOrderStatusList", e);
 		}
 		return serviceUtil.getResponse(StatusCode.MER_ERROR, "Internal Server Error.");
 	}
