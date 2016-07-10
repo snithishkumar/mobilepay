@@ -41,6 +41,7 @@ public class PurchaseCntrl {
 	
 	@RequestMapping(value="/merchant/discardPurchase")
 	public ResponseEntity<String> discardPurchase(@RequestBody String requestData){
+		synLogger.info(requestData);
 		return purchaseServices.discardPurchase(requestData);
 	}
 	

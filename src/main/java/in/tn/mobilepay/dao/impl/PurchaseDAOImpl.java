@@ -161,7 +161,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 
 	public PurchaseEntity getDiscardablePurchaseEntity(String purchaseGuid, MerchantEntity merchantEntity) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
-		criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_GUID, purchaseGuid));
+		criteria.add(Restrictions.eq(PurchaseEntity.BILL_NUMBER, purchaseGuid));
 		applyDiscardableCriteria(criteria, merchantEntity);
 		return (PurchaseEntity) criteria.uniqueResult();
 	}
