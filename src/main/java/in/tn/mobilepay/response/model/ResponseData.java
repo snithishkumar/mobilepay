@@ -6,6 +6,13 @@ public class ResponseData {
 	private Object data;
 	private Boolean success;
 	
+	
+	public ResponseData(boolean success, Object data,int statusCode) {
+		this.statusCode = statusCode;
+		this.success = success;
+		this.data = data;
+	}
+	
 	public ResponseData(boolean success, Object data) {
 		this.success = success;
 		this.data = data;

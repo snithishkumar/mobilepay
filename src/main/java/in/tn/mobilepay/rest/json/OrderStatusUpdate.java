@@ -8,6 +8,7 @@ public class OrderStatusUpdate {
 	private OrderStatus orderStatus;
 	private String declineReason;
 	private String description;
+	private String counterNumber;
 
 	public String getPurchaseUUID() {
 		return purchaseUUID;
@@ -41,10 +42,18 @@ public class OrderStatusUpdate {
 		this.description = description;
 	}
 
+	public String getCounterNumber() {
+		return counterNumber;
+	}
+
+	public void setCounterNumber(String counterNumber) {
+		this.counterNumber = counterNumber;
+	}
+
 	@Override
 	public String toString() {
 		return "OrderStatusUpdate [purchaseUUID=" + purchaseUUID + ", orderStatus=" + orderStatus + ", declineReason="
-				+ declineReason + ", description=" + description + "]";
+				+ declineReason + ", description=" + description + ", counterNumber=" + counterNumber + "]";
 	}
 
 }

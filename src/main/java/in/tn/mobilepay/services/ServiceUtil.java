@@ -64,6 +64,12 @@ public class ServiceUtil {
 		return responseEntity;
 	}
 	
+	public ResponseEntity<String> getRestResponse(boolean success,Object object,int statusCode){
+		ResponseData responseData = new ResponseData(success, object,statusCode);
+		String temp = gson.toJson(responseData);
+		ResponseEntity<String> responseEntity = new ResponseEntity<String>(temp, HttpStatus.OK);
+		return responseEntity;
+	}
 	
 	public ResponseEntity<String> getRestResponse(boolean success,Object object){
 		ResponseData responseData = new ResponseData(success, object);

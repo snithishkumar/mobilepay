@@ -5,9 +5,11 @@ import java.util.List;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.OrderStatus;
+import in.tn.mobilepay.request.model.AmountDetailsJson;
 import in.tn.mobilepay.request.model.DiscardJson;
 import in.tn.mobilepay.response.model.AddressBookJson;
 import in.tn.mobilepay.response.model.AddressJson;
+import in.tn.mobilepay.response.model.UserJson;
 
 public class PurchaseDetails {
 
@@ -21,13 +23,17 @@ public class PurchaseDetails {
 	private boolean isDiscard;
 	private AddressJson addressDetails;
 	private DiscardJson discardDetails;
-	//private AmountDetailsJson amountDetails;
+	private long lastModifiedDate;
 	
-	public PurchaseDetails(){
-		
+	private AmountDetails amountDetails;
+	private List<PurchaseItem> unModifiedPurchaseItem;
+	private UserJson userDetails;
+
+	public PurchaseDetails() {
+
 	}
-	
-	public PurchaseDetails(PurchaseEntity purchaseEntity){
+
+	public PurchaseDetails(PurchaseEntity purchaseEntity) {
 		this.purchaseUUID = purchaseEntity.getPurchaseGuid();
 		this.billNumber = purchaseEntity.getBillNumber();
 		this.purchaseDate = purchaseEntity.getPurchaseDateTime();
@@ -35,7 +41,8 @@ public class PurchaseDetails {
 		this.deliveryOptions = purchaseEntity.getDeliveryOptions();
 		this.totalAmount = purchaseEntity.getTotalAmount();
 		this.isDiscard = purchaseEntity.isDiscard();
-		
+		this.lastModifiedDate = purchaseEntity.getUpdatedDateTime();
+
 	}
 
 	public String getPurchaseUUID() {
@@ -117,23 +124,39 @@ public class PurchaseDetails {
 	public void setDiscardDetails(DiscardJson discardDetails) {
 		this.discardDetails = discardDetails;
 	}
-	
-	
 
-	/*public AmountDetailsJson getAmountDetails() {
+	public long getLastModifiedDate() {
+		return lastModifiedDate;
+	}
+
+	public void setLastModifiedDate(long lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
+
+	public AmountDetails getAmountDetails() {
 		return amountDetails;
 	}
 
-	public void setAmountDetails(AmountDetailsJson amountDetails) {
+	public void setAmountDetails(AmountDetails amountDetails) {
 		this.amountDetails = amountDetails;
-	}*/
+	}
 
-	@Override
-	public String toString() {
-		return "PurchaseDetails [purchaseUUID=" + purchaseUUID + ", billNumber=" + billNumber + ", purchaseDate="
-				+ purchaseDate + ", purchaseItem=" + purchaseItem + ", orderStatus=" + orderStatus
-				+ ", deliveryOptions=" + deliveryOptions + ", totalAmount=" + totalAmount + ", isDiscard=" + isDiscard
-				+ ", addressDetails=" + addressDetails + ", discardDetails=" + discardDetails + "]";
+	public List<PurchaseItem> getUnModifiedPurchaseItem() {
+		return unModifiedPurchaseItem;
+	}
+
+	public void setUnModifiedPurchaseItem(List<PurchaseItem> unModifiedPurchaseItem) {
+		this.unModifiedPurchaseItem = unModifiedPurchaseItem;
+	}
+
+	
+
+	public UserJson getUserDetails() {
+		return userDetails;
+	}
+
+	public void setUserDetails(UserJson userDetails) {
+		this.userDetails = userDetails;
 	}
 
 }
