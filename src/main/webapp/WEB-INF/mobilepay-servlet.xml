@@ -22,7 +22,7 @@
 		<property name="url"
 			value="jdbc:mysql://localhost/mobilepay?allowMultiQueries=true" />
 		<property name="username" value="root" />
-		<property name="password" value="Dec302013@" />
+		<property name="password" value="admin" />
 		<property name="initialSize" value="34" />
 		<property name="maxActive" value="377" />
         <!-- Production Conf // http://www.codingpedia.org/ama/tomcat-jdbc-connection-pool-configuration-for-production-and-development/ -->

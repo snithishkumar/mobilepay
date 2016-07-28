@@ -20,6 +20,7 @@ import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
+import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
 import in.tn.mobilepay.request.model.MerchantOrderStatusJson;
@@ -82,9 +83,9 @@ public class MerchantPurchaseService {
 			}
 			//String response = serviceUtil.toJson(purchaseJsons);
 			// Get Total Count
-			long totalCount = purchaseDAO.getUnPayedPurchaseCount(merchantEntity);
+			//long totalCount = purchaseDAO.getUnPayedPurchaseCount(merchantEntity);
 			// Get Count (After ServerSyncTime)
-			long count = purchaseDAO.getUnPayedPurchaseCount(merchantEntity,unPayedMerchantPurchaseJson.getServerSyncTime());
+			//long count = purchaseDAO.getUnPayedPurchaseCount(merchantEntity,unPayedMerchantPurchaseJson.getServerSyncTime());
 			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200,purchaseJsons);
 			//responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
 			//responseEntity.getHeaders().add(COUNT, String.valueOf(count));
@@ -134,9 +135,9 @@ public class MerchantPurchaseService {
 			}
 			//String response = serviceUtil.toJson(purchaseJsons);
 			// Get Total Count
-			long totalCount = purchaseDAO.getPurchaseOrderStatusListCount(merchantEntity);
+			//long totalCount = purchaseDAO.getPurchaseOrderStatusListCount(merchantEntity);
 			// Get Count (After PurchaseDateTime)
-			long count = purchaseDAO.getPurchaseOrderStatusListCount(merchantEntity,payedMerchantPurchaseJson.getPurchaseDateTime());
+			//long count = purchaseDAO.getPurchaseOrderStatusListCount(merchantEntity,payedMerchantPurchaseJson.getPurchaseDateTime());
 			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200, purchaseJsons);
 			//responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
 			//responseEntity.getHeaders().add(COUNT, String.valueOf(count));
@@ -174,7 +175,7 @@ public class MerchantPurchaseService {
 				UserJson userJson = new UserJson(purchaseEntity.getUserEntity());
 				purchaseJson.setUsers(userJson);
 				// If its discard, then we need to add Discard Details.
-				if(purchaseEntity.isDiscard()){
+				if(purchaseEntity.getOrderStatus().ordinal() == OrderStatus.CANCELLED.ordinal()){
 					DiscardEntity discardEntity = purchaseDAO.getDiscardEntity(purchaseEntity);
 					DiscardJson discardJson = new DiscardJson(discardEntity);
 					discardJson.setCreatedDateTime(discardEntity.getCreatedDateTime());
@@ -194,9 +195,9 @@ public class MerchantPurchaseService {
 			}
 			//String response = serviceUtil.toJson(purchaseJsons);
 			// Get Total Count
-			long totalCount = purchaseDAO.getPurchaseHistoryListCount(merchantEntity);
+			//long totalCount = purchaseDAO.getPurchaseHistoryListCount(merchantEntity);
 			// Get Count (After ServerSyncTime)
-			long count = purchaseDAO.getPurchaseHistoryListCount(merchantEntity,unPayedMerchantPurchaseJson.getServerSyncTime());
+			//long count = purchaseDAO.getPurchaseHistoryListCount(merchantEntity,unPayedMerchantPurchaseJson.getServerSyncTime());
 			ResponseEntity<String>  responseEntity = serviceUtil.getResponse(200, purchaseJsons);
 		//	responseEntity.getHeaders().add(TOTAL_COUNT, String.valueOf(totalCount));
 		//	responseEntity.getHeaders().add(COUNT, String.valueOf(count));

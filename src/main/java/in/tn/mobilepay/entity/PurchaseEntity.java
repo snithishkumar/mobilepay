@@ -70,24 +70,22 @@ public class PurchaseEntity {
 	private boolean isEditable;
 	@Column(name = "UpdatedDateTime")
 	private long updatedDateTime;
-	@Column(name = "IsDeliverable")
-	private boolean isDeliverable;
+	
 	// Amount, Tax, Total amount
 	@Column(name = "AmountDetails")
 	private String amountDetails;
 
 	@Column(name = "UnModifiedAmountDetails")
 	private String unModifiedAmountDetails;
-	@Column(name = "IsDiscard")
-	private boolean isDiscard;
+	
 	@Column(name = "ServerDateTime")
 	private long serverDateTime;
 
-	@Enumerated
+	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "DeliveryOptions")
 	private DeliveryOptions deliveryOptions;
 
-	@Enumerated
+	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "OrderStatus") // ORDER_STATUS any one of status
 	private OrderStatus orderStatus;
 
@@ -108,10 +106,10 @@ public class PurchaseEntity {
 		this.billNumber = purchaseJson.getBillNumber();
 		this.purchaseGuid = purchaseJson.getPurchaseUuid();
 		this.purchaseDateTime = Long.valueOf(purchaseJson.getPurchaseDateTime());
-		this.isDeliverable = purchaseJson.getIsHomeDeliver() != null ? purchaseJson.getIsHomeDeliver() : false;
 		this.updatedDateTime = ServiceUtil.getCurrentGmtTime();
 		this.isEditable = purchaseJson.getIsEditable();
 		this.serverDateTime = updatedDateTime;
+		this.deliveryOptions = purchaseJson.getDeliveryOptions();
 	}
 
 	public String getBillNumber() {
@@ -154,14 +152,7 @@ public class PurchaseEntity {
 		this.updatedDateTime = updatedDateTime;
 	}
 
-	public boolean isDeliverable() {
-		return isDeliverable;
-	}
-
-	public void setDeliverable(boolean isDeliverable) {
-		this.isDeliverable = isDeliverable;
-	}
-
+	
 	public String getAmountDetails() {
 		return amountDetails;
 	}
@@ -218,13 +209,7 @@ public class PurchaseEntity {
 		this.purchaseGuid = purchaseGuid;
 	}
 
-	public boolean isDiscard() {
-		return isDiscard;
-	}
 
-	public void setDiscard(boolean isDiscard) {
-		this.isDiscard = isDiscard;
-	}
 
 	public long getServerDateTime() {
 		return serverDateTime;
@@ -282,10 +267,12 @@ public class PurchaseEntity {
 				+ purchaseDateTime + ", userEntity=" + userEntity + ", merchantEntity=" + merchantEntity
 				+ ", paymentStatus=" + paymentStatus + ", billNumber=" + billNumber + ", purchaseData=" + purchaseData
 				+ ", unModifiedPurchaseData=" + unModifiedPurchaseData + ", isEditable=" + isEditable
-				+ ", updatedDateTime=" + updatedDateTime + ", isDeliverable=" + isDeliverable + ", amountDetails="
-				+ amountDetails + ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", isDiscard=" + isDiscard
-				+ ", serverDateTime=" + serverDateTime + ", deliveryOptions=" + deliveryOptions + ", orderStatus="
-				+ orderStatus + ", totalAmount=" + totalAmount + ", addressEntities=" + addressEntities + "]";
+				+ ", updatedDateTime=" + updatedDateTime + ", amountDetails=" + amountDetails
+				+ ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", serverDateTime=" + serverDateTime
+				+ ", deliveryOptions=" + deliveryOptions + ", orderStatus=" + orderStatus + ", totalAmount="
+				+ totalAmount + ", addressEntities=" + addressEntities + "]";
 	}
+
+
 
 }

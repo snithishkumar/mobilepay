@@ -40,11 +40,11 @@ public class PurchaseJson {
 		this.productDetails = purchaseEntity.getPurchaseData();
 		this.amountDetails = purchaseEntity.getAmountDetails();
 		this.isEditable = purchaseEntity.isEditable();
-		this.isDelivered = purchaseEntity.isDeliverable();
+		//this.isDelivered = purchaseEntity.isDeliverable();
 		this.category = purchaseEntity.getMerchantEntity().getCategory();
 		this.lastModifiedDateTime = purchaseEntity.getUpdatedDateTime();
 		this.serverDateTime = purchaseEntity.getServerDateTime();
-		this.isDiscard = purchaseEntity.isDiscard();
+		//this.isDiscard = purchaseEntity.isDiscard();
 		this.paymentStatus = purchaseEntity.getPaymentStatus();
 		this.orderStatus = purchaseEntity.getOrderStatus();
 		this.deliveryOptions = purchaseEntity.getDeliveryOptions();

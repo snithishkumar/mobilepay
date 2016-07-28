@@ -1,12 +1,23 @@
 package in.tn.mobilepay.request.model;
 
+import in.tn.mobilepay.enumeration.OrderStatus;
+
 public class OrderStatusUpdate extends TokenJson{
 	private String purchaseUUID;
-	private String orderStatus;
+	private OrderStatus orderStatus;
 	private String orderStatusDesc;
+	private String counterNumber;
 	
 	
 
+
+	public String getCounterNumber() {
+		return counterNumber;
+	}
+
+	public void setCounterNumber(String counterNumber) {
+		this.counterNumber = counterNumber;
+	}
 
 	public String getOrderStatusDesc() {
 		return orderStatusDesc;
@@ -24,11 +35,11 @@ public class OrderStatusUpdate extends TokenJson{
 		this.purchaseUUID = purchaseUUID;
 	}
 
-	public String getOrderStatus() {
+	public OrderStatus getOrderStatus() {
 		return orderStatus;
 	}
 
-	public void setOrderStatus(String orderStatus) {
+	public void setOrderStatus(OrderStatus orderStatus) {
 		this.orderStatus = orderStatus;
 	}
 

@@ -126,7 +126,7 @@ public class PurchaseRestService {
 			purchaseEntity.setAmountDetails(gson.toJson(amountDetails));
 		}
 		purchaseEntity.setBillNumber(merchantPurchaseData.getBillNumber());
-		purchaseEntity.setDeliverable(merchantPurchaseData.getIsHomeDelivery());
+		purchaseEntity.setDeliveryOptions(merchantPurchaseData.getDeliveryOptions());
 		purchaseEntity.setEditable(merchantPurchaseData.getIsRemovable());
 		List<PurchaseItem> purchaseItems = merchantPurchaseData.getPurchaseItems();
 		if(purchaseItems != null && purchaseItems.size() > 0){
@@ -199,7 +199,7 @@ public class PurchaseRestService {
 		String purchaseData = purchaseEntity.getPurchaseData();
 		PurchaseItems purchaseItems = gson.fromJson(purchaseData,PurchaseItems.class);
 		purchaseDetails.setPurchaseItem(purchaseItems.getPurchaseItems());
-		if(purchaseEntity.isDiscard()){
+		if(purchaseEntity.getOrderStatus().ordinal() == OrderStatus.CANCELLED.ordinal()){
 			DiscardEntity discardEntity =  purchaseDAOImpl.getDiscardEntity(purchaseEntity);
 			if(discardEntity != null){
 				DiscardJson discardJson = new DiscardJson(discardEntity);
@@ -388,7 +388,7 @@ public class PurchaseRestService {
 		discardEntity.setCreatedDateTime(purchaseEntity.getServerDateTime());
 		discardEntity.setPurchaseEntity(purchaseEntity);
 		discardEntity.setDiscardBy(DiscardBy.MERCHANT);
-		purchaseEntity.setDiscard(true);
+		purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
 		
 		
 		purchaseDAOImpl.createDiscard(discardEntity);

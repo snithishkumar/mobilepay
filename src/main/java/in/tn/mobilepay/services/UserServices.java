@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
@@ -32,7 +33,7 @@ import in.tn.mobilepay.util.StatusCode;
 public class UserServices {
 
 	@Autowired
-	private UserDAOImpl userDao;
+	private UserDAO userDao;
 
 	@Autowired
 	private Gson gson;
@@ -409,7 +410,7 @@ public class UserServices {
 
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 
-			userDao.removeCloudMessageEntity(userEntity, cloudMessageJson.getImeiNumber());
+			//userDao.removeCloudMessageEntity(userEntity, cloudMessageJson.getImeiNumber());
 
 			// Get CloudMessageEntity for this user
 			CloudMessageEntity cloudMessageEntity = userDao.getCloudMessageEntity(userEntity);

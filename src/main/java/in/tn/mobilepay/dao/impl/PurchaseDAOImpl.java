@@ -213,8 +213,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 	}
 
 	private void applyUnPayedCriteria(Criteria criteria) {
-		criteria.add(Restrictions.ne(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAIED));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_DISCARD, false));
+		criteria.add(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.PURCHASE));
 	}
 
 	private void applyUnPayedCriteria(Criteria criteria, UserEntity userEntity) {

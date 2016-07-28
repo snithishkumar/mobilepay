@@ -40,7 +40,6 @@ public class PurchaseDetails {
 		this.orderStatus = purchaseEntity.getOrderStatus();
 		this.deliveryOptions = purchaseEntity.getDeliveryOptions();
 		this.totalAmount = purchaseEntity.getTotalAmount();
-		this.isDiscard = purchaseEntity.isDiscard();
 		this.lastModifiedDate = purchaseEntity.getUpdatedDateTime();
 
 	}

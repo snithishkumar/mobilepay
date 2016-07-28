@@ -3,13 +3,15 @@ package in.tn.mobilepay.request.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import in.tn.mobilepay.enumeration.DeliveryOptions;
+
 public class PurchaseJson extends TokenJson {
 
 	private String billNumber;
 	private String purchaseUuid;
 	private String purchaseDateTime;
 	private String userMobile;
-	private Boolean isHomeDeliver;
+	private DeliveryOptions deliveryOptions;
 	private Boolean isEditable;
 	private List<PurchaseDetailsJson> purchaseDetails = new ArrayList<PurchaseDetailsJson>();
 	private AmountDetailsJson amountDetails;
@@ -48,12 +50,13 @@ public class PurchaseJson extends TokenJson {
 		this.userMobile = userMobile;
 	}
 
-	public Boolean getIsHomeDeliver() {
-		return isHomeDeliver;
+	
+	public DeliveryOptions getDeliveryOptions() {
+		return deliveryOptions;
 	}
 
-	public void setIsHomeDeliver(Boolean isHomeDeliver) {
-		this.isHomeDeliver = isHomeDeliver;
+	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
+		this.deliveryOptions = deliveryOptions;
 	}
 
 	public List<PurchaseDetailsJson> getPurchaseDetails() {
@@ -95,9 +98,9 @@ public class PurchaseJson extends TokenJson {
 	@Override
 	public String toString() {
 		return "PurchaseJson [billNumber=" + billNumber + ", purchaseUuid=" + purchaseUuid + ", purchaseDateTime="
-				+ purchaseDateTime + ", userMobile=" + userMobile + ", isHomeDeliver=" + isHomeDeliver
-				+ ", purchaseDetails=" + purchaseDetails + ", amountDetails=" + amountDetails + ", totalAmount="
-				+ totalAmount + "]";
+				+ purchaseDateTime + ", userMobile=" + userMobile + ", deliveryOptions=" + deliveryOptions
+				+ ", isEditable=" + isEditable + ", purchaseDetails=" + purchaseDetails + ", amountDetails="
+				+ amountDetails + ", totalAmount=" + totalAmount + "]";
 	}
 
 	

@@ -3,10 +3,12 @@ package in.tn.mobilepay.rest.json;
 import java.util.ArrayList;
 import java.util.List;
 
+import in.tn.mobilepay.enumeration.DeliveryOptions;
+
 public class MerchantPurchaseData {
 	private String customerName;
 	private String customerMobileNo;
-	private Boolean isHomeDelivery;
+	private DeliveryOptions deliveryOptions;
 	private Boolean isRemovable;
 	private long purchaseDate;
 	private String totalAmount;
@@ -30,12 +32,14 @@ public class MerchantPurchaseData {
 		this.customerMobileNo = customerMobileNo;
 	}
 
-	public Boolean getIsHomeDelivery() {
-		return isHomeDelivery;
+	
+
+	public DeliveryOptions getDeliveryOptions() {
+		return deliveryOptions;
 	}
 
-	public void setIsHomeDelivery(Boolean isHomeDelivery) {
-		this.isHomeDelivery = isHomeDelivery;
+	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
+		this.deliveryOptions = deliveryOptions;
 	}
 
 	public Boolean getIsRemovable() {
@@ -89,9 +93,11 @@ public class MerchantPurchaseData {
 	@Override
 	public String toString() {
 		return "MerchantPurchaseData [customerName=" + customerName + ", customerMobileNo=" + customerMobileNo
-				+ ", isHomeDelivery=" + isHomeDelivery + ", isRemovable=" + isRemovable + ", purchaseDate="
+				+ ", deliveryOptions=" + deliveryOptions + ", isRemovable=" + isRemovable + ", purchaseDate="
 				+ purchaseDate + ", totalAmount=" + totalAmount + ", billNumber=" + billNumber + ", purchaseItems="
 				+ purchaseItems + ", amountDetails=" + amountDetails + "]";
 	}
+
+	
 
 }

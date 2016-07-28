@@ -100,7 +100,6 @@ public class PurchaseServices {
 				discardEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
 				discardEntity.setPurchaseEntity(purchaseEntity);
 				discardEntity.setDiscardBy(DiscardBy.MERCHANT);
-				purchaseEntity.setDiscard(true);
 				purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
 				purchaseEntity.setServerDateTime(discardEntity.getCreatedDateTime());
 				purchaseEntity.setUpdatedDateTime(discardEntity.getCreatedDateTime());
@@ -140,10 +139,10 @@ public class PurchaseServices {
 				if(purchaseEntity != null){
 					purchaseEntity.setDeliveryOptions(payedPurchaseDetailsJson.getDeliveryOptions());
 					switch (payedPurchaseDetailsJson.getDeliveryOptions()) {
-					case BILLING:
+					case NONE:
 						purchaseEntity.setOrderStatus(OrderStatus.DELIVERED);
 						break;
-					case LUGGAGE:
+					case COUNTER_COLLECTION:
 						purchaseEntity.setOrderStatus(OrderStatus.PACKING);
 						break;
 					
@@ -227,7 +226,7 @@ public class PurchaseServices {
 			List<PurchaseJson> purchaseJsons = new ArrayList<>();
 			for (DiscardJson discardJson : discardJsonList.getDiscardJsons()) {
 				PurchaseEntity purchaseEntity = purchaseDAOImpl.getPurchaseEntity(discardJson.getPurchaseGuid());
-				if(purchaseEntity != null && !purchaseEntity.isDiscard()){
+				if(purchaseEntity != null && purchaseEntity.getOrderStatus().ordinal() != OrderStatus.CANCELLED.ordinal()){
 					DiscardEntity discardEntity = new DiscardEntity();
 					discardEntity.setDiscardGuid(serviceUtil.uuid());
 					discardEntity.setUserEntity(userEntity);
@@ -235,7 +234,6 @@ public class PurchaseServices {
 					discardEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
 					discardEntity.setPurchaseEntity(purchaseEntity);
 					discardEntity.setDiscardBy(DiscardBy.USER);
-					purchaseEntity.setDiscard(true);
 					
 					purchaseEntity.setUnModifiedAmountDetails(purchaseEntity.getAmountDetails());
 					purchaseEntity.setUnModifiedPurchaseData(purchaseEntity.getPurchaseData());
@@ -266,14 +264,9 @@ public class PurchaseServices {
 	}
 	
 	private void updateCounterStatus(PurchaseEntity purchaseEntity,OrderStatusUpdate orderStatusUpdate){
-		List<String> orderStatus = new ArrayList<>();
-		orderStatus.add(OrderStatus.CANCELLED.toString());
-		orderStatus.add(OrderStatus.DELIVERED.toString());
-		orderStatus.add(OrderStatus.OUT_FOR_DELIVERY.toString());
-		orderStatus.add(OrderStatus.READY_TO_SHIPPING.toString());
-		orderStatus.add(OrderStatus.FAILED_TO_DELIVER.toString());
-		String counterNumber = orderStatusUpdate.getOrderStatus();
-		if(!orderStatus.contains(counterNumber)){
+		
+		switch (orderStatusUpdate.getOrderStatus()) {
+		case READY_TO_COLLECT:
 			CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(purchaseEntity.getPurchaseId());
 			boolean isCreate = false;
 			if(counterDetailsEntity == null){
@@ -282,10 +275,9 @@ public class PurchaseServices {
 				 isCreate = true;
 			}
 			
-			counterDetailsEntity.setCounterNumber(orderStatusUpdate.getOrderStatus());
+			counterDetailsEntity.setCounterNumber(orderStatusUpdate.getCounterNumber());
 			counterDetailsEntity.setCreatedDateTime(purchaseEntity.getServerDateTime());
 			counterDetailsEntity.setMessage(orderStatusUpdate.getOrderStatusDesc());
-			
 			counterDetailsEntity.setPurchaseEntity(purchaseEntity);
 			purchaseEntity.setOrderStatus(OrderStatus.READY_TO_COLLECT);
 			if(isCreate){
@@ -293,8 +285,9 @@ public class PurchaseServices {
 			}else{
 				purchaseDAOImpl.updateCounterStatus(counterDetailsEntity);
 			}
+			break;
 			
-		}else if(counterNumber.equals(OrderStatus.OUT_FOR_DELIVERY.toString())){
+		case OUT_FOR_DELIVERY :
 			purchaseEntity.setOrderStatus(OrderStatus.OUT_FOR_DELIVERY);
 			DeliveryDetailsEntity deliveryDetailsEntity = deliveryDAO.getDeliveryDetailsEntity(purchaseEntity);
 			if(deliveryDetailsEntity == null){
@@ -303,18 +296,28 @@ public class PurchaseServices {
 				deliveryDetailsEntity.setPurchaseEntity(purchaseEntity);
 				deliveryDAO.createDeliveryDetails(deliveryDetailsEntity);
 			}
-		}else if(counterNumber.equals(OrderStatus.DELIVERED.toString())){
+			break;
+		case DELIVERED:
 			purchaseEntity.setOrderStatus(OrderStatus.DELIVERED);
-			DeliveryDetailsEntity deliveryDetailsEntity = deliveryDAO.getDeliveryDetailsEntity(purchaseEntity);
+			 deliveryDetailsEntity = deliveryDAO.getDeliveryDetailsEntity(purchaseEntity);
 			if(deliveryDetailsEntity != null){
 				deliveryDetailsEntity.setDeliveredDate(purchaseEntity.getServerDateTime());
 				deliveryDetailsEntity.setDeliveryStatus(DeliveryStatus.SUCCESS);
 				deliveryDAO.updateDeliveryDetails(deliveryDetailsEntity);
 			}
-		}else{
-			purchaseEntity.setOrderStatus(OrderStatus.valueOf(orderStatusUpdate.getOrderStatus()));
+			break;
+			
+/*		case FAILED_TO_DELIVER:
+			break;
+			
+		case READY_TO_SHIPPING:
+			break;
+*/
+		default:
+			purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
+			break;
 		}
-		
+			
 	}
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -329,7 +332,6 @@ public class PurchaseServices {
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(purchaseEntity.getServerDateTime());
 					updateCounterStatus(purchaseEntity, orderStatusUpdate);
-					//purchaseEntity.setOrderStatus(orderStatusUpdate.getOrderStatus());
 					
 					purchaseDAOImpl.updatePurchaseObject(purchaseEntity);
 					
@@ -471,7 +473,7 @@ public class PurchaseServices {
 		purchaseEntity.setPurchaseData(purchaseData);
 		String amountDetails = serviceUtil.toJson(purchaseJson.getAmountDetails());
 		purchaseEntity.setAmountDetails(amountDetails);
-		
+		purchaseEntity.setDeliveryOptions(purchaseJson.getDeliveryOptions());
 	}
 	
 	
@@ -500,7 +502,7 @@ public class PurchaseServices {
 				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
 				purchaseJson.setMerchants(merchantJson);
 				
-				if(purchaseEntity.isDiscard()){
+				if(purchaseEntity.getOrderStatus().ordinal() == OrderStatus.CANCELLED.ordinal()){
 					DiscardEntity discardEntity = purchaseDAOImpl.getDiscardEntity(purchaseEntity);
 					DiscardJson discardJson = new DiscardJson(discardEntity);
 					purchaseJson.setDiscardJson(discardJson);
