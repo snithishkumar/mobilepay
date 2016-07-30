@@ -12,7 +12,7 @@ public class PayedPurchaseDetailsJson {
 	private String purchaseId;
 	private String productDetails;
 	private String amountDetails;
-	private DeliveryOptions deliveryOptions;
+	private DeliveryOptions userDeliveryOptions;
 	private long payemetTime;
 	 private AddressJson addressJson;
 	 private String addressGuid;
@@ -37,11 +37,12 @@ public class PayedPurchaseDetailsJson {
 	public void setAmountDetails(String amountDetails) {
 		this.amountDetails = amountDetails;
 	}
-	public DeliveryOptions getDeliveryOptions() {
-		return deliveryOptions;
+	
+	public DeliveryOptions getUserDeliveryOptions() {
+		return userDeliveryOptions;
 	}
-	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
-		this.deliveryOptions = deliveryOptions;
+	public void setUserDeliveryOptions(DeliveryOptions userDeliveryOptions) {
+		this.userDeliveryOptions = userDeliveryOptions;
 	}
 	public long getPayemetTime() {
 		return payemetTime;
@@ -80,10 +81,11 @@ public class PayedPurchaseDetailsJson {
 	@Override
 	public String toString() {
 		return "PayedPurchaseDetailsJson [purchaseId=" + purchaseId + ", productDetails=" + productDetails
-				+ ", amountDetails=" + amountDetails + ", deliveryOptions=" + deliveryOptions + ", payemetTime="
-				+ payemetTime + ", addressJson=" + addressJson + ", addressGuid=" + addressGuid + ", transactions="
-				+ transactions + "]";
+				+ ", amountDetails=" + amountDetails + ", userDeliveryOptions=" + userDeliveryOptions + ", payemetTime="
+				+ payemetTime + ", addressJson=" + addressJson + ", addressGuid=" + addressGuid + ", totalAmount="
+				+ totalAmount + ", transactions=" + transactions + "]";
 	}
+	
 	
 	
 

@@ -1,5 +1,6 @@
 package in.tn.mobilepay.response.model;
 
+import in.tn.mobilepay.entity.HomeDeliveryOptionsEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.OrderStatus;
@@ -23,11 +24,12 @@ public class PurchaseJson {
 	private boolean isDiscard;
 	private PaymentStatus paymentStatus;
 	private OrderStatus orderStatus;
-	private DeliveryOptions deliveryOptions;
+	private DeliveryOptions merchantDeliveryOptions;
 	private String totalAmount;
 	private DiscardJson discardJson;
 	private AddressJson addressJson;
 	private CounterDetailsJson counterDetails;
+	private HomeDeliveryOptionsEntity homeDeliveryOptions;
 
 	public PurchaseJson() {
 
@@ -40,15 +42,13 @@ public class PurchaseJson {
 		this.productDetails = purchaseEntity.getPurchaseData();
 		this.amountDetails = purchaseEntity.getAmountDetails();
 		this.isEditable = purchaseEntity.isEditable();
-		//this.isDelivered = purchaseEntity.isDeliverable();
 		this.category = purchaseEntity.getMerchantEntity().getCategory();
 		this.lastModifiedDateTime = purchaseEntity.getUpdatedDateTime();
 		this.serverDateTime = purchaseEntity.getServerDateTime();
-		//this.isDiscard = purchaseEntity.isDiscard();
 		this.paymentStatus = purchaseEntity.getPaymentStatus();
 		this.orderStatus = purchaseEntity.getOrderStatus();
-		this.deliveryOptions = purchaseEntity.getDeliveryOptions();
 		this.totalAmount = purchaseEntity.getTotalAmount();
+		this.merchantDeliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
 	}
 
 	public String getPurchaseId() {
@@ -171,9 +171,7 @@ public class PurchaseJson {
 		this.orderStatus = orderStatus;
 	}
 
-	public DeliveryOptions getDeliveryOptions() {
-		return deliveryOptions;
-	}
+	
 
 	public String getTotalAmount() {
 		return totalAmount;
@@ -191,8 +189,14 @@ public class PurchaseJson {
 		this.discardJson = discardJson;
 	}
 
-	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
-		this.deliveryOptions = deliveryOptions;
+	
+
+	public DeliveryOptions getMerchantDeliveryOptions() {
+		return merchantDeliveryOptions;
+	}
+
+	public void setMerchantDeliveryOptions(DeliveryOptions merchantDeliveryOptions) {
+		this.merchantDeliveryOptions = merchantDeliveryOptions;
 	}
 
 	public AddressJson getAddressJson() {
@@ -212,6 +216,16 @@ public class PurchaseJson {
 	public void setCounterDetails(CounterDetailsJson counterDetails) {
 		this.counterDetails = counterDetails;
 	}
+	
+	
+
+	public HomeDeliveryOptionsEntity getHomeDeliveryOptions() {
+		return homeDeliveryOptions;
+	}
+
+	public void setHomeDeliveryOptions(HomeDeliveryOptionsEntity homeDeliveryOptions) {
+		this.homeDeliveryOptions = homeDeliveryOptions;
+	}
 
 	@Override
 	public String toString() {
@@ -220,10 +234,12 @@ public class PurchaseJson {
 				+ ", amountDetails=" + amountDetails + ", category=" + category + ", isEditable=" + isEditable
 				+ ", isDelivered=" + isDelivered + ", lastModifiedDateTime=" + lastModifiedDateTime
 				+ ", serverDateTime=" + serverDateTime + ", isDiscard=" + isDiscard + ", paymentStatus=" + paymentStatus
-				+ ", orderStatus=" + orderStatus + ", deliveryOptions=" + deliveryOptions + ", totalAmount="
-				+ totalAmount + ", discardJson=" + discardJson + ", addressJson=" + addressJson + ", counterDetails="
-				+ counterDetails + "]";
+				+ ", orderStatus=" + orderStatus + ", merchantDeliveryOptions=" + merchantDeliveryOptions
+				+ ", totalAmount=" + totalAmount + ", discardJson=" + discardJson + ", addressJson=" + addressJson
+				+ ", counterDetails=" + counterDetails + "]";
 	}
+
+	
 
 	
 

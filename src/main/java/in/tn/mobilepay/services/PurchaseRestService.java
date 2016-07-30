@@ -18,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import in.tn.mobilepay.dao.DeliveryDAO;
+import in.tn.mobilepay.dao.impl.DeliveryDAOImpl;
 import in.tn.mobilepay.dao.impl.PurchaseDAOImpl;
 import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
@@ -63,7 +64,7 @@ public class PurchaseRestService {
 	private ServiceUtil serviceUtil;
 	
 	@Autowired
-	private DeliveryDAO deliveryDAO;
+	private DeliveryDAOImpl deliveryDAO;
 	
 	
 	
@@ -126,7 +127,7 @@ public class PurchaseRestService {
 			purchaseEntity.setAmountDetails(gson.toJson(amountDetails));
 		}
 		purchaseEntity.setBillNumber(merchantPurchaseData.getBillNumber());
-		purchaseEntity.setDeliveryOptions(merchantPurchaseData.getDeliveryOptions());
+		purchaseEntity.setMerchantDeliveryOptions(merchantPurchaseData.getDeliveryOptions());
 		purchaseEntity.setEditable(merchantPurchaseData.getIsRemovable());
 		List<PurchaseItem> purchaseItems = merchantPurchaseData.getPurchaseItems();
 		if(purchaseItems != null && purchaseItems.size() > 0){

@@ -39,6 +39,8 @@ public class PurchaseEntity {
 	public static final String SERVER_DATE_TIME = "serverDateTime";
 	public static final String IS_DISCARD = "isDiscard";
 	public static final String ORDER_STATUS = "orderStatus";
+	public static final String MERCHANT_DELIVERY_OPTIONS = "merchantDeliveryOptions";
+	public static final String USER_DELIVERY_OPTIONS = "userDeliveryOptions";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -48,7 +50,7 @@ public class PurchaseEntity {
 	private String purchaseGuid;
 	@Column(name = "PurchaseDateTime")
 	private long purchaseDateTime;
-	@ManyToOne(cascade=CascadeType.ALL)
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "UserId", referencedColumnName = "UserId")
 	private UserEntity userEntity;
 	@ManyToOne
@@ -70,20 +72,24 @@ public class PurchaseEntity {
 	private boolean isEditable;
 	@Column(name = "UpdatedDateTime")
 	private long updatedDateTime;
-	
+
 	// Amount, Tax, Total amount
 	@Column(name = "AmountDetails")
 	private String amountDetails;
 
 	@Column(name = "UnModifiedAmountDetails")
 	private String unModifiedAmountDetails;
-	
+
 	@Column(name = "ServerDateTime")
 	private long serverDateTime;
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name = "DeliveryOptions")
-	private DeliveryOptions deliveryOptions;
+	@Column(name = "MerchantDeliveryOptions")
+	private DeliveryOptions merchantDeliveryOptions;
+
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name = "UserDeliveryOptions")
+	private DeliveryOptions userDeliveryOptions;
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "OrderStatus") // ORDER_STATUS any one of status
@@ -109,7 +115,6 @@ public class PurchaseEntity {
 		this.updatedDateTime = ServiceUtil.getCurrentGmtTime();
 		this.isEditable = purchaseJson.getIsEditable();
 		this.serverDateTime = updatedDateTime;
-		this.deliveryOptions = purchaseJson.getDeliveryOptions();
 	}
 
 	public String getBillNumber() {
@@ -152,7 +157,6 @@ public class PurchaseEntity {
 		this.updatedDateTime = updatedDateTime;
 	}
 
-	
 	public String getAmountDetails() {
 		return amountDetails;
 	}
@@ -209,22 +213,12 @@ public class PurchaseEntity {
 		this.purchaseGuid = purchaseGuid;
 	}
 
-
-
 	public long getServerDateTime() {
 		return serverDateTime;
 	}
 
 	public void setServerDateTime(long serverDateTime) {
 		this.serverDateTime = serverDateTime;
-	}
-
-	public DeliveryOptions getDeliveryOptions() {
-		return deliveryOptions;
-	}
-
-	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
-		this.deliveryOptions = deliveryOptions;
 	}
 
 	public OrderStatus getOrderStatus() {
@@ -250,8 +244,6 @@ public class PurchaseEntity {
 	public void setAddressEntities(Collection<AddressEntity> addressEntities) {
 		this.addressEntities = addressEntities;
 	}
-	
-	
 
 	public PaymentStatus getPaymentStatus() {
 		return paymentStatus;
@@ -259,6 +251,22 @@ public class PurchaseEntity {
 
 	public void setPaymentStatus(PaymentStatus paymentStatus) {
 		this.paymentStatus = paymentStatus;
+	}
+
+	public DeliveryOptions getMerchantDeliveryOptions() {
+		return merchantDeliveryOptions;
+	}
+
+	public void setMerchantDeliveryOptions(DeliveryOptions merchantDeliveryOptions) {
+		this.merchantDeliveryOptions = merchantDeliveryOptions;
+	}
+
+	public DeliveryOptions getUserDeliveryOptions() {
+		return userDeliveryOptions;
+	}
+
+	public void setUserDeliveryOptions(DeliveryOptions userDeliveryOptions) {
+		this.userDeliveryOptions = userDeliveryOptions;
 	}
 
 	@Override
@@ -269,10 +277,9 @@ public class PurchaseEntity {
 				+ ", unModifiedPurchaseData=" + unModifiedPurchaseData + ", isEditable=" + isEditable
 				+ ", updatedDateTime=" + updatedDateTime + ", amountDetails=" + amountDetails
 				+ ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", serverDateTime=" + serverDateTime
-				+ ", deliveryOptions=" + deliveryOptions + ", orderStatus=" + orderStatus + ", totalAmount="
-				+ totalAmount + ", addressEntities=" + addressEntities + "]";
+				+ ", merchantDeliveryOptions=" + merchantDeliveryOptions + ", userDeliveryOptions="
+				+ userDeliveryOptions + ", orderStatus=" + orderStatus + ", totalAmount=" + totalAmount
+				+ ", addressEntities=" + addressEntities + "]";
 	}
-
-
 
 }

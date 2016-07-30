@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
@@ -33,7 +32,7 @@ import in.tn.mobilepay.util.StatusCode;
 public class UserServices {
 
 	@Autowired
-	private UserDAO userDao;
+	private UserDAOImpl userDAOImpl;
 
 	@Autowired
 	private Gson gson;
@@ -44,7 +43,7 @@ public class UserServices {
 	private static final Logger logger = Logger.getLogger(UserServices.class);
 
 	private UserEntity validate(RegisterJson registerJson) throws ValidationException {
-		UserEntity dbUserEntity = userDao.getUserEntity(registerJson.getMobileNumber());
+		UserEntity dbUserEntity = userDAOImpl.getUserEntity(registerJson.getMobileNumber());
 		if (dbUserEntity != null && dbUserEntity.isActive()) {
 			throw new ValidationException(StatusCode.INVALID_MOBILE, "Mobile Number Already Registered");
 		}
@@ -74,17 +73,17 @@ public class UserServices {
 				String otpPassword = otpResponse.getResponse().getOneTimePassword();
 				// If OTP Entity is present, it will update otherwise it will
 				// create.
-				OtpEntity otpEntity = userDao.getOtpEntity(otpJson.getMobileNumber());
+				OtpEntity otpEntity = userDAOImpl.getOtpEntity(otpJson.getMobileNumber());
 				if (otpEntity != null) {
 					otpEntity.setOptNumber(otpPassword);
 					otpEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
-					userDao.updateOtpEntity(otpEntity);
+					userDAOImpl.updateOtpEntity(otpEntity);
 				} else {
 					otpEntity = new OtpEntity();
 					otpEntity.setMobileNumber(otpJson.getMobileNumber());
 					otpEntity.setOptNumber(otpPassword);
 					otpEntity.setCreatedDateTime(ServiceUtil.getCurrentGmtTime());
-					userDao.createOtp(otpEntity);
+					userDAOImpl.createOtp(otpEntity);
 				}
 				// Success response
 				return serviceUtil.getResponse(StatusCode.MOB_VAL_OK, "Success");
@@ -150,7 +149,7 @@ public class UserServices {
 				return serviceUtil.getResponse(StatusCode.INVALID_OTP, "Not Valid Data");
 			}
 			// Get OTP entity by Mobile Number
-			OtpEntity otpEntity = userDao.getOtpEntity(otpJson.getMobileNumber());
+			OtpEntity otpEntity = userDAOImpl.getOtpEntity(otpJson.getMobileNumber());
 			// Validate given otp number
 			if (otpEntity == null || !otpEntity.getOptNumber().equals(otpJson.getOtpPassword())) {
 				return serviceUtil.getResponse(StatusCode.INVALID_OTP, "Invalid OTP Number");
@@ -160,7 +159,7 @@ public class UserServices {
 			if (ServiceUtil.getCurrentGmtTime() - otpEntity.getCreatedDateTime() > (1000 * 60 * 10)) {
 				return serviceUtil.getResponse(StatusCode.OTP_EXPIRED, "OTP Expired");
 			}
-			userDao.deleteOtpEntity(otpEntity);
+			userDAOImpl.deleteOtpEntity(otpEntity);
 
 			return serviceUtil.getResponse(StatusCode.OTP_OK, "Success");
 		} catch (Exception e) {
@@ -191,7 +190,7 @@ public class UserServices {
 				dbUserEntity.setLoginId(Integer.valueOf(registerJson.getPassword()));
 			}
 			dbUserEntity.toUser(registerJson);
-			userDao.updateUser(dbUserEntity);
+			userDAOImpl.updateUser(dbUserEntity);
 
 			return serviceUtil.getResponse(StatusCode.REG_OK, "Success");
 		} catch (Exception e) {
@@ -210,7 +209,7 @@ public class UserServices {
 	public ResponseEntity<String> getUserProfile(String mobileNumber) {
 		try {
 			// Get User based on mobile number
-			UserEntity dbUserEntity = userDao.getUserEntity(mobileNumber);
+			UserEntity dbUserEntity = userDAOImpl.getUserEntity(mobileNumber);
 			if (dbUserEntity != null) {
 				RegisterJson registerJson = new RegisterJson();
 				registerJson.setEmail(dbUserEntity.getEmail());
@@ -272,15 +271,15 @@ public class UserServices {
 		try {
 			RegisterJson registerJson = serviceUtil.fromJson(registerData, RegisterJson.class);
 			// Get UserEntity by Mobile Number
-			UserEntity dbUserEntity = userDao.getUserEntity(registerJson.getMobileNumber());
+			UserEntity dbUserEntity = userDAOImpl.getUserEntity(registerJson.getMobileNumber());
 			// If User is not present, then it will create new User
 			if (dbUserEntity == null) {
 				dbUserEntity = new UserEntity();
 				dbUserEntity.toUser(registerJson);
-				userDao.createUser(dbUserEntity);
+				userDAOImpl.createUser(dbUserEntity);
 			} else { // Otherwise, it will update
 				dbUserEntity.toUser(registerJson);
-				userDao.updateUser(dbUserEntity);
+				userDAOImpl.updateUser(dbUserEntity);
 			}
 
 			return serviceUtil.getResponse(StatusCode.REG_OK, "Success");
@@ -295,7 +294,7 @@ public class UserServices {
 	public ResponseEntity<String> login(String loginData) {
 		try {
 			RegisterJson registerJson = serviceUtil.fromJson(loginData, RegisterJson.class);
-			UserEntity dbUserEntity = userDao.getUserEnity(registerJson.getImei(), registerJson.getPassword());
+			UserEntity dbUserEntity = userDAOImpl.getUserEnity(registerJson.getImei(), registerJson.getPassword());
 			if (dbUserEntity == null) {
 				return serviceUtil.getResponse(StatusCode.LOGIN_INVALID_PIN, "Invalid LoginId");
 			}
@@ -316,7 +315,7 @@ public class UserServices {
 		try {
 			RegisterJson registerJson = serviceUtil.fromJson(loginData, RegisterJson.class);
 			// Get User Entity based on Mobile Number
-			UserEntity dbUserEntity = userDao.getUserEntity(registerJson.getMobileNumber());
+			UserEntity dbUserEntity = userDAOImpl.getUserEntity(registerJson.getMobileNumber());
 			if (dbUserEntity == null) {
 				return serviceUtil.getResponse(StatusCode.LOGIN_INVALID_MOBILE,
 						"You are not yet register. Please register");
@@ -329,7 +328,7 @@ public class UserServices {
 				dbUserEntity.setAccessToken(accessToken);
 				dbUserEntity.setServerToken(serverToken);
 				
-				userDao.updateUser(dbUserEntity);
+				userDAOImpl.updateUser(dbUserEntity);
 				JsonObject res = new JsonObject();
 				res.addProperty("serverToken", serverToken);
 				res.addProperty("accessToken", accessToken);
@@ -358,7 +357,7 @@ public class UserServices {
 			UserEntity userEntity = serviceUtil.getUserEntity(principal);
 
 			// Get Address List to send back to device
-			List<AddressEntity> dbAddressList = userDao.getAddressList(addressBookJson.getLastModifiedTime(),
+			List<AddressEntity> dbAddressList = userDAOImpl.getAddressList(addressBookJson.getLastModifiedTime(),
 					userEntity);
 
 			/**
@@ -367,15 +366,15 @@ public class UserServices {
 			 * modified time
 			 */
 			for (AddressJson addressJson : addressBookJson.getAddressList()) {
-				AddressEntity addressEntity = userDao.getAddressEntity(addressJson.getAddressUUID(), userEntity);
+				AddressEntity addressEntity = userDAOImpl.getAddressEntity(addressJson.getAddressUUID(), userEntity);
 				if (addressEntity == null) {
 					addressEntity = new AddressEntity(addressJson);
 					addressEntity.setUserEntity(userEntity);
-					userDao.createAddressEntity(addressEntity);
+					userDAOImpl.createAddressEntity(addressEntity);
 
 				} else if (addressJson.getLastModifiedTime() > addressEntity.getLastModifiedTime()) {
 					addressEntity.toAddress(addressJson);
-					userDao.updateAddressEntity(addressEntity);
+					userDAOImpl.updateAddressEntity(addressEntity);
 				}
 			}
 			/**
@@ -413,15 +412,15 @@ public class UserServices {
 			//userDao.removeCloudMessageEntity(userEntity, cloudMessageJson.getImeiNumber());
 
 			// Get CloudMessageEntity for this user
-			CloudMessageEntity cloudMessageEntity = userDao.getCloudMessageEntity(userEntity);
+			CloudMessageEntity cloudMessageEntity = userDAOImpl.getCloudMessageEntity(userEntity);
 			// If its present, then update otherwise need to create
 			if (cloudMessageEntity != null) {
 				cloudMessageEntity.toCloudMessageEntity(cloudMessageJson);
-				userDao.updateCloudMessageEntity(cloudMessageEntity);
+				userDAOImpl.updateCloudMessageEntity(cloudMessageEntity);
 			} else {
 				cloudMessageEntity = new CloudMessageEntity(cloudMessageJson);
 				cloudMessageEntity.setUserEntity(userEntity);
-				userDao.saveCloudMessageEntity(cloudMessageEntity);
+				userDAOImpl.saveCloudMessageEntity(cloudMessageEntity);
 			}
 			// Response
 			return serviceUtil.getResponse(StatusCode.MER_OK, "success");

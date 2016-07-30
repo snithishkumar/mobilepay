@@ -27,7 +27,8 @@ public class PurchaseMerchantJson {
 	private boolean isDiscard;
 	private PaymentStatus paymentStatus;
 	private String orderStatus;
-	private DeliveryOptions deliveryOptions;
+	private DeliveryOptions merchantDeliveryOptions;
+	private DeliveryOptions userDeliveryOptions;
 	private String totalAmount;
 	private DiscardJson discardJson;
 	private AddressJson addressDetails;
@@ -50,7 +51,8 @@ public class PurchaseMerchantJson {
 		// this.isDiscard = purchaseEntity.isDiscard();
 		 this.paymentStatus = purchaseEntity.getPaymentStatus();
 		 this.orderStatus = purchaseEntity.getOrderStatus().toString();
-		 this.deliveryOptions = purchaseEntity.getDeliveryOptions();
+		 this.merchantDeliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
+		 this.userDeliveryOptions = purchaseEntity.getUserDeliveryOptions();
 		 this.totalAmount = purchaseEntity.getTotalAmount();
 	}
 
@@ -152,6 +154,22 @@ public class PurchaseMerchantJson {
 
 	
 
+	public DeliveryOptions getMerchantDeliveryOptions() {
+		return merchantDeliveryOptions;
+	}
+
+	public void setMerchantDeliveryOptions(DeliveryOptions merchantDeliveryOptions) {
+		this.merchantDeliveryOptions = merchantDeliveryOptions;
+	}
+
+	public DeliveryOptions getUserDeliveryOptions() {
+		return userDeliveryOptions;
+	}
+
+	public void setUserDeliveryOptions(DeliveryOptions userDeliveryOptions) {
+		this.userDeliveryOptions = userDeliveryOptions;
+	}
+
 	public boolean isDiscard() {
 		return isDiscard;
 	}
@@ -177,9 +195,7 @@ public class PurchaseMerchantJson {
 		this.orderStatus = orderStatus;
 	}
 
-	public DeliveryOptions getDeliveryOptions() {
-		return deliveryOptions;
-	}
+	
 	
 	
 
@@ -199,9 +215,6 @@ public class PurchaseMerchantJson {
 		this.discardJson = discardJson;
 	}
 
-	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
-		this.deliveryOptions = deliveryOptions;
-	}
 	
 	
 
@@ -220,10 +233,12 @@ public class PurchaseMerchantJson {
 				+ ", amountDetails=" + amountDetails + ", category=" + category + ", isEditable=" + isEditable
 				+ ", isDelivered=" + isDelivered + ", lastModifiedDateTime=" + lastModifiedDateTime
 				+ ", serverDateTime=" + serverDateTime + ", isDiscard=" + isDiscard + ", paymentStatus=" + paymentStatus
-				+ ", orderStatus=" + orderStatus + ", deliveryOptions=" + deliveryOptions + ", totalAmount="
-				+ totalAmount + ", discardJson=" + discardJson + ", addressJson=" + addressDetails + "]";
+				+ ", orderStatus=" + orderStatus + ", merchantDeliveryOptions=" + merchantDeliveryOptions
+				+ ", userDeliveryOptions=" + userDeliveryOptions + ", totalAmount=" + totalAmount + ", discardJson="
+				+ discardJson + ", addressDetails=" + addressDetails + "]";
 	}
 
+	
 	
 
 	

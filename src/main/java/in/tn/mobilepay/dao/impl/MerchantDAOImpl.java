@@ -7,6 +7,7 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import in.tn.mobilepay.entity.HomeDeliveryOptionsEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.MerchantProfile;
 
@@ -15,6 +16,11 @@ public class MerchantDAOImpl extends BaseDAOImpl{
 	
 	public void createMerchant(MerchantEntity merchantEntity){
 		saveObject(merchantEntity);
+	}
+	
+	
+	public void createHomeDeliveryOptions(HomeDeliveryOptionsEntity homeDeliveryOptionsEntity){
+		saveObject(homeDeliveryOptionsEntity);
 	}
 	
 	public void createMerchantProfile(MerchantProfile merchantProfile,byte[] byteData){
@@ -56,5 +62,13 @@ public class MerchantDAOImpl extends BaseDAOImpl{
 		criteria.add(Restrictions.eq(appendAlias(MerchantProfile.MERCHANT_ID, MerchantEntity.MERCHANT_GUID), merchantGuid));
 		return (MerchantProfile)criteria.uniqueResult();
 	}
+	
+	
+	public HomeDeliveryOptionsEntity geHomeDeliveryOptionsEntity(MerchantEntity merchantEntity){
+		Criteria criteria = createCriteria(HomeDeliveryOptionsEntity.class);
+		criteria.add(Restrictions.eq(HomeDeliveryOptionsEntity.MERCHANT_ENTITY, merchantEntity));
+		return (HomeDeliveryOptionsEntity)criteria.uniqueResult();
+	}
+	
 
 }

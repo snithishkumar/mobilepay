@@ -14,11 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
+import in.tn.mobilepay.entity.HomeDeliveryOptionsEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.MerchantProfile;
+import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.request.model.MerchantLoginJson;
 import in.tn.mobilepay.util.StatusCode;
 
@@ -98,13 +102,25 @@ public class MerchantServices {
 		try{
 			MerchantEntity merchantEntity =	gson.fromJson(requestData, MerchantEntity.class);
 			MerchantEntity dbMerchantEntity =	merchantDAO.getMerchant(merchantEntity.getMobileNumber());
+			HomeDeliveryOptionsEntity homeDeliveryOptionsEntity = null;
 			if(dbMerchantEntity == null){
+				JsonParser jsonParser = new JsonParser();
+				JsonObject jsonObject = (JsonObject)jsonParser.parse(requestData);
+				String deliveryOptions = jsonObject.get("deliveryOptions").getAsString();
+				if(deliveryOptions != null){
+					if(deliveryOptions.equals(DeliveryOptions.HOME.toString()) || deliveryOptions.equals(DeliveryOptions.BOTH.toString())){
+					JsonElement jsonElement =	jsonObject.get("homeDeliveryOptions");
+					homeDeliveryOptionsEntity = gson.fromJson(jsonElement, HomeDeliveryOptionsEntity.class);
+					}
+				}
 				merchantEntity.setMerchantGuid(serviceUtil.uuid());
 				merchantEntity.setMerchantToken(serviceUtil.getToken());
 				merchantEntity.setServerToken(serviceUtil.getToken());
 				merchantEntity.setCreatedTime(serviceUtil.getCurrentGmtTime());
 				merchantEntity.setUpdatedTime(merchantEntity.getCreatedTime());
 				merchantDAO.createMerchant(merchantEntity);
+				homeDeliveryOptionsEntity.setMerchantEntity(merchantEntity);
+				merchantDAO.createHomeDeliveryOptions(homeDeliveryOptionsEntity);
 				JsonObject result = new JsonObject();
 				result.addProperty("merchantToken", merchantEntity.getMerchantToken());
 				result.addProperty("serverToken", merchantEntity.getServerToken());

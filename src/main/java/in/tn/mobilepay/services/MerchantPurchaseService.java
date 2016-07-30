@@ -122,7 +122,7 @@ public class MerchantPurchaseService {
 				UserJson userJson = new UserJson(purchaseEntity.getUserEntity());
 				purchaseJson.setUsers(userJson);
 				// If its home delivery, then we need to send Home delivery address
-				if(purchaseEntity.getDeliveryOptions().toString().equals(DeliveryOptions.HOME.toString())){
+				if(purchaseEntity.getUserDeliveryOptions().toString().equals(DeliveryOptions.HOME.toString())){
 					Collection<AddressEntity> collections = purchaseEntity.getAddressEntities();
 					for(AddressEntity addressEntity : collections){
 						AddressJson addressJson = new AddressJson(addressEntity);
@@ -182,7 +182,7 @@ public class MerchantPurchaseService {
 					purchaseJson.setDiscardJson(discardJson);
 				}
 				// If its home delivery, then we need to send Home delivery address
-				if(purchaseEntity.getDeliveryOptions() != null && purchaseEntity.getDeliveryOptions().toString().equals(DeliveryOptions.HOME.toString())){
+				if(purchaseEntity.getUserDeliveryOptions() != null && purchaseEntity.getUserDeliveryOptions().toString().equals(DeliveryOptions.HOME.toString())){
 					Collection<AddressEntity> collections = purchaseEntity.getAddressEntities();
 					for(AddressEntity addressEntity : collections){
 						AddressJson addressJson = new AddressJson(addressEntity);

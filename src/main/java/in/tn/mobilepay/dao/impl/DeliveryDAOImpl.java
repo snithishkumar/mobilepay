@@ -10,26 +10,23 @@ import in.tn.mobilepay.entity.DeliveryDetailsEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
 
 @Repository
-public class DeliveryDAOImpl extends BaseDAOImpl implements DeliveryDAO{
+public class DeliveryDAOImpl extends BaseDAOImpl{
 	
 	/**
 	 * Get Delivery Entity based on PurchaseEntity
 	 * @param purchaseEntity
 	 * @return
 	 */
-	@Override
 	public DeliveryDetailsEntity getDeliveryDetailsEntity(PurchaseEntity purchaseEntity){
 		Criteria deliveryCriteria = createCriteria(DeliveryDetailsEntity.class);
 		deliveryCriteria.add(Restrictions.eq(DeliveryDetailsEntity.PURCHASE_ENTITY, purchaseEntity));
 		return (DeliveryDetailsEntity)deliveryCriteria.uniqueResult();
 	}
 	
-	@Override
 	public void createDeliveryDetails(DeliveryDetailsEntity deliveryDetailsEntity){
 		saveObject(deliveryDetailsEntity);
 	}
 	
-	@Override
 	public void updateDeliveryDetails(DeliveryDetailsEntity deliveryDetailsEntity){
 		updateObject(deliveryDetailsEntity);
 	}
@@ -40,7 +37,6 @@ public class DeliveryDAOImpl extends BaseDAOImpl implements DeliveryDAO{
 	 * @param purchaseId
 	 * @return
 	 */
-	@Override
 	public CounterDetailsEntity geCounterDetailsEntity(int purchaseId){
 		Criteria counterDetails = createCriteria(CounterDetailsEntity.class);
 		counterDetails.createAlias(CounterDetailsEntity.PURCHASE_ID, CounterDetailsEntity.PURCHASE_ID);
