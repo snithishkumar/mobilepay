@@ -111,6 +111,7 @@ public class MerchantServices {
 					if(deliveryOptions.equals(DeliveryOptions.HOME.toString()) || deliveryOptions.equals(DeliveryOptions.BOTH.toString())){
 					JsonElement jsonElement =	jsonObject.get("homeDeliveryOptions");
 					homeDeliveryOptionsEntity = gson.fromJson(jsonElement, HomeDeliveryOptionsEntity.class);
+					homeDeliveryOptionsEntity.setMerchantEntity(merchantEntity);
 					}
 				}
 				merchantEntity.setMerchantGuid(serviceUtil.uuid());
@@ -119,8 +120,10 @@ public class MerchantServices {
 				merchantEntity.setCreatedTime(serviceUtil.getCurrentGmtTime());
 				merchantEntity.setUpdatedTime(merchantEntity.getCreatedTime());
 				merchantDAO.createMerchant(merchantEntity);
-				homeDeliveryOptionsEntity.setMerchantEntity(merchantEntity);
-				merchantDAO.createHomeDeliveryOptions(homeDeliveryOptionsEntity);
+				if(homeDeliveryOptionsEntity != null){
+					merchantDAO.createHomeDeliveryOptions(homeDeliveryOptionsEntity);
+				}
+				
 				JsonObject result = new JsonObject();
 				result.addProperty("merchantToken", merchantEntity.getMerchantToken());
 				result.addProperty("serverToken", merchantEntity.getServerToken());

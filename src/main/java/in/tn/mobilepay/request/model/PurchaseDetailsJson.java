@@ -6,6 +6,8 @@ public class PurchaseDetailsJson {
 	private String description;
 	private int quantity;
 	private String amount;
+	private String unitPrice;
+	private float rating = 0;
 
 	public int getItemNo() {
 		return itemNo;
@@ -39,10 +41,26 @@ public class PurchaseDetailsJson {
 		this.amount = amount;
 	}
 
+	public String getUnitPrice() {
+		return unitPrice;
+	}
+
+	public void setUnitPrice(String unitPrice) {
+		this.unitPrice = unitPrice;
+	}
+
+	public float getRating() {
+		return rating;
+	}
+
+	public void setRating(float rating) {
+		this.rating = rating;
+	}
+
 	@Override
 	public String toString() {
 		return "PurchaseDetailsJson [itemNo=" + itemNo + ", description=" + description + ", quantity=" + quantity
-				+ ", amount=" + amount + "]";
+				+ ", amount=" + amount + ", unitPrice=" + unitPrice + ", rating=" + rating + "]";
 	}
 
 }

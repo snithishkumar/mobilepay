@@ -37,7 +37,6 @@ public class PurchaseEntity {
 	public static final String IS_EDITABLE = "isEditable";
 	public static final String UPDATED_DATE_TIME = "updatedDateTime";
 	public static final String SERVER_DATE_TIME = "serverDateTime";
-	public static final String IS_DISCARD = "isDiscard";
 	public static final String ORDER_STATUS = "orderStatus";
 	public static final String MERCHANT_DELIVERY_OPTIONS = "merchantDeliveryOptions";
 	public static final String USER_DELIVERY_OPTIONS = "userDeliveryOptions";

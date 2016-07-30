@@ -197,7 +197,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 	public PurchaseEntity getNonDiscardPurchaseEntity(String purchaseGuid) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		criteria.add(Restrictions.eq(PurchaseEntity.PURCHASE_GUID, purchaseGuid));
-		criteria.add(Restrictions.eq(PurchaseEntity.IS_DISCARD, false));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS,  OrderStatus.CANCELLED));
 		return (PurchaseEntity) criteria.uniqueResult();
 	}
 
@@ -474,7 +474,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl{
 				criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.NOT_PAIED));
 				break;
 			case "discard":
-				criteria.add(Restrictions.eq(PurchaseEntity.IS_DISCARD, true));
+				criteria.add(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED));
 				break;
 
 			default:
