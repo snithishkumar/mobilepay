@@ -25,6 +25,7 @@ public class PurchaseJson {
 	private PaymentStatus paymentStatus;
 	private OrderStatus orderStatus;
 	private DeliveryOptions merchantDeliveryOptions;
+	private DeliveryOptions userDeliveryOptions;
 	private String totalAmount;
 	private DiscardJson discardJson;
 	private AddressJson addressJson;
@@ -49,6 +50,17 @@ public class PurchaseJson {
 		this.orderStatus = purchaseEntity.getOrderStatus();
 		this.totalAmount = purchaseEntity.getTotalAmount();
 		this.merchantDeliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
+		this.userDeliveryOptions = purchaseEntity.getUserDeliveryOptions();
+	}
+	
+	
+
+	public DeliveryOptions getUserDeliveryOptions() {
+		return userDeliveryOptions;
+	}
+
+	public void setUserDeliveryOptions(DeliveryOptions userDeliveryOptions) {
+		this.userDeliveryOptions = userDeliveryOptions;
 	}
 
 	public String getPurchaseId() {

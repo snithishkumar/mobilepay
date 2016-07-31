@@ -5,6 +5,7 @@ import java.util.List;
 
 import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
+import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.response.model.AddressJson;
 
 public class PayedPurchaseDetailsJson {
@@ -17,6 +18,7 @@ public class PayedPurchaseDetailsJson {
 	 private AddressJson addressJson;
 	 private String addressGuid;
 	 private String totalAmount;
+	 private OrderStatus orderStatus;
 	 private List<TransactionalDetailsEntity> transactions = new ArrayList<>();
 	    
 	public String getPurchaseId() {
@@ -38,6 +40,14 @@ public class PayedPurchaseDetailsJson {
 		this.amountDetails = amountDetails;
 	}
 	
+	
+	
+	public OrderStatus getOrderStatus() {
+		return orderStatus;
+	}
+	public void setOrderStatus(OrderStatus orderStatus) {
+		this.orderStatus = orderStatus;
+	}
 	public DeliveryOptions getUserDeliveryOptions() {
 		return userDeliveryOptions;
 	}

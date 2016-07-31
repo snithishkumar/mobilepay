@@ -156,6 +156,7 @@ public class PurchaseServices {
 							addressList.put(payedPurchaseDetailsJson.getAddressJson().getAddressUUID(), addressEntity);
 						}
 					}
+					purchaseEntity.setOrderStatus(payedPurchaseDetailsJson.getOrderStatus());
 					purchaseEntity.setPaymentStatus(PaymentStatus.PAIED);
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(payedPurchaseDetailsJson.getPayemetTime());
@@ -255,7 +256,27 @@ public class PurchaseServices {
 	}
 	
 	private void updateCounterStatus(PurchaseEntity purchaseEntity,OrderStatusUpdate orderStatusUpdate){
-		
+		if(orderStatusUpdate.getOrderStatus() == null){
+			CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(purchaseEntity.getPurchaseId());
+			boolean isCreate = false;
+			if(counterDetailsEntity == null){
+				 counterDetailsEntity = new CounterDetailsEntity();
+				 counterDetailsEntity.setCounterGuid(serviceUtil.uuid());
+				 isCreate = true;
+			}
+			
+			counterDetailsEntity.setCounterNumber("45");
+			counterDetailsEntity.setCreatedDateTime(purchaseEntity.getServerDateTime());
+			counterDetailsEntity.setMessage(orderStatusUpdate.getOrderStatusDesc());
+			counterDetailsEntity.setPurchaseEntity(purchaseEntity);
+			purchaseEntity.setOrderStatus(OrderStatus.READY_TO_COLLECT);
+			if(isCreate){
+				purchaseDAOImpl.createCounterStatus(counterDetailsEntity);
+			}else{
+				purchaseDAOImpl.updateCounterStatus(counterDetailsEntity);
+			}
+			return;
+		}
 		switch (orderStatusUpdate.getOrderStatus()) {
 		case READY_TO_COLLECT:
 			CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(purchaseEntity.getPurchaseId());
