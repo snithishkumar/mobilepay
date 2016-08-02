@@ -6,15 +6,14 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 
+import in.tn.mobilepay.dao.PurchaseDAO;
 import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
-import in.tn.mobilepay.dao.impl.PurchaseDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
@@ -26,7 +25,6 @@ import in.tn.mobilepay.request.model.DiscardJson;
 import in.tn.mobilepay.request.model.MerchantOrderStatusJson;
 import in.tn.mobilepay.request.model.UnPayedMerchantPurchaseJson;
 import in.tn.mobilepay.response.model.AddressJson;
-import in.tn.mobilepay.response.model.PurchaseJson;
 import in.tn.mobilepay.response.model.PurchaseMerchantJson;
 import in.tn.mobilepay.response.model.UserJson;
 import in.tn.mobilepay.util.StatusCode;
@@ -40,7 +38,7 @@ public class MerchantPurchaseService {
 	private static final String COUNT = "X-Count";
 	
 	@Autowired
-	private PurchaseDAOImpl purchaseDAO;
+	private PurchaseDAO purchaseDAO;
 	@Autowired
 	private ServiceUtil serviceUtil;
 	@Autowired
@@ -125,7 +123,7 @@ public class MerchantPurchaseService {
 				if(purchaseEntity.getUserDeliveryOptions().toString().equals(DeliveryOptions.HOME.toString())){
 					Collection<AddressEntity> collections = purchaseEntity.getAddressEntities();
 					for(AddressEntity addressEntity : collections){
-						AddressJson addressJson = new AddressJson(addressEntity);
+						AddressJson addressJson = new AddressJson(addressEntity,true);
 						purchaseJson.setAddressDetails(addressJson);
 						break;
 					}

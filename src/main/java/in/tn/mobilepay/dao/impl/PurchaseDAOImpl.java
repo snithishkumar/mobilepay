@@ -10,6 +10,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 
+import in.tn.mobilepay.dao.PurchaseDAO;
 import in.tn.mobilepay.entity.CounterDetailsEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
@@ -23,7 +24,7 @@ import in.tn.mobilepay.request.model.UnPayedMerchantPurchaseJson;
 import in.tn.mobilepay.response.model.OrderStatusJson;
 
 @Repository
-public class PurchaseDAOImpl extends BaseDAOImpl{
+public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 
 	/**
 	 * Get Current Purchase UUIDs List

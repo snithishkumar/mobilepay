@@ -19,10 +19,8 @@ import com.google.gson.reflect.TypeToken;
 
 import in.tn.mobilepay.dao.DeliveryDAO;
 import in.tn.mobilepay.dao.PurchaseDAO;
-import in.tn.mobilepay.dao.impl.DeliveryDAOImpl;
+import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
-import in.tn.mobilepay.dao.impl.PurchaseDAOImpl;
-import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.CounterDetailsEntity;
@@ -60,16 +58,16 @@ import in.tn.mobilepay.util.StatusCode;
 public class PurchaseServices {
 
 	@Autowired
-	private PurchaseDAOImpl purchaseDAOImpl;
+	private PurchaseDAO purchaseDAOImpl;
 	@Autowired
-	private UserDAOImpl userDAOImpl;
+	private UserDAO userDAO;
 	@Autowired
 	private MerchantDAOImpl merchantDAO;
 	@Autowired
 	private ServiceUtil serviceUtil;
 	
 	@Autowired
-	private DeliveryDAOImpl deliveryDAO;
+	private DeliveryDAO deliveryDAO;
 	
 	private static final Logger logger = Logger.getLogger(PurchaseServices.class);
 
@@ -110,7 +108,7 @@ public class PurchaseServices {
 				purchaseDAOImpl.createDiscard(discardEntity);
 				
 				//Send Push Notification
-				CloudMessageEntity cloudMessageEntity = userDAOImpl.getCloudMessageEntity(purchaseEntity.getUserEntity());
+				CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(purchaseEntity.getUserEntity());
 				if(cloudMessageEntity != null){
 					NotificationJson notificationJson = new NotificationJson();
 					notificationJson.setNotificationType(NotificationType.STATUS);
@@ -143,14 +141,14 @@ public class PurchaseServices {
 					purchaseEntity.setUserDeliveryOptions(payedPurchaseDetailsJson.getUserDeliveryOptions());
 					if(payedPurchaseDetailsJson.getUserDeliveryOptions().ordinal() == DeliveryOptions.HOME.ordinal()){
 						if(payedPurchaseDetailsJson.getAddressGuid() != null){
-							AddressEntity addressEntity = userDAOImpl.getAddressEntity(payedPurchaseDetailsJson.getAddressGuid());
+							AddressEntity addressEntity = userDAO.getAddressEntity(payedPurchaseDetailsJson.getAddressGuid());
 							purchaseEntity.getAddressEntities().add(addressEntity);
 						}else{
 							AddressEntity addressEntity =  addressList.get(payedPurchaseDetailsJson.getAddressJson());
 							if(addressEntity == null){
 								addressEntity = new AddressEntity(payedPurchaseDetailsJson.getAddressJson());
 								addressEntity.setUserEntity(userEntity);
-								userDAOImpl.createAddressEntity(addressEntity);
+								userDAO.createAddressEntity(addressEntity);
 							}
 							purchaseEntity.getAddressEntities().add(addressEntity);
 							addressList.put(payedPurchaseDetailsJson.getAddressJson().getAddressUUID(), addressEntity);
@@ -348,7 +346,7 @@ public class PurchaseServices {
 					purchaseDAOImpl.updatePurchaseObject(purchaseEntity);
 					
 					//Send Push Notification
-					CloudMessageEntity cloudMessageEntity = userDAOImpl.getCloudMessageEntity(purchaseEntity.getUserEntity());
+					CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(purchaseEntity.getUserEntity());
 					if(cloudMessageEntity != null){
 						NotificationJson notificationJson = new NotificationJson();
 						notificationJson.setNotificationType(NotificationType.STATUS);
@@ -416,7 +414,7 @@ public class PurchaseServices {
 			//Create New Record
 			purchaseDAOImpl.createPurchaseObject(dbPurchaseEntity);
 			//Send Push Notification
-			CloudMessageEntity cloudMessageEntity = userDAOImpl.getCloudMessageEntity(userEntity);
+			CloudMessageEntity cloudMessageEntity = userDAO.getCloudMessageEntity(userEntity);
 			if(cloudMessageEntity != null){
 				NotificationJson notificationJson = new NotificationJson();
 				notificationJson.setNotificationType(NotificationType.PURCHASE);
@@ -470,7 +468,7 @@ public class PurchaseServices {
 	 * @throws ValidationException
 	 */
 	private UserEntity validateMobile(String mobileNumber) throws ValidationException{
-		UserEntity userEntity = userDAOImpl.getUserEntity(mobileNumber);
+		UserEntity userEntity = userDAO.getUserEntity(mobileNumber);
 		if(userEntity == null){
 			throw new ValidationException(StatusCode.MER_INVALID_MOBILE, "Invalid Mobile", null);
 		}

@@ -33,46 +33,46 @@ public class AddressEntity {
 	private String name;
 	@Column(name = "MobileNumber")
 	private String mobileNumber;
-	@Column(name = "AddressUUID",unique = true)
+	@Column(name = "AddressUUID", unique = true)
 	private String addressUUID;
-	@Column(name = "Street")
-	private String street;
+
 	@Column(name = "Address")
 	private String address;
-	@Column(name = "Area")
-	private String area;
-	@Column(name = "City")
-	private String city;
-	@Column(name = "PostalCode")
-	private Long postalCode;
+
 	@Column(name = "LastModifiedTime")
 	private long lastModifiedTime;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "UserId", referencedColumnName = "UserId")
 	private UserEntity userEntity;
-	
-	public AddressEntity(){
-		
+
+	public AddressEntity() {
+
 	}
-	
-	public AddressEntity(AddressJson addressJson){
+
+	public AddressEntity(AddressJson addressJson) {
 		toAddress(addressJson);
 	}
-	
-	public void toAddress(AddressJson addressJson){
+
+	public void toAddress(AddressJson addressJson) {
 		this.name = addressJson.getName();
-		this.mobileNumber =addressJson.getMobile();
+		this.mobileNumber = addressJson.getMobile();
 		this.addressUUID = addressJson.getAddressUUID();
-		this.street = addressJson.getStreet();
+		// this.street = addressJson.getStreet();
 		this.address = addressJson.getAddress();
-		this.area = addressJson.getArea();
-		this.city = addressJson.getCity();
-		this.postalCode = addressJson.getPostalCode();
+		// this.area = addressJson.getArea();
+		// this.city = addressJson.getCity();
+		// this.postalCode = addressJson.getPostalCode();
 		this.lastModifiedTime = addressJson.getLastModifiedTime();
 	}
-	
-	
+
+	public int getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(int addressId) {
+		this.addressId = addressId;
+	}
 
 	public String getName() {
 		return name;
@@ -90,14 +90,6 @@ public class AddressEntity {
 		this.mobileNumber = mobileNumber;
 	}
 
-	public int getAddressId() {
-		return addressId;
-	}
-
-	public void setAddressId(int addressId) {
-		this.addressId = addressId;
-	}
-
 	public String getAddressUUID() {
 		return addressUUID;
 	}
@@ -106,44 +98,12 @@ public class AddressEntity {
 		this.addressUUID = addressUUID;
 	}
 
-	public String getStreet() {
-		return street;
-	}
-
-	public void setStreet(String street) {
-		this.street = street;
-	}
-
 	public String getAddress() {
 		return address;
 	}
 
 	public void setAddress(String address) {
 		this.address = address;
-	}
-
-	public String getArea() {
-		return area;
-	}
-
-	public void setArea(String area) {
-		this.area = area;
-	}
-
-	public String getCity() {
-		return city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
-	}
-
-	public Long getPostalCode() {
-		return postalCode;
-	}
-
-	public void setPostalCode(Long postalCode) {
-		this.postalCode = postalCode;
 	}
 
 	public long getLastModifiedTime() {
@@ -164,11 +124,9 @@ public class AddressEntity {
 
 	@Override
 	public String toString() {
-		return "AddressEntity [addressId=" + addressId + ", addressUUID=" + addressUUID + ", street=" + street
-				+ ", address=" + address + ", area=" + area + ", city=" + city + ", postalCode=" + postalCode
-				+ ", lastModifiedTime=" + lastModifiedTime + ", userEntity=" + userEntity + "]";
+		return "AddressEntity [addressId=" + addressId + ", name=" + name + ", mobileNumber=" + mobileNumber
+				+ ", addressUUID=" + addressUUID + ", address=" + address + ", lastModifiedTime=" + lastModifiedTime
+				+ ", userEntity=" + userEntity + "]";
 	}
-	
-	
 
 }

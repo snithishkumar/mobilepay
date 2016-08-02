@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import in.tn.mobilepay.dao.impl.UserDAOImpl;
+import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.OtpEntity;
@@ -32,7 +32,7 @@ import in.tn.mobilepay.util.StatusCode;
 public class UserServices {
 
 	@Autowired
-	private UserDAOImpl userDAOImpl;
+	private UserDAO userDAOImpl;
 
 	@Autowired
 	private Gson gson;

@@ -25,8 +25,8 @@ import org.springframework.web.client.RestTemplate;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
-import in.tn.mobilepay.dao.impl.UserDAOImpl;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.response.model.NotificationJson;
@@ -39,7 +39,7 @@ public class ServiceUtil {
 	private Gson gson;
 	
 	@Autowired
-	private UserDAOImpl userDAO;
+	private UserDAO userDAO;
 	
 	@Autowired
 	private MerchantDAOImpl merchantDAO;

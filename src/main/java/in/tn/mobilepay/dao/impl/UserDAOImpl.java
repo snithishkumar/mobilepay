@@ -14,7 +14,7 @@ import in.tn.mobilepay.entity.OtpEntity;
 import in.tn.mobilepay.entity.UserEntity;
 
 @Repository
-public class UserDAOImpl extends BaseDAOImpl {
+public class UserDAOImpl extends BaseDAOImpl implements UserDAO{
 
 	
 	public void createUser(UserEntity userEntity){
@@ -167,6 +167,12 @@ public class UserDAOImpl extends BaseDAOImpl {
 	 */
 	public void updateCloudMessageEntity(CloudMessageEntity cloudMessageEntity){
 		sessionFactory.getCurrentSession().update(cloudMessageEntity);
+	}
+
+	@Override
+	public void removeCloudMessageEntity(CloudMessageEntity cloudMessageEntity) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

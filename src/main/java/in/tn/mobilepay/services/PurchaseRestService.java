@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,9 +17,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import in.tn.mobilepay.dao.DeliveryDAO;
-import in.tn.mobilepay.dao.impl.DeliveryDAOImpl;
-import in.tn.mobilepay.dao.impl.PurchaseDAOImpl;
-import in.tn.mobilepay.dao.impl.UserDAOImpl;
+import in.tn.mobilepay.dao.PurchaseDAO;
+import in.tn.mobilepay.dao.UserDAO;
 import in.tn.mobilepay.entity.AddressEntity;
 import in.tn.mobilepay.entity.CloudMessageEntity;
 import in.tn.mobilepay.entity.CounterDetailsEntity;
@@ -55,16 +53,16 @@ public class PurchaseRestService {
 	private Gson gson;
 	
 	@Autowired
-	private UserDAOImpl userDAOImpl;
+	private UserDAO userDAOImpl;
 	
 	@Autowired
-	private PurchaseDAOImpl purchaseDAOImpl;
+	private PurchaseDAO purchaseDAOImpl;
 	
 	@Autowired
 	private ServiceUtil serviceUtil;
 	
 	@Autowired
-	private DeliveryDAOImpl deliveryDAO;
+	private DeliveryDAO deliveryDAO;
 	
 	
 	

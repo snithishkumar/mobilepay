@@ -25,11 +25,23 @@ public class AddressJson {
     	this.name = addressEntity.getName();
     	this.addressUUID = addressEntity.getAddressUUID();
     	this.mobile = addressEntity.getMobileNumber();
-    	this.street = addressEntity.getStreet();
+    	//this.street = addressEntity.getStreet();
     	this.address = addressEntity.getAddress();
-    	this.area = addressEntity.getArea();
-    	this.city = addressEntity.getCity();
-    	this.postalCode = addressEntity.getPostalCode();
+    	//this.area = addressEntity.getArea();
+    	//this.city = addressEntity.getCity();
+    	//this.postalCode = addressEntity.getPostalCode();
+    	this.lastModifiedTime = addressEntity.getLastModifiedTime();
+    }
+    
+    public AddressJson(AddressEntity addressEntity,boolean flag){
+    	this.name = addressEntity.getName();
+    	this.addressUUID = addressEntity.getAddressUUID();
+    	this.mobile = addressEntity.getMobileNumber();
+    	this.street = " ";
+    	this.address = addressEntity.getAddress();
+    	this.area = " ";
+    	this.city = " ";
+    	this.postalCode = 0;
     	this.lastModifiedTime = addressEntity.getLastModifiedTime();
     }
 
