@@ -98,6 +98,9 @@ public class PurchaseEntity {
 	
 	@Column(name = "CalculatedAmounts",length = 255)
 	private String calculatedAmounts;
+	
+	@Column(name = "TotalAmount")
+	private double totalAmount;
 
 	@ManyToMany
 	@JoinTable(name = "HomeDeliveryAddress", joinColumns = { @JoinColumn(name = "addressId") }, inverseJoinColumns = {
@@ -115,6 +118,7 @@ public class PurchaseEntity {
 		this.updatedDateTime = ServiceUtil.getCurrentGmtTime();
 		this.isEditable = purchaseJson.getIsEditable();
 		this.serverDateTime = updatedDateTime;
+		this.totalAmount = Double.valueOf(purchaseJson.getTotalAmount());
 	}
 
 	public String getBillNumber() {
@@ -270,6 +274,16 @@ public class PurchaseEntity {
 
 	public void setUserDeliveryOptions(DeliveryOptions userDeliveryOptions) {
 		this.userDeliveryOptions = userDeliveryOptions;
+	}
+	
+	
+
+	public double getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(double totalAmount) {
+		this.totalAmount = totalAmount;
 	}
 
 	@Override

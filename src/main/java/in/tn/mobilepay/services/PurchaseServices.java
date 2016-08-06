@@ -163,6 +163,7 @@ public class PurchaseServices {
 					purchaseEntity.setUnModifiedPurchaseData(purchaseEntity.getPurchaseData());
 					purchaseEntity.setAmountDetails(payedPurchaseDetailsJson.getAmountDetails());
 					purchaseEntity.setPurchaseData(payedPurchaseDetailsJson.getProductDetails());
+					purchaseEntity.setTotalAmount(payedPurchaseDetailsJson.getCalculatedAmounts().getTotalAmount());
 					purchaseEntity.setCalculatedAmounts(serviceUtil.toJson(payedPurchaseDetailsJson.getCalculatedAmounts()));
 					purchaseDAOImpl.updatePurchaseObject(purchaseEntity);
 					processTransactions(purchaseEntity, payedPurchaseDetailsJson.getTransactions());
@@ -230,7 +231,10 @@ public class PurchaseServices {
 					purchaseEntity.setUnModifiedPurchaseData(purchaseEntity.getPurchaseData());
 					purchaseEntity.setAmountDetails(discardJson.getAmountDetails());
 					purchaseEntity.setPurchaseData(discardJson.getProductDetails());
-					purchaseEntity.setCalculatedAmounts(discardJson.getCalculatedAmounts());
+					
+					
+					purchaseEntity.setTotalAmount(discardJson.getCalculatedAmounts().getTotalAmount());
+					purchaseEntity.setCalculatedAmounts(serviceUtil.toJson(discardJson.getCalculatedAmounts()));
 					
 					purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());

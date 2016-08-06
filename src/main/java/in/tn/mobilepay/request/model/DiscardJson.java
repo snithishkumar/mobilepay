@@ -6,6 +6,7 @@ import java.util.List;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.enumeration.DiscardBy;
+import in.tn.mobilepay.rest.json.CalculatedAmounts;
 
 public class DiscardJson extends TokenJson {
 
@@ -16,7 +17,7 @@ public class DiscardJson extends TokenJson {
 
 	private String productDetails;
 	private String amountDetails;
-	private String calculatedAmounts;
+	private CalculatedAmounts calculatedAmounts;
 
 	private DiscardBy discardBy;
 
@@ -90,11 +91,11 @@ public class DiscardJson extends TokenJson {
 
 	
 
-	public String getCalculatedAmounts() {
+	public CalculatedAmounts getCalculatedAmounts() {
 		return calculatedAmounts;
 	}
 
-	public void setCalculatedAmounts(String calculatedAmounts) {
+	public void setCalculatedAmounts(CalculatedAmounts calculatedAmounts) {
 		this.calculatedAmounts = calculatedAmounts;
 	}
 

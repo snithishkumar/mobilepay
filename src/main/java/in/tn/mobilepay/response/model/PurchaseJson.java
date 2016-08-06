@@ -33,6 +33,7 @@ public class PurchaseJson {
 	private HomeDeliveryOptionsEntity homeDeliveryOptions;
 	private CalculatedAmounts calculatedAmounts;
 
+	private double totalAmount;
 	public PurchaseJson() {
 
 	}
@@ -51,6 +52,7 @@ public class PurchaseJson {
 		this.orderStatus = purchaseEntity.getOrderStatus();
 		this.merchantDeliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
 		this.userDeliveryOptions = purchaseEntity.getUserDeliveryOptions();
+		this.totalAmount = purchaseEntity.getTotalAmount();
 	}
 	
 	
