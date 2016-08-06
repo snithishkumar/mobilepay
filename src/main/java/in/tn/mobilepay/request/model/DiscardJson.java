@@ -16,7 +16,7 @@ public class DiscardJson extends TokenJson {
 
 	private String productDetails;
 	private String amountDetails;
-	private String totalAmount;
+	private String calculatedAmounts;
 
 	private DiscardBy discardBy;
 
@@ -88,12 +88,14 @@ public class DiscardJson extends TokenJson {
 		this.amountDetails = amountDetails;
 	}
 
-	public String getTotalAmount() {
-		return totalAmount;
+	
+
+	public String getCalculatedAmounts() {
+		return calculatedAmounts;
 	}
 
-	public void setTotalAmount(String totalAmount) {
-		this.totalAmount = totalAmount;
+	public void setCalculatedAmounts(String calculatedAmounts) {
+		this.calculatedAmounts = calculatedAmounts;
 	}
 
 	public List<TransactionalDetailsEntity> getTransactions() {
@@ -108,8 +110,9 @@ public class DiscardJson extends TokenJson {
 	public String toString() {
 		return "DiscardJson [userMobile=" + userMobile + ", purchaseGuid=" + purchaseGuid + ", reason=" + reason
 				+ ", createdDateTime=" + createdDateTime + ", productDetails=" + productDetails + ", amountDetails="
-				+ amountDetails + ", totalAmount=" + totalAmount + ", discardBy=" + discardBy + ", transactions="
-				+ transactions + "]";
+				+ amountDetails + ", calculatedAmounts=" + calculatedAmounts + ", discardBy=" + discardBy
+				+ ", transactions=" + transactions + "]";
 	}
+
 
 }

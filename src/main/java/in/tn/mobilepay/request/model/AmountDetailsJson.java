@@ -8,6 +8,17 @@ public class AmountDetailsJson {
 	private String discount;
 	private DiscountType discountType;
 	private String discountMiniVal;
+	private String deliveryAmount;
+	
+	
+
+	public String getDeliveryAmount() {
+		return deliveryAmount;
+	}
+
+	public void setDeliveryAmount(String deliveryAmount) {
+		this.deliveryAmount = deliveryAmount;
+	}
 
 	public float getTaxAmount() {
 		return taxAmount;

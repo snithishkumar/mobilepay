@@ -134,7 +134,7 @@ public class PurchaseRestService {
 		purchaseEntity.setPurchaseDateTime(merchantPurchaseData.getPurchaseDate());
 		purchaseEntity.setPurchaseGuid(serviceUtil.uuid());
 		purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
-		purchaseEntity.setTotalAmount(merchantPurchaseData.getTotalAmount());
+		//purchaseEntity.setTotalAmount(merchantPurchaseData.getTotalAmount());
 		
 	}
 	

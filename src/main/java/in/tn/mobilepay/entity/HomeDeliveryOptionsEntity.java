@@ -11,7 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import in.tn.mobilepay.enumeration.DeliveryConditons;
+import in.tn.mobilepay.enumeration.DeliveryConditions;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 
 @Entity
@@ -41,7 +41,7 @@ public class HomeDeliveryOptionsEntity {
 
 	@Column(name = "DeliveryConditions")
 	@Enumerated(EnumType.STRING)
-	private DeliveryConditons deliveryConditions;
+	private DeliveryConditions deliveryConditions;
 
 	@Column(name = "MinAmount")
 	private float minAmount;
@@ -78,11 +78,11 @@ public class HomeDeliveryOptionsEntity {
 
 	
 
-	public DeliveryConditons getDeliveryConditions() {
+	public DeliveryConditions getDeliveryConditions() {
 		return deliveryConditions;
 	}
 
-	public void setDeliveryConditions(DeliveryConditons deliveryConditions) {
+	public void setDeliveryConditions(DeliveryConditions deliveryConditions) {
 		this.deliveryConditions = deliveryConditions;
 	}
 

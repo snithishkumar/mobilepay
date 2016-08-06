@@ -7,6 +7,7 @@ import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.response.model.AddressJson;
+import in.tn.mobilepay.rest.json.CalculatedAmounts;
 
 public class PayedPurchaseDetailsJson {
 	
@@ -17,9 +18,9 @@ public class PayedPurchaseDetailsJson {
 	private long payemetTime;
 	 private AddressJson addressJson;
 	 private String addressGuid;
-	 private String totalAmount;
 	 private OrderStatus orderStatus;
 	 private List<TransactionalDetailsEntity> transactions = new ArrayList<>();
+	 private CalculatedAmounts calculatedAmounts;
 	    
 	public String getPurchaseId() {
 		return purchaseId;
@@ -42,6 +43,12 @@ public class PayedPurchaseDetailsJson {
 	
 	
 	
+	public CalculatedAmounts getCalculatedAmounts() {
+		return calculatedAmounts;
+	}
+	public void setCalculatedAmounts(CalculatedAmounts calculatedAmounts) {
+		this.calculatedAmounts = calculatedAmounts;
+	}
 	public OrderStatus getOrderStatus() {
 		return orderStatus;
 	}
@@ -62,12 +69,6 @@ public class PayedPurchaseDetailsJson {
 	}
 	
 	
-	public String getTotalAmount() {
-		return totalAmount;
-	}
-	public void setTotalAmount(String totalAmount) {
-		this.totalAmount = totalAmount;
-	}
 	public AddressJson getAddressJson() {
 		return addressJson;
 	}
@@ -92,9 +93,10 @@ public class PayedPurchaseDetailsJson {
 	public String toString() {
 		return "PayedPurchaseDetailsJson [purchaseId=" + purchaseId + ", productDetails=" + productDetails
 				+ ", amountDetails=" + amountDetails + ", userDeliveryOptions=" + userDeliveryOptions + ", payemetTime="
-				+ payemetTime + ", addressJson=" + addressJson + ", addressGuid=" + addressGuid + ", totalAmount="
-				+ totalAmount + ", transactions=" + transactions + "]";
+				+ payemetTime + ", addressJson=" + addressJson + ", addressGuid=" + addressGuid + ", orderStatus="
+				+ orderStatus + ", transactions=" + transactions + ", calculatedAmounts=" + calculatedAmounts + "]";
 	}
+	
 	
 	
 	

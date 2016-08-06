@@ -22,12 +22,12 @@
 		<property name="url"
 			value="jdbc:mysql://localhost/mobilepay?allowMultiQueries=true" />
 		<property name="username" value="root" />
-		<property name="password" value="admin" />
-		<property name="initialSize" value="34" />
-		<property name="maxActive" value="377" />
+		<property name="password" value="Dec302013@" />
+		<property name="initialSize" value="20" />
+		<property name="maxActive" value="100" />
         <!-- Production Conf // http://www.codingpedia.org/ama/tomcat-jdbc-connection-pool-configuration-for-production-and-development/ -->
-		<property name="maxIdle" value="233"/>
-		<property name="minIdle" value="89" />
+		<property name="maxIdle" value="45"/>
+		<property name="minIdle" value="20" />
 		<property name="timeBetweenEvictionRunsMillis" value="34000" />
 		<property name="minEvictableIdleTimeMillis" value="55000" />
 		<property name="validationQuery" value="SELECT 1" />

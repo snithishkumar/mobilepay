@@ -1,12 +1,12 @@
 package in.tn.mobilepay.rest.json;
 
-import in.tn.mobilepay.enumeration.DeliveryConditons;
+import in.tn.mobilepay.enumeration.DeliveryConditions;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 
 public class HomeDeliveryOptionsJson {
 
 	private DeliveryOptions deliveryOptions;
-	private DeliveryConditons deliveryConditons;
+	private DeliveryConditions deliveryConditons;
 	private float minAmount;
 	private float maxDistance;
 	private float amount;
@@ -26,11 +26,11 @@ public class HomeDeliveryOptionsJson {
 		this.deliveryOptions = deliveryOptions;
 	}
 
-	public DeliveryConditons getDeliveryConditons() {
+	public DeliveryConditions getDeliveryConditons() {
 		return deliveryConditons;
 	}
 
-	public void setDeliveryConditons(DeliveryConditons deliveryConditons) {
+	public void setDeliveryConditons(DeliveryConditions deliveryConditons) {
 		this.deliveryConditons = deliveryConditons;
 	}
 

@@ -6,6 +6,7 @@ import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.OrderStatus;
 import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.request.model.DiscardJson;
+import in.tn.mobilepay.rest.json.CalculatedAmounts;
 
 public class PurchaseJson {
 
@@ -26,11 +27,11 @@ public class PurchaseJson {
 	private OrderStatus orderStatus;
 	private DeliveryOptions merchantDeliveryOptions;
 	private DeliveryOptions userDeliveryOptions;
-	private String totalAmount;
 	private DiscardJson discardJson;
 	private AddressJson addressJson;
 	private CounterDetailsJson counterDetails;
 	private HomeDeliveryOptionsEntity homeDeliveryOptions;
+	private CalculatedAmounts calculatedAmounts;
 
 	public PurchaseJson() {
 
@@ -48,12 +49,19 @@ public class PurchaseJson {
 		this.serverDateTime = purchaseEntity.getServerDateTime();
 		this.paymentStatus = purchaseEntity.getPaymentStatus();
 		this.orderStatus = purchaseEntity.getOrderStatus();
-		this.totalAmount = purchaseEntity.getTotalAmount();
 		this.merchantDeliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
 		this.userDeliveryOptions = purchaseEntity.getUserDeliveryOptions();
 	}
 	
 	
+
+	public CalculatedAmounts getCalculatedAmounts() {
+		return calculatedAmounts;
+	}
+
+	public void setCalculatedAmounts(CalculatedAmounts calculatedAmounts) {
+		this.calculatedAmounts = calculatedAmounts;
+	}
 
 	public DeliveryOptions getUserDeliveryOptions() {
 		return userDeliveryOptions;
@@ -185,13 +193,7 @@ public class PurchaseJson {
 
 	
 
-	public String getTotalAmount() {
-		return totalAmount;
-	}
-
-	public void setTotalAmount(String totalAmount) {
-		this.totalAmount = totalAmount;
-	}
+	
 
 	public DiscardJson getDiscardJson() {
 		return discardJson;
@@ -247,11 +249,10 @@ public class PurchaseJson {
 				+ ", isDelivered=" + isDelivered + ", lastModifiedDateTime=" + lastModifiedDateTime
 				+ ", serverDateTime=" + serverDateTime + ", isDiscard=" + isDiscard + ", paymentStatus=" + paymentStatus
 				+ ", orderStatus=" + orderStatus + ", merchantDeliveryOptions=" + merchantDeliveryOptions
-				+ ", totalAmount=" + totalAmount + ", discardJson=" + discardJson + ", addressJson=" + addressJson
-				+ ", counterDetails=" + counterDetails + "]";
+				+ ", userDeliveryOptions=" + userDeliveryOptions + ", discardJson=" + discardJson + ", addressJson="
+				+ addressJson + ", counterDetails=" + counterDetails + ", homeDeliveryOptions=" + homeDeliveryOptions
+				+ ", calculatedAmounts=" + calculatedAmounts + "]";
 	}
-
-	
 
 	
 

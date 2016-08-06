@@ -94,8 +94,10 @@ public class PurchaseEntity {
 	@Column(name = "OrderStatus") // ORDER_STATUS any one of status
 	private OrderStatus orderStatus;
 
-	@Column(name = "TotalAmount")
-	private String totalAmount;
+
+	
+	@Column(name = "CalculatedAmounts",length = 255)
+	private String calculatedAmounts;
 
 	@ManyToMany
 	@JoinTable(name = "HomeDeliveryAddress", joinColumns = { @JoinColumn(name = "addressId") }, inverseJoinColumns = {
@@ -107,7 +109,6 @@ public class PurchaseEntity {
 	}
 
 	public void loadValue(PurchaseJson purchaseJson) {
-		this.totalAmount = purchaseJson.getTotalAmount();
 		this.billNumber = purchaseJson.getBillNumber();
 		this.purchaseGuid = purchaseJson.getPurchaseUuid();
 		this.purchaseDateTime = Long.valueOf(purchaseJson.getPurchaseDateTime());
@@ -122,6 +123,16 @@ public class PurchaseEntity {
 
 	public void setBillNumber(String billNumber) {
 		this.billNumber = billNumber;
+	}
+	
+	
+
+	public String getCalculatedAmounts() {
+		return calculatedAmounts;
+	}
+
+	public void setCalculatedAmounts(String calculatedAmounts) {
+		this.calculatedAmounts = calculatedAmounts;
 	}
 
 	public String getPurchaseData() {
@@ -228,14 +239,7 @@ public class PurchaseEntity {
 		this.orderStatus = orderStatus;
 	}
 
-	public String getTotalAmount() {
-		return totalAmount;
-	}
-
-	public void setTotalAmount(String totalAmount) {
-		this.totalAmount = totalAmount;
-	}
-
+	
 	public Collection<AddressEntity> getAddressEntities() {
 		return addressEntities;
 	}
@@ -277,8 +281,10 @@ public class PurchaseEntity {
 				+ ", updatedDateTime=" + updatedDateTime + ", amountDetails=" + amountDetails
 				+ ", unModifiedAmountDetails=" + unModifiedAmountDetails + ", serverDateTime=" + serverDateTime
 				+ ", merchantDeliveryOptions=" + merchantDeliveryOptions + ", userDeliveryOptions="
-				+ userDeliveryOptions + ", orderStatus=" + orderStatus + ", totalAmount=" + totalAmount
+				+ userDeliveryOptions + ", orderStatus=" + orderStatus + ", calculatedAmounts=" + calculatedAmounts
 				+ ", addressEntities=" + addressEntities + "]";
 	}
+
+	
 
 }

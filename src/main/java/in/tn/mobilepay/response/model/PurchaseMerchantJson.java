@@ -9,6 +9,7 @@ import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.request.model.DiscardJson;
+import in.tn.mobilepay.rest.json.CalculatedAmounts;
 
 public class PurchaseMerchantJson {
 	
@@ -53,7 +54,12 @@ public class PurchaseMerchantJson {
 		 this.orderStatus = purchaseEntity.getOrderStatus().toString();
 		 this.merchantDeliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
 		 this.userDeliveryOptions = purchaseEntity.getUserDeliveryOptions();
-		 this.totalAmount = purchaseEntity.getTotalAmount();
+		 String calc = purchaseEntity.getCalculatedAmounts();
+		 if(calc != null){
+			 CalculatedAmounts calculatedAmounts = gson.fromJson(calc, CalculatedAmounts.class);
+			 this.totalAmount = String.valueOf(calculatedAmounts.getTotalAmount());
+		 }
+		 
 	}
 
 	public String getPurchaseId() {

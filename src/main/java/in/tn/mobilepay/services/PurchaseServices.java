@@ -52,6 +52,7 @@ import in.tn.mobilepay.response.model.NotificationJson;
 import in.tn.mobilepay.response.model.OrderStatusJson;
 import in.tn.mobilepay.response.model.PurchaseJson;
 import in.tn.mobilepay.response.model.UserJson;
+import in.tn.mobilepay.rest.json.CalculatedAmounts;
 import in.tn.mobilepay.util.StatusCode;
 
 @Service
@@ -162,7 +163,7 @@ public class PurchaseServices {
 					purchaseEntity.setUnModifiedPurchaseData(purchaseEntity.getPurchaseData());
 					purchaseEntity.setAmountDetails(payedPurchaseDetailsJson.getAmountDetails());
 					purchaseEntity.setPurchaseData(payedPurchaseDetailsJson.getProductDetails());
-					purchaseEntity.setTotalAmount(payedPurchaseDetailsJson.getTotalAmount());
+					purchaseEntity.setCalculatedAmounts(serviceUtil.toJson(payedPurchaseDetailsJson.getCalculatedAmounts()));
 					purchaseDAOImpl.updatePurchaseObject(purchaseEntity);
 					processTransactions(purchaseEntity, payedPurchaseDetailsJson.getTransactions());
 					PurchaseJson purchaseJson = new PurchaseJson();
@@ -229,8 +230,7 @@ public class PurchaseServices {
 					purchaseEntity.setUnModifiedPurchaseData(purchaseEntity.getPurchaseData());
 					purchaseEntity.setAmountDetails(discardJson.getAmountDetails());
 					purchaseEntity.setPurchaseData(discardJson.getProductDetails());
-					purchaseEntity.setTotalAmount(discardJson.getTotalAmount());
-					
+					purchaseEntity.setCalculatedAmounts(discardJson.getCalculatedAmounts());
 					
 					purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
@@ -418,7 +418,7 @@ public class PurchaseServices {
 			if(cloudMessageEntity != null){
 				NotificationJson notificationJson = new NotificationJson();
 				notificationJson.setNotificationType(NotificationType.PURCHASE);
-				notificationJson.setMessage("You have Purchased in"+ merchantEntity.getMerchantName()+".Total Cost : "+dbPurchaseEntity.getTotalAmount()+"."); // TODO
+				notificationJson.setMessage("You have Purchased in"+ merchantEntity.getMerchantName()+".Total Cost : "+purchaseJson.getTotalAmount()+"."); // TODO
 				notificationJson.setPurchaseGuid(dbPurchaseEntity.getPurchaseGuid());
 				serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
 			}
@@ -512,6 +512,10 @@ public class PurchaseServices {
 					HomeDeliveryOptionsEntity homeDeliveryOptionsEntity =	merchantDAO.geHomeDeliveryOptionsEntity(purchaseEntity.getMerchantEntity());
 					homeDeliveryOptionsEntity.setMerchantEntity(null);
 					purchaseJson.setHomeDeliveryOptions(homeDeliveryOptionsEntity);
+				}
+				if(purchaseEntity.getCalculatedAmounts() != null){
+					CalculatedAmounts calculatedAmounts = serviceUtil.fromJson(purchaseEntity.getCalculatedAmounts(), CalculatedAmounts.class);
+					purchaseJson.setCalculatedAmounts(calculatedAmounts);
 				}
 				
 				UserJson userJson = new UserJson(userEntity);

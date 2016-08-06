@@ -12,6 +12,7 @@ public class AmountDetails {
 	private DiscountType discountType;
 	private String discountAmount;
 	private String minimumAmount;
+	private String deliveryAmount;
 
 	public String getTaxAmount() {
 		return taxAmount;
@@ -43,6 +44,16 @@ public class AmountDetails {
 
 	public void setMinimumAmount(String minimumAmount) {
 		this.minimumAmount = minimumAmount;
+	}
+	
+	
+
+	public String getDeliveryAmount() {
+		return deliveryAmount;
+	}
+
+	public void setDeliveryAmount(String deliveryAmount) {
+		this.deliveryAmount = deliveryAmount;
 	}
 
 	@Override
