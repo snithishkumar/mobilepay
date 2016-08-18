@@ -32,6 +32,7 @@ import in.tn.mobilepay.enumeration.DeliveryStatus;
 import in.tn.mobilepay.enumeration.DiscardBy;
 import in.tn.mobilepay.enumeration.NotificationType;
 import in.tn.mobilepay.enumeration.OrderStatus;
+import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.exception.ValidationException;
 import in.tn.mobilepay.request.model.DiscardJson;
 import in.tn.mobilepay.response.model.AddressJson;
@@ -48,52 +49,51 @@ import in.tn.mobilepay.rest.json.PurchaseItems;
 
 @Service
 public class PurchaseRestService {
-	
+
 	@Autowired
 	private Gson gson;
-	
+
 	@Autowired
 	private UserDAO userDAOImpl;
-	
+
 	@Autowired
 	private PurchaseDAO purchaseDAOImpl;
-	
+
 	@Autowired
 	private ServiceUtil serviceUtil;
-	
+
 	@Autowired
 	private DeliveryDAO deliveryDAO;
-	
-	
-	
-	private static final Logger  logger = Logger.getLogger(PurchaseRestService.class);
-	
+
+	private static final Logger logger = Logger.getLogger(PurchaseRestService.class);
+
 	/**
 	 * Create New Purchase Entity
+	 * 
 	 * @param requestData
 	 * @return
 	 */
-	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
-	public ResponseEntity<String> createPurchase(String requestData,Principal principal){
-		try{
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> createPurchase(String requestData, Principal principal) {
+		try {
 			// Json to Object
 			MerchantPurchaseDatas merchantPurchaseDatas = gson.fromJson(requestData, MerchantPurchaseDatas.class);
 			List<MerchantPurchaseData> purchaseDatas = merchantPurchaseDatas.getMerchantPurchaseDatas();
 			JsonArray responseData = new JsonArray();
 			// Process each data
-			for(MerchantPurchaseData merchantPurchaseData : purchaseDatas){
-				try{
+			for (MerchantPurchaseData merchantPurchaseData : purchaseDatas) {
+				try {
 					// Validate Customer mobile number
-					UserEntity userEntity =	validateUserMobile(merchantPurchaseData.getCustomerMobileNo());
+					UserEntity userEntity = validateUserMobile(merchantPurchaseData.getCustomerMobileNo());
 					PurchaseEntity purchaseEntity = new PurchaseEntity();
-					//Copy MerchantPurchase Data to Purchase
+					// Copy MerchantPurchase Data to Purchase
 					copyMerchantPurchaseData(merchantPurchaseData, purchaseEntity);
-					
+
 					purchaseEntity.setUserEntity(userEntity);
 					// Get Merchant Entity
 					MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
 					purchaseEntity.setMerchantEntity(merchantEntity);
-					
+
 					purchaseDAOImpl.createPurchaseObject(purchaseEntity);
 					// Response
 					JsonObject response = new JsonObject();
@@ -102,59 +102,88 @@ public class PurchaseRestService {
 					response.addProperty("purchaseUUID", purchaseEntity.getPurchaseGuid());
 					response.addProperty("message", "Created Successfully.");
 					responseData.add(response);
-				}catch(ValidationException e){
+				} catch (ValidationException e) {
 					// Error Response
 					JsonObject response = new JsonObject();
 					response.addProperty("statusCode", 404);
 					response.addProperty("message", "Invalid Customer Number.");
 					responseData.add(response);
 				}
-				
+
 			}
-			return serviceUtil.getRestResponse(true, responseData,200);
-		}catch(Exception e){
+			return serviceUtil.getRestResponse(true, responseData, 200);
+		} catch (Exception e) {
 			logger.error("Error in PurchaseRestService", e);
 		}
-		return serviceUtil.getRestResponse(false, "OOPS.",500);
+		return serviceUtil.getRestResponse(false, "OOPS.", 500);
 	}
-	
-	
-	private void copyMerchantPurchaseData(MerchantPurchaseData merchantPurchaseData,PurchaseEntity purchaseEntity){
+
+	private void copyMerchantPurchaseData(MerchantPurchaseData merchantPurchaseData, PurchaseEntity purchaseEntity) {
 		AmountDetails amountDetails = merchantPurchaseData.getAmountDetails();
-		if(amountDetails != null){
+		if (amountDetails != null) {
 			purchaseEntity.setAmountDetails(gson.toJson(amountDetails));
 		}
 		purchaseEntity.setBillNumber(merchantPurchaseData.getBillNumber());
 		purchaseEntity.setMerchantDeliveryOptions(merchantPurchaseData.getDeliveryOptions());
 		purchaseEntity.setEditable(merchantPurchaseData.getIsRemovable());
 		List<PurchaseItem> purchaseItems = merchantPurchaseData.getPurchaseItems();
-		if(purchaseItems != null && purchaseItems.size() > 0){
+		if (purchaseItems != null && purchaseItems.size() > 0) {
 			purchaseEntity.setPurchaseData(gson.toJson(purchaseItems));
 		}
 		purchaseEntity.setPurchaseDateTime(merchantPurchaseData.getPurchaseDate());
 		purchaseEntity.setPurchaseGuid(serviceUtil.uuid());
 		purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
-		//purchaseEntity.setTotalAmount(merchantPurchaseData.getTotalAmount());
-		
+		purchaseEntity.setTotalAmount(Double.valueOf(merchantPurchaseData.getTotalAmount()));
+		purchaseEntity.setOrderStatus(OrderStatus.PURCHASE);
+		purchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAIED);
 	}
-	
+
 	/**
 	 * Validate given mobile Number is present or not
+	 * 
 	 * @param mobileNumber
 	 * @return
 	 * @throws ValidationException
 	 */
-	private UserEntity validateUserMobile(String mobileNumber)throws ValidationException{
-		UserEntity userEntity =	userDAOImpl.getUserEntity(mobileNumber);
-		if(userEntity == null){
+	private UserEntity validateUserMobile(String mobileNumber) throws ValidationException {
+		UserEntity userEntity = userDAOImpl.getUserEntity(mobileNumber);
+		if (userEntity == null) {
 			throw new ValidationException(0, "");
 		}
 		return userEntity;
 	}
-	
-	
+
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> getUnPaiedList(Integer index, Integer limit, String status, Long fromDate,
+			Long toDate, Principal principal) {
+		try {
+			// Get Merchant Entity
+			MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
+			// Get Purchase Detail List
+			List<PurchaseEntity> purchaseEntities = purchaseDAOImpl.getPurchaseEntityList(merchantEntity, index, limit,
+					status, fromDate, toDate);
+			List<PurchaseDetails> purchaseDetailsList = new ArrayList<>();
+			boolean isAdded = false;
+
+			// Convert Purchase Entity to Purchase Json
+			for (PurchaseEntity purchaseEntity : purchaseEntities) {
+				PurchaseDetails purchaseDetails = new PurchaseDetails(purchaseEntity,serviceUtil);
+				purchaseDetailsList.add(purchaseDetails);
+			}
+			if (isAdded) {
+				return serviceUtil.getRestResponse(true, purchaseDetailsList, 200);
+			}
+			return serviceUtil.getRestResponse(true, purchaseDetailsList, 403);
+
+		} catch (Exception e) {
+			logger.error("Error in getUnPaiedList", e);
+		}
+		return serviceUtil.getRestResponse(false, "Internal Server Error.", 500);
+	}
+
 	/**
 	 * Get List of Purchase Details
+	 * 
 	 * @param index
 	 * @param limit
 	 * @param status
@@ -163,54 +192,59 @@ public class PurchaseRestService {
 	 * @param principal
 	 * @return ResponseEntity
 	 */
-	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
-	public ResponseEntity<String> getPurchaseList(Integer index,Integer limit,String status,Long fromDate,Long toDate,Principal principal){
-		try{
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> getPurchaseList(Integer index, Integer limit, String status, Long fromDate,
+			Long toDate, Principal principal) {
+		try {
 			// Get Merchant Entity
 			MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
 			// Get Purchase Detail List
-			List<PurchaseEntity> purchaseEntities = purchaseDAOImpl.getPurchaseEntityList(merchantEntity, index, limit, status, fromDate, toDate);
+			List<PurchaseEntity> purchaseEntities = purchaseDAOImpl.getPurchaseEntityList(merchantEntity, index, limit,
+					status, fromDate, toDate);
 			List<PurchaseDetails> purchaseDetailsList = new ArrayList<>();
 			boolean isAdded = false;
 			// Convert Purchase Entity to Purchase Json
-			for(PurchaseEntity purchaseEntity : purchaseEntities){
+			for (PurchaseEntity purchaseEntity : purchaseEntities) {
 				PurchaseDetails purchaseDetails = getPurchaseData(purchaseEntity);
 				purchaseDetailsList.add(purchaseDetails);
 				isAdded = true;
 			}
-			if(isAdded){
+			if (isAdded) {
 				return serviceUtil.getRestResponse(true, purchaseDetailsList, 200);
 			}
 			return serviceUtil.getRestResponse(true, purchaseDetailsList, 403);
-		}catch(Exception e){
+		} catch (Exception e) {
 			logger.error("Error in getPurchaseList", e);
 		}
 		return serviceUtil.getRestResponse(false, "Internal Server Error.", 500);
 	}
 	
+	
+	
+
 	/**
 	 * Purchase Entity to Purchase Json
+	 * 
 	 * @param purchaseEntity
 	 * @return
 	 */
-	private PurchaseDetails getPurchaseData(PurchaseEntity purchaseEntity){
-		PurchaseDetails purchaseDetails = new PurchaseDetails(purchaseEntity);
-		String purchaseData = purchaseEntity.getPurchaseData();
-		PurchaseItems purchaseItems = gson.fromJson(purchaseData,PurchaseItems.class);
-		purchaseDetails.setPurchaseItem(purchaseItems.getPurchaseItems());
-		if(purchaseEntity.getOrderStatus().ordinal() == OrderStatus.CANCELLED.ordinal()){
-			DiscardEntity discardEntity =  purchaseDAOImpl.getDiscardEntity(purchaseEntity);
-			if(discardEntity != null){
+	private PurchaseDetails getPurchaseData(PurchaseEntity purchaseEntity) {
+		PurchaseDetails purchaseDetails = new PurchaseDetails(purchaseEntity,serviceUtil);
+		
+		if (purchaseEntity.getOrderStatus().ordinal() == OrderStatus.CANCELLED.ordinal()) {
+			DiscardEntity discardEntity = purchaseDAOImpl.getDiscardEntity(purchaseEntity);
+			if (discardEntity != null) {
 				DiscardJson discardJson = new DiscardJson(discardEntity);
 				purchaseDetails.setDiscardDetails(discardJson);
 			}
-			
+
 		}
-		
-		if(purchaseDetails.getDeliveryOptions() != null && purchaseDetails.getDeliveryOptions().toString().equals(DeliveryOptions.HOME.toString())){
+
+		if (purchaseDetails.getDeliveryOptions() != null
+				&& purchaseDetails.getDeliveryOptions().toString().equals(DeliveryOptions.HOME.toString())) {
 			Collection<AddressEntity> addressEntities = purchaseEntity.getAddressEntities();
-			if(addressEntities != null){
-				for(AddressEntity addressEntity : addressEntities){
+			if (addressEntities != null) {
+				for (AddressEntity addressEntity : addressEntities) {
 					AddressJson addressJson = new AddressJson(addressEntity);
 					purchaseDetails.setAddressDetails(addressJson);
 				}
@@ -218,77 +252,79 @@ public class PurchaseRestService {
 		}
 		return purchaseDetails;
 	}
-	
-	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
-	public ResponseEntity<String> getPurchaseData(String purchaseUUID,Principal principal){
-		try{
+
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> getPurchaseData(String purchaseUUID, Principal principal) {
+		try {
 			MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
-			PurchaseEntity purchaseEntity = purchaseDAOImpl.getPurchaseEntity(purchaseUUID,merchantEntity);
-			if(purchaseEntity == null){
+			PurchaseEntity purchaseEntity = purchaseDAOImpl.getPurchaseEntity(purchaseUUID, merchantEntity);
+			if (purchaseEntity == null) {
 				return serviceUtil.getRestResponse(false, "PurchaseUUID is not matched", 404);
 			}
 			PurchaseDetails purchaseDetails = getPurchaseData(purchaseEntity);
-			
+
 			String amountDetailsJson = purchaseEntity.getAmountDetails();
-			AmountDetails amountDetails =  serviceUtil.fromJson(amountDetailsJson, AmountDetails.class);
+			AmountDetails amountDetails = serviceUtil.fromJson(amountDetailsJson, AmountDetails.class);
 			purchaseDetails.setAmountDetails(amountDetails);
-			
+
 			String unModifiedPurchase = purchaseEntity.getUnModifiedPurchaseData();
-			if(unModifiedPurchase != null){
-				PurchaseItems purchaseItems =  serviceUtil.fromJson(unModifiedPurchase, PurchaseItems.class);
+			if (unModifiedPurchase != null) {
+				PurchaseItems purchaseItems = serviceUtil.fromJson(unModifiedPurchase, PurchaseItems.class);
 				purchaseDetails.setUnModifiedPurchaseItem(purchaseItems.getPurchaseItems());
 			}
-			
+
 			UserEntity userEntity = purchaseEntity.getUserEntity();
 			UserJson userJson = new UserJson(userEntity);
 			purchaseDetails.setUserDetails(userJson);
 			return serviceUtil.getRestResponse(true, purchaseDetails, 200);
-		}catch(Exception e){
+		} catch (Exception e) {
 			logger.error("Error in getPurchaseData", e);
 		}
 		return serviceUtil.getRestResponse(false, "Internal Server Error", 500);
 	}
-	
-	
-	@Transactional(readOnly = false,propagation=Propagation.REQUIRED)
-	public ResponseEntity<String> updateOrderStatus(Principal principal,String orderStatusJson){
-		try{
-			OrderStatusUpdateList orderStatusUpdateList = serviceUtil.fromJson(orderStatusJson, OrderStatusUpdateList.class);
+
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> updateOrderStatus(Principal principal, String orderStatusJson) {
+		try {
+			OrderStatusUpdateList orderStatusUpdateList = serviceUtil.fromJson(orderStatusJson,
+					OrderStatusUpdateList.class);
 			MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
 			List<OrderStatusUpdate> orderStatusUpdates = orderStatusUpdateList.getOrderStatusUpdates();
 			JsonArray results = new JsonArray();
-			for(OrderStatusUpdate orderStatusUpdate : orderStatusUpdates){
-				JsonObject result = updateOrderStatus( orderStatusUpdate, merchantEntity);
+			for (OrderStatusUpdate orderStatusUpdate : orderStatusUpdates) {
+				JsonObject result = updateOrderStatus(orderStatusUpdate, merchantEntity);
 				results.add(result);
 			}
 			return serviceUtil.getRestResponse(true, results, 200);
-			
-		}catch(Exception e){
+
+		} catch (Exception e) {
 			logger.error("Error in updateOrderStatus", e);
 		}
 		return serviceUtil.getRestResponse(false, "Internal server Error", 500);
 	}
-	
-	
-	private JsonObject updateOrderStatus(OrderStatusUpdate orderStatusUpdate,MerchantEntity merchantEntity){
+
+	private JsonObject updateOrderStatus(OrderStatusUpdate orderStatusUpdate, MerchantEntity merchantEntity) {
 		JsonObject result = new JsonObject();
-		try{
-			PurchaseEntity purchaseEntity = purchaseDAOImpl.getPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),merchantEntity);
-			if(purchaseEntity == null){
-				logger.error("Invalid PurchaseUUID ["+orderStatusUpdate.getPurchaseUUID()+"],principal["+merchantEntity+"]");
+		try {
+			PurchaseEntity purchaseEntity = purchaseDAOImpl.getPurchaseEntity(orderStatusUpdate.getPurchaseUUID(),
+					merchantEntity);
+			if (purchaseEntity == null) {
+				logger.error("Invalid PurchaseUUID [" + orderStatusUpdate.getPurchaseUUID() + "],principal["
+						+ merchantEntity + "]");
 				result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
 				result.addProperty("statusCode", 404);
 				result.addProperty("message", "PurchaseUUID is not found.");
 				return result;
 			}
-			
+
 			purchaseEntity.setUpdatedDateTime(ServiceUtil.getCurrentGmtTime());
 			purchaseEntity.setServerDateTime(purchaseEntity.getUpdatedDateTime());
-			
+
 			switch (orderStatusUpdate.getOrderStatus()) {
 			case CANCELLED:
-				PurchaseEntity dbPurchaseEntity  = purchaseDAOImpl.getDiscardablePurchaseEntity(purchaseEntity.getPurchaseGuid(),purchaseEntity.getMerchantEntity());
-				if(dbPurchaseEntity == null){
+				PurchaseEntity dbPurchaseEntity = purchaseDAOImpl.getDiscardablePurchaseEntity(
+						purchaseEntity.getPurchaseGuid(), purchaseEntity.getMerchantEntity());
+				if (dbPurchaseEntity == null) {
 					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
 					result.addProperty("statusCode", "");
 					result.addProperty("message", "Already paied by Customer.");
@@ -296,12 +332,12 @@ public class PurchaseRestService {
 				}
 				purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
 				updateOrderDiscard(orderStatusUpdate, dbPurchaseEntity);
-				
+
 				break;
 			case DELIVERED:
 				purchaseEntity.setOrderStatus(OrderStatus.DELIVERED);
 				updateOrderDelivered(purchaseEntity);
-				
+
 				break;
 			case FAILED_TO_DELIVER:
 				break;
@@ -316,7 +352,7 @@ public class PurchaseRestService {
 			case READY_TO_SHIPPING:
 				purchaseEntity.setOrderStatus(OrderStatus.READY_TO_SHIPPING);
 				break;
-			
+
 			default:
 				break;
 			}
@@ -324,60 +360,56 @@ public class PurchaseRestService {
 			result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
 			result.addProperty("statusCode", "200");
 			result.addProperty("message", "Success.");
-		}catch(Exception e){
+		} catch (Exception e) {
 			logger.error("Error in updateOrderStatus", e);
 		}
 		return result;
 	}
-	
-	
-	private void updateCounterDetails(OrderStatusUpdate orderStatusUpdate,PurchaseEntity purchaseEntity){
+
+	private void updateCounterDetails(OrderStatusUpdate orderStatusUpdate, PurchaseEntity purchaseEntity) {
 		CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(purchaseEntity.getPurchaseId());
 		boolean isCreate = false;
-		if(counterDetailsEntity == null){
-			 counterDetailsEntity = new CounterDetailsEntity();
-			 counterDetailsEntity.setCounterGuid(serviceUtil.uuid());
-			 isCreate = true;
+		if (counterDetailsEntity == null) {
+			counterDetailsEntity = new CounterDetailsEntity();
+			counterDetailsEntity.setCounterGuid(serviceUtil.uuid());
+			isCreate = true;
 		}
-		
+
 		counterDetailsEntity.setCounterNumber(orderStatusUpdate.getCounterNumber());
 		counterDetailsEntity.setCreatedDateTime(purchaseEntity.getServerDateTime());
 		counterDetailsEntity.setMessage(orderStatusUpdate.getDescription());
-		
+
 		counterDetailsEntity.setPurchaseEntity(purchaseEntity);
 		purchaseEntity.setOrderStatus(OrderStatus.READY_TO_COLLECT);
-		if(isCreate){
+		if (isCreate) {
 			purchaseDAOImpl.createCounterStatus(counterDetailsEntity);
-		}else{
+		} else {
 			purchaseDAOImpl.updateCounterStatus(counterDetailsEntity);
 		}
-		
+
 	}
-	
-	
-	private void updateOrderOutForDelivery(PurchaseEntity purchaseEntity){
+
+	private void updateOrderOutForDelivery(PurchaseEntity purchaseEntity) {
 		DeliveryDetailsEntity deliveryDetailsEntity = deliveryDAO.getDeliveryDetailsEntity(purchaseEntity);
-		if(deliveryDetailsEntity == null){
+		if (deliveryDetailsEntity == null) {
 			deliveryDetailsEntity = new DeliveryDetailsEntity();
 			deliveryDetailsEntity.setOutForDeliveryDate(purchaseEntity.getServerDateTime());
 			deliveryDetailsEntity.setPurchaseEntity(purchaseEntity);
 			deliveryDAO.createDeliveryDetails(deliveryDetailsEntity);
 		}
 	}
-	
-	
-	private void updateOrderDelivered(PurchaseEntity purchaseEntity){
+
+	private void updateOrderDelivered(PurchaseEntity purchaseEntity) {
 		DeliveryDetailsEntity deliveryDetailsEntity = deliveryDAO.getDeliveryDetailsEntity(purchaseEntity);
-		if(deliveryDetailsEntity != null){
+		if (deliveryDetailsEntity != null) {
 			deliveryDetailsEntity.setDeliveredDate(purchaseEntity.getServerDateTime());
 			deliveryDetailsEntity.setDeliveryStatus(DeliveryStatus.SUCCESS);
 			deliveryDAO.updateDeliveryDetails(deliveryDetailsEntity);
 		}
-		
+
 	}
-	
-	
-	private void updateOrderDiscard(OrderStatusUpdate orderStatusUpdate,PurchaseEntity purchaseEntity){
+
+	private void updateOrderDiscard(OrderStatusUpdate orderStatusUpdate, PurchaseEntity purchaseEntity) {
 		// Discard
 		DiscardEntity discardEntity = new DiscardEntity();
 		discardEntity.setDiscardGuid(serviceUtil.uuid());
@@ -388,16 +420,16 @@ public class PurchaseRestService {
 		discardEntity.setPurchaseEntity(purchaseEntity);
 		discardEntity.setDiscardBy(DiscardBy.MERCHANT);
 		purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
-		
-		
+
 		purchaseDAOImpl.createDiscard(discardEntity);
-		
-		//Send Push Notification
+
+		// Send Push Notification
 		CloudMessageEntity cloudMessageEntity = userDAOImpl.getCloudMessageEntity(purchaseEntity.getUserEntity());
-		if(cloudMessageEntity != null){
+		if (cloudMessageEntity != null) {
 			NotificationJson notificationJson = new NotificationJson();
 			notificationJson.setNotificationType(NotificationType.STATUS);
-			notificationJson.setMessage("Your order has been Declined by Merchant. Because of "+discardEntity.getReason()); // TODO
+			notificationJson
+					.setMessage("Your order has been Declined by Merchant. Because of " + discardEntity.getReason()); // TODO
 			notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
 			serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
 		}

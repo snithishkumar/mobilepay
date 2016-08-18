@@ -2,8 +2,6 @@ package in.tn.mobilepay.dao;
 
 import java.util.List;
 
-import org.springframework.stereotype.Repository;
-
 import in.tn.mobilepay.entity.CounterDetailsEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
@@ -72,9 +70,24 @@ public interface PurchaseDAO {
 	void createCounterStatus(CounterDetailsEntity counterDetailsEntity);
 
 	void updateCounterStatus(CounterDetailsEntity counterDetailsEntity);
-	
-	
-	List<PurchaseEntity> getPurchaseEntityList(MerchantEntity merchantEntity,Integer index,Integer limit,String status,Long fromDate,Long toDate);
+
+	List<PurchaseEntity> getPurchaseEntityList(MerchantEntity merchantEntity, Integer index, Integer limit,
+			String status, Long fromDate, Long toDate);
 
 	PurchaseEntity getPurchaseEntity(String purchaseGuid, MerchantEntity merchantEntity);
+
+	List<PurchaseEntity> getUnPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
+			Long fromDate, Long toDate);
+
+	List<PurchaseEntity> getPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
+			Long fromDate, Long toDate);
+
+	List<PurchaseEntity> getCancelledList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
+			Long fromDate, Long toDate);
+
+	List<PurchaseEntity> getDeliveredList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
+			Long fromDate, Long toDate);
+
+	List<PurchaseEntity> getHistoryList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
+			Long fromDate, Long toDate);
 }

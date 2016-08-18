@@ -442,6 +442,76 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 		updateCounterStatus(counterDetailsEntity);
 	}
 	
+	private void applyMerchantRestCriteria(MerchantEntity merchantEntity, Integer index, Integer limit,
+			 Long fromDate, Long toDate,Criteria criteria){
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		if (index != null && index > -1) {
+			criteria.setFirstResult(index);
+		}
+
+		if (limit != null && limit > -1) {
+			criteria.setMaxResults(limit);
+		}
+
+		if (fromDate != null && fromDate > 0) {
+			criteria.add(Restrictions.ge(PurchaseEntity.PURCHASE_DATE_TIME, fromDate));
+			if (toDate != null && toDate > 0 && fromDate > toDate) {
+				toDate = 0L;
+			}
+		}
+
+		if (toDate != null && toDate > 0) {
+			criteria.add(Restrictions.le(PurchaseEntity.PURCHASE_DATE_TIME, fromDate));
+		}
+	}
+	
+	public List<PurchaseEntity> getUnPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit,
+			String status, Long fromDate, Long toDate) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
+		criteria.add(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.PURCHASE));
+		return criteria.list();
+	}
+	
+	
+	public List<PurchaseEntity> getPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit,
+			String status, Long fromDate, Long toDate) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED));
+		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED));
+		criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAIED));
+		return criteria.list();
+	}
+	
+	
+	public List<PurchaseEntity> getCancelledList(MerchantEntity merchantEntity, Integer index, Integer limit,
+			String status, Long fromDate, Long toDate) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
+		criteria.add(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED));
+		return criteria.list();
+	}
+	
+	
+	public List<PurchaseEntity> getDeliveredList(MerchantEntity merchantEntity, Integer index, Integer limit,
+			String status, Long fromDate, Long toDate) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
+		criteria.add(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED));
+		return criteria.list();
+	}
+	
+	
+	public List<PurchaseEntity> getHistoryList(MerchantEntity merchantEntity, Integer index, Integer limit,
+			String status, Long fromDate, Long toDate) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
+		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED),
+				Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED)));
+		return criteria.list();
+	}
+	
 
 	public List<PurchaseEntity> getPurchaseEntityList(MerchantEntity merchantEntity, Integer index, Integer limit,
 			String status, Long fromDate, Long toDate) {

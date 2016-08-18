@@ -5,11 +5,11 @@ import java.util.List;
 import in.tn.mobilepay.entity.PurchaseEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.OrderStatus;
-import in.tn.mobilepay.request.model.AmountDetailsJson;
+import in.tn.mobilepay.enumeration.PaymentStatus;
 import in.tn.mobilepay.request.model.DiscardJson;
-import in.tn.mobilepay.response.model.AddressBookJson;
 import in.tn.mobilepay.response.model.AddressJson;
 import in.tn.mobilepay.response.model.UserJson;
+import in.tn.mobilepay.services.ServiceUtil;
 
 public class PurchaseDetails {
 
@@ -24,24 +24,30 @@ public class PurchaseDetails {
 	private AddressJson addressDetails;
 	private DiscardJson discardDetails;
 	private long lastModifiedDate;
-	
+
 	private AmountDetails amountDetails;
 	private List<PurchaseItem> unModifiedPurchaseItem;
 	private UserJson userDetails;
+	private PaymentStatus paymentStatus;
+	private DeliveryOptions merchantDeliveryOptions;
 
 	public PurchaseDetails() {
 
 	}
 
-	public PurchaseDetails(PurchaseEntity purchaseEntity) {
+	public PurchaseDetails(PurchaseEntity purchaseEntity, ServiceUtil serviceUtil) {
 		this.purchaseUUID = purchaseEntity.getPurchaseGuid();
 		this.billNumber = purchaseEntity.getBillNumber();
 		this.purchaseDate = purchaseEntity.getPurchaseDateTime();
 		this.orderStatus = purchaseEntity.getOrderStatus();
 		this.deliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
-		//this.totalAmount = purchaseEntity.getTotalAmount();
+		this.totalAmount = String.valueOf(purchaseEntity.getTotalAmount());
 		this.lastModifiedDate = purchaseEntity.getUpdatedDateTime();
-
+		String purchaseData = purchaseEntity.getPurchaseData();
+		PurchaseItems purchaseItems = serviceUtil.fromJson(purchaseData, PurchaseItems.class);
+		this.purchaseItem = purchaseItems.getPurchaseItems();
+		this.paymentStatus = purchaseEntity.getPaymentStatus();
+		this.merchantDeliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
 	}
 
 	public String getPurchaseUUID() {
@@ -62,6 +68,24 @@ public class PurchaseDetails {
 
 	public long getPurchaseDate() {
 		return purchaseDate;
+	}
+	
+	
+
+	public PaymentStatus getPaymentStatus() {
+		return paymentStatus;
+	}
+
+	public void setPaymentStatus(PaymentStatus paymentStatus) {
+		this.paymentStatus = paymentStatus;
+	}
+
+	public DeliveryOptions getMerchantDeliveryOptions() {
+		return merchantDeliveryOptions;
+	}
+
+	public void setMerchantDeliveryOptions(DeliveryOptions merchantDeliveryOptions) {
+		this.merchantDeliveryOptions = merchantDeliveryOptions;
 	}
 
 	public void setPurchaseDate(long purchaseDate) {
@@ -147,8 +171,6 @@ public class PurchaseDetails {
 	public void setUnModifiedPurchaseItem(List<PurchaseItem> unModifiedPurchaseItem) {
 		this.unModifiedPurchaseItem = unModifiedPurchaseItem;
 	}
-
-	
 
 	public UserJson getUserDetails() {
 		return userDetails;
