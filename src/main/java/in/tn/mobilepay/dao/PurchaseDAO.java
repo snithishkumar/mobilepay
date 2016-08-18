@@ -76,18 +76,13 @@ public interface PurchaseDAO {
 
 	PurchaseEntity getPurchaseEntity(String purchaseGuid, MerchantEntity merchantEntity);
 
-	List<PurchaseEntity> getUnPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
-			Long fromDate, Long toDate);
+	List<PurchaseEntity> getUnPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate);
 
-	List<PurchaseEntity> getPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
-			Long fromDate, Long toDate);
+	List<PurchaseEntity> getPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate);
 
-	List<PurchaseEntity> getCancelledList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
-			Long fromDate, Long toDate);
+	List<PurchaseEntity> getCancelledList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate);
 
-	List<PurchaseEntity> getDeliveredList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
-			Long fromDate, Long toDate);
+	List<PurchaseEntity> getDeliveredList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate);
 
-	List<PurchaseEntity> getHistoryList(MerchantEntity merchantEntity, Integer index, Integer limit, String status,
-			Long fromDate, Long toDate);
+	List<PurchaseEntity> getHistoryList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate);
 }

@@ -14,11 +14,13 @@ import in.tn.mobilepay.services.ServiceUtil;
 public class PurchaseDetails {
 
 	private String purchaseUUID;
+	
 	private String billNumber;
 	private long purchaseDate;
 	private List<PurchaseItem> purchaseItem;
 	private OrderStatus orderStatus;
-	private DeliveryOptions deliveryOptions;
+	private DeliveryOptions userDeliveryOptions;
+	
 	private String totalAmount;
 	private boolean isDiscard;
 	private AddressJson addressDetails;
@@ -40,7 +42,7 @@ public class PurchaseDetails {
 		this.billNumber = purchaseEntity.getBillNumber();
 		this.purchaseDate = purchaseEntity.getPurchaseDateTime();
 		this.orderStatus = purchaseEntity.getOrderStatus();
-		this.deliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
+		this.userDeliveryOptions = purchaseEntity.getUserDeliveryOptions();
 		this.totalAmount = String.valueOf(purchaseEntity.getTotalAmount());
 		this.lastModifiedDate = purchaseEntity.getUpdatedDateTime();
 		String purchaseData = purchaseEntity.getPurchaseData();
@@ -48,6 +50,8 @@ public class PurchaseDetails {
 		this.purchaseItem = purchaseItems.getPurchaseItems();
 		this.paymentStatus = purchaseEntity.getPaymentStatus();
 		this.merchantDeliveryOptions = purchaseEntity.getMerchantDeliveryOptions();
+		
+		
 	}
 
 	public String getPurchaseUUID() {
@@ -108,12 +112,14 @@ public class PurchaseDetails {
 		this.orderStatus = orderStatus;
 	}
 
-	public DeliveryOptions getDeliveryOptions() {
-		return deliveryOptions;
+	
+
+	public DeliveryOptions getUserDeliveryOptions() {
+		return userDeliveryOptions;
 	}
 
-	public void setDeliveryOptions(DeliveryOptions deliveryOptions) {
-		this.deliveryOptions = deliveryOptions;
+	public void setUserDeliveryOptions(DeliveryOptions userDeliveryOptions) {
+		this.userDeliveryOptions = userDeliveryOptions;
 	}
 
 	public String getTotalAmount() {

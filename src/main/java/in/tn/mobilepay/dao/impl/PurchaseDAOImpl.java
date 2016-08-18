@@ -465,8 +465,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 		}
 	}
 	
-	public List<PurchaseEntity> getUnPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit,
-			String status, Long fromDate, Long toDate) {
+	public List<PurchaseEntity> getUnPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
 		criteria.add(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.PURCHASE));
@@ -474,8 +473,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 	}
 	
 	
-	public List<PurchaseEntity> getPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit,
-			String status, Long fromDate, Long toDate) {
+	public List<PurchaseEntity> getPaiedList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED));
@@ -485,8 +483,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 	}
 	
 	
-	public List<PurchaseEntity> getCancelledList(MerchantEntity merchantEntity, Integer index, Integer limit,
-			String status, Long fromDate, Long toDate) {
+	public List<PurchaseEntity> getCancelledList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
 		criteria.add(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED));
@@ -494,8 +491,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 	}
 	
 	
-	public List<PurchaseEntity> getDeliveredList(MerchantEntity merchantEntity, Integer index, Integer limit,
-			String status, Long fromDate, Long toDate) {
+	public List<PurchaseEntity> getDeliveredList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
 		criteria.add(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED));
@@ -503,8 +499,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 	}
 	
 	
-	public List<PurchaseEntity> getHistoryList(MerchantEntity merchantEntity, Integer index, Integer limit,
-			String status, Long fromDate, Long toDate) {
+	public List<PurchaseEntity> getHistoryList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate) {
 		Criteria criteria = createCriteria(PurchaseEntity.class);
 		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
 		criteria.add(Restrictions.or(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED),
