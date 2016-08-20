@@ -114,6 +114,7 @@ public class PurchaseRestService {
 					// Error Response
 					JsonObject response = new JsonObject();
 					response.addProperty("statusCode", 404);
+					response.addProperty("billNumber", merchantPurchaseData.getBillNumber());
 					response.addProperty("message", "Invalid Customer Number.");
 					responseData.add(response);
 				}
@@ -677,7 +678,7 @@ public class PurchaseRestService {
 		} catch (Exception e) {
 			logger.error("Error in updateOrderStatus", e);
 		}
-		return serviceUtil.getRestResponse(false, "Internal server Error", 500);
+		return serviceUtil.getRestResponse(false, "OOPS.Internal server Error", 500);
 	}
 
 	private JsonObject updateOrderStatus(OrderStatusUpdate orderStatusUpdate, MerchantEntity merchantEntity) {
@@ -699,35 +700,85 @@ public class PurchaseRestService {
 
 			switch (orderStatusUpdate.getOrderStatus()) {
 			case CANCELLED:
-				PurchaseEntity dbPurchaseEntity = purchaseDAOImpl.getDiscardablePurchaseEntity(
-						purchaseEntity.getPurchaseGuid(), purchaseEntity.getMerchantEntity());
-				if (dbPurchaseEntity == null) {
+				if(purchaseEntity.getPaymentStatus().getPaymentStatusType() == PaymentStatus.PAIED.getPaymentStatusType()){
 					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
-					result.addProperty("statusCode", "");
-					result.addProperty("message", "Already paied by Customer.");
+					result.addProperty("statusCode", 405);
+					result.addProperty("message", "Already paid by Customer.");
 					return result;
 				}
+				
 				purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
-				updateOrderDiscard(orderStatusUpdate, dbPurchaseEntity);
+				updateOrderDiscard(orderStatusUpdate, purchaseEntity);
 
 				break;
 			case DELIVERED:
+				if(purchaseEntity.getPaymentStatus().getPaymentStatusType() == PaymentStatus.NOT_PAIED.getPaymentStatusType()){
+					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+					result.addProperty("statusCode", 406);
+					result.addProperty("message", "Customer is not yet Paid. or Already Cancelled");
+					return result;
+				}
 				purchaseEntity.setOrderStatus(OrderStatus.DELIVERED);
 				updateOrderDelivered(purchaseEntity);
 
 				break;
 			case FAILED_TO_DELIVER:
+				// TODO  added in next release
 				break;
 			case OUT_FOR_DELIVERY:
+				if(purchaseEntity.getOrderStatus().getOrderStatusId() == OrderStatus.PURCHASE.getOrderStatusId()){
+					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+					result.addProperty("statusCode", 406);
+					result.addProperty("message", "Customer is not yet Paid");
+					return result;
+				}else if(purchaseEntity.getOrderStatus().getOrderStatusId() >= OrderStatus.DELIVERED.getOrderStatusId()){
+					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+					result.addProperty("statusCode", 407);
+					result.addProperty("message", "Purchase is already Delivered or  Cancelled.Current Status is "+purchaseEntity.getOrderStatus());
+					return result;
+				}/*else if(purchaseEntity.getUserDeliveryOptions() == null || purchaseEntity.getUserDeliveryOptions().getDeliveryOptions() != DeliveryOptions.HOME.getDeliveryOptions()){
+					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+					result.addProperty("statusCode", 408);
+					result.addProperty("message", "Customer not choose home delivery.Customer delivery options is "+purchaseEntity.getUserDeliveryOptions());
+					return result;
+				}*/// Need to get opinion from merchant -- TODO
 				purchaseEntity.setOrderStatus(OrderStatus.OUT_FOR_DELIVERY);
 				updateOrderOutForDelivery(purchaseEntity);
 				break;
 			case READY_TO_COLLECT:
+				if(purchaseEntity.getOrderStatus().getOrderStatusId() == OrderStatus.PURCHASE.getOrderStatusId()){
+					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+					result.addProperty("statusCode", 406);
+					result.addProperty("message", "Customer is not yet Paid");
+					return result;
+				}else if(purchaseEntity.getOrderStatus().getOrderStatusId() >= OrderStatus.DELIVERED.getOrderStatusId()){
+					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+					result.addProperty("statusCode", 407);
+					result.addProperty("message", "Purchase is already Delivered or  Cancelled.Current Status is "+purchaseEntity.getOrderStatus());
+					return result;
+				}
 				purchaseEntity.setOrderStatus(OrderStatus.READY_TO_COLLECT);
 				updateCounterDetails(orderStatusUpdate, purchaseEntity);
 				break;
 			case READY_TO_SHIPPING:
+				if(purchaseEntity.getOrderStatus().getOrderStatusId() == OrderStatus.PURCHASE.getOrderStatusId()){
+					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+					result.addProperty("statusCode", 406);
+					result.addProperty("message", "Customer is not yet Paid");
+					return result;
+				}else if(purchaseEntity.getOrderStatus().getOrderStatusId() >= OrderStatus.DELIVERED.getOrderStatusId()){
+					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+					result.addProperty("statusCode", 407);
+					result.addProperty("message", "Purchase is already Delivered or  Cancelled.Current Status is "+purchaseEntity.getOrderStatus());
+					return result;
+				}/*else if(purchaseEntity.getUserDeliveryOptions() == null || purchaseEntity.getUserDeliveryOptions().getDeliveryOptions() != DeliveryOptions.HOME.getDeliveryOptions()){
+					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+					result.addProperty("statusCode", 408);
+					result.addProperty("message", "Customer not choose home delivery.Customer delivery options is "+purchaseEntity.getUserDeliveryOptions());
+					return result;
+				}*/ // Need to get opinion from merchant -- TODO
 				purchaseEntity.setOrderStatus(OrderStatus.READY_TO_SHIPPING);
+				sendPushNotification(purchaseEntity, "Your order has been Ready. It will be dispatched shortly.");
 				break;
 
 			default:
@@ -739,6 +790,9 @@ public class PurchaseRestService {
 			result.addProperty("message", "Success.");
 		} catch (Exception e) {
 			logger.error("Error in updateOrderStatus", e);
+			result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
+			result.addProperty("statusCode", "500");
+			result.addProperty("message", "OOPS.Internal server Error.");
 		}
 		return result;
 	}
@@ -763,7 +817,8 @@ public class PurchaseRestService {
 		} else {
 			purchaseDAOImpl.updateCounterStatus(counterDetailsEntity);
 		}
-
+		sendPushNotification(purchaseEntity, "Your order has been Ready.You can collect it from "+purchaseEntity.getMerchantEntity().getMerchantName());
+//
 	}
 
 	private void updateOrderOutForDelivery(PurchaseEntity purchaseEntity) {
@@ -774,6 +829,8 @@ public class PurchaseRestService {
 			deliveryDetailsEntity.setPurchaseEntity(purchaseEntity);
 			deliveryDAO.createDeliveryDetails(deliveryDetailsEntity);
 		}
+		
+		sendPushNotification(purchaseEntity, "Your order has went to delivery. It will be dispatched shortly.");
 	}
 
 	private void updateOrderDelivered(PurchaseEntity purchaseEntity) {
@@ -782,8 +839,10 @@ public class PurchaseRestService {
 			deliveryDetailsEntity.setDeliveredDate(purchaseEntity.getServerDateTime());
 			deliveryDetailsEntity.setDeliveryStatus(DeliveryStatus.SUCCESS);
 			deliveryDAO.updateDeliveryDetails(deliveryDetailsEntity);
+			
 		}
-
+		sendPushNotification(purchaseEntity, "Your order has been Deliverd. Thanks for Shopping!!!");
+		
 	}
 
 	private void updateOrderDiscard(OrderStatusUpdate orderStatusUpdate, PurchaseEntity purchaseEntity) {
@@ -797,19 +856,22 @@ public class PurchaseRestService {
 		discardEntity.setPurchaseEntity(purchaseEntity);
 		discardEntity.setDiscardBy(DiscardBy.MERCHANT);
 		purchaseEntity.setOrderStatus(OrderStatus.CANCELLED);
-
 		purchaseDAOImpl.createDiscard(discardEntity);
-
+		sendPushNotification(purchaseEntity, "Your order has been Declined by Merchant. Because of " + discardEntity.getReason());
+		
+	}
+	
+	
+	private void sendPushNotification(PurchaseEntity purchaseEntity,String message){
 		// Send Push Notification
-		CloudMessageEntity cloudMessageEntity = userDAOImpl.getCloudMessageEntity(purchaseEntity.getUserEntity());
-		if (cloudMessageEntity != null) {
-			NotificationJson notificationJson = new NotificationJson();
-			notificationJson.setNotificationType(NotificationType.STATUS);
-			notificationJson
-					.setMessage("Your order has been Declined by Merchant. Because of " + discardEntity.getReason()); // TODO
-			notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
-			serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
-		}
+				CloudMessageEntity cloudMessageEntity = userDAOImpl.getCloudMessageEntity(purchaseEntity.getUserEntity());
+				if (cloudMessageEntity != null) {
+					NotificationJson notificationJson = new NotificationJson();
+					notificationJson.setNotificationType(NotificationType.STATUS);
+					notificationJson.setMessage(message); 
+					notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
+					serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
+				}
 	}
 
 }
