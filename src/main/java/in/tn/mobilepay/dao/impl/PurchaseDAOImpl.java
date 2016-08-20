@@ -507,6 +507,14 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 		return criteria.list();
 	}
 	
+	
+	public List<PurchaseEntity> getPurhcaseList(MerchantEntity merchantEntity,List<String> purchaseUUIDs) {
+		Criteria criteria = createCriteria(PurchaseEntity.class);
+		criteria.add(Restrictions.eq(PurchaseEntity.MERCHANT_ID, merchantEntity));
+		criteria.add(Restrictions.in(PurchaseEntity.PURCHASE_GUID, purchaseUUIDs));
+		return criteria.list();
+	}
+	
 
 	public List<PurchaseEntity> getPurchaseEntityList(MerchantEntity merchantEntity, Integer index, Integer limit,
 			String status, Long fromDate, Long toDate) {

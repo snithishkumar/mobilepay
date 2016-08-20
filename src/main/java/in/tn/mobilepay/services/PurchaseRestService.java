@@ -1,5 +1,6 @@
 package in.tn.mobilepay.services;
 
+import java.lang.reflect.Type;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import in.tn.mobilepay.dao.DeliveryDAO;
 import in.tn.mobilepay.dao.PurchaseDAO;
@@ -26,6 +28,7 @@ import in.tn.mobilepay.entity.DeliveryDetailsEntity;
 import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.entity.PurchaseEntity;
+import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.entity.UserEntity;
 import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.enumeration.DeliveryStatus;
@@ -39,7 +42,9 @@ import in.tn.mobilepay.response.model.AddressJson;
 import in.tn.mobilepay.response.model.NotificationJson;
 import in.tn.mobilepay.response.model.UserJson;
 import in.tn.mobilepay.rest.json.AmountDetails;
+import in.tn.mobilepay.rest.json.CommonPurchaseData;
 import in.tn.mobilepay.rest.json.DeliveredPurchaseData;
+import in.tn.mobilepay.rest.json.HistoryPurchaseData;
 import in.tn.mobilepay.rest.json.MerchantPurchaseData;
 import in.tn.mobilepay.rest.json.MerchantPurchaseDatas;
 import in.tn.mobilepay.rest.json.OrderStatusUpdate;
@@ -48,6 +53,7 @@ import in.tn.mobilepay.rest.json.PaiedPurchaseDetails;
 import in.tn.mobilepay.rest.json.PurchaseDetails;
 import in.tn.mobilepay.rest.json.PurchaseItem;
 import in.tn.mobilepay.rest.json.PurchaseItems;
+import in.tn.mobilepay.rest.json.PurchaseStatus;
 
 @Service
 public class PurchaseRestService {
@@ -155,23 +161,31 @@ public class PurchaseRestService {
 		return userEntity;
 	}
 
+	/***
+	 * Returns UnPaid Data based on given filters. It returns purchaseUUID,purchaseDate,billNumber,orderStatus,lastModifiedDate and paymentStatus
+	 * @param index
+	 * @param limit
+	 * @param fromDate
+	 * @param toDate
+	 * @param principal
+	 * @return
+	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> getUnPaiedList(Integer index, Integer limit, Long fromDate,
+	public ResponseEntity<String> getUnPaidList(Integer index, Integer limit, Long fromDate,
 			Long toDate, Principal principal) {
 		try {
 			// Get Merchant Entity
 			MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
 			// Get Purchase Detail List
 			List<PurchaseEntity> purchaseEntities = purchaseDAOImpl.getUnPaiedList(merchantEntity, index, limit, fromDate, toDate);
-			List<PurchaseDetails> purchaseDetailsList = new ArrayList<>();
+			List<CommonPurchaseData> purchaseDetailsList = new ArrayList<>();
 			boolean isAdded = false;
 
 			// Convert Purchase Entity to Purchase Json
 			for (PurchaseEntity purchaseEntity : purchaseEntities) {
-				PurchaseDetails purchaseDetails = new PurchaseDetails(purchaseEntity,serviceUtil);
-				//User Details
-				getUserDetails(purchaseEntity, purchaseDetails);
-				purchaseDetailsList.add(purchaseDetails);
+				CommonPurchaseData commonPurchaseData = new CommonPurchaseData(purchaseEntity);
+				
+				purchaseDetailsList.add(commonPurchaseData);
 				isAdded = true;
 			}
 			if (isAdded) {
@@ -180,14 +194,22 @@ public class PurchaseRestService {
 			return serviceUtil.getRestResponse(true, purchaseDetailsList, 403);
 
 		} catch (Exception e) {
-			logger.error("Error in getUnPaiedList", e);
+			logger.error("Error in getUnPaidList", e);
 		}
 		return serviceUtil.getRestResponse(false, "Internal Server Error.", 500);
 	}
 
-	
+	/**
+	 * Returns Order Status (Paid and not delivered).
+	 * @param index
+	 * @param limit
+	 * @param fromDate
+	 * @param toDate
+	 * @param principal
+	 * @return
+	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public ResponseEntity<String> getPaiedList(Integer index, Integer limit, Long fromDate,
+	public ResponseEntity<String> getPaidList(Integer index, Integer limit, Long fromDate,
 			Long toDate, Principal principal) {
 		try {
 			// Get Merchant Entity
@@ -199,14 +221,7 @@ public class PurchaseRestService {
 
 			// Convert Purchase Entity to Purchase Json
 			for (PurchaseEntity purchaseEntity : purchaseEntities) {
-				
-				PaiedPurchaseDetails paiedPurchaseDetails = new PaiedPurchaseDetails(purchaseEntity);
-				
-				// User Amount Details
-				getCalculatedAmounts(purchaseEntity, paiedPurchaseDetails);
-				
-				// Delivery Details
-				getDeliveryDetails(purchaseEntity, paiedPurchaseDetails);
+				PaiedPurchaseDetails paiedPurchaseDetails = getPaiedList(purchaseEntity);
 				purchaseDetailsList.add(paiedPurchaseDetails);
 				isAdded = true;
 			}
@@ -222,7 +237,28 @@ public class PurchaseRestService {
 	}
 	
 	
+	private PaiedPurchaseDetails getPaiedList(PurchaseEntity purchaseEntity){
+		PaiedPurchaseDetails paiedPurchaseDetails = new PaiedPurchaseDetails(purchaseEntity);
+		
+		// User Amount Details
+		getCalculatedAmounts(purchaseEntity, paiedPurchaseDetails);
+		
+		// Delivery Details
+		getDeliveryDetails(purchaseEntity, paiedPurchaseDetails);
+		
+		return paiedPurchaseDetails;
+	}
 	
+	
+	/**
+	 * Returns list of cancelled data.
+	 * @param index
+	 * @param limit
+	 * @param fromDate
+	 * @param toDate
+	 * @param principal
+	 * @return
+	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> getCancelledList(Integer index, Integer limit, Long fromDate,
 			Long toDate, Principal principal) {
@@ -236,20 +272,11 @@ public class PurchaseRestService {
 
 			// Convert Purchase Entity to Purchase Json
 			for (PurchaseEntity purchaseEntity : purchaseEntities) {
-				
-				DiscardEntity discardEntity = purchaseDAOImpl.getDiscardEntity(purchaseEntity);
-				if (discardEntity != null) {
-					DiscardJson discardJson = new DiscardJson(discardEntity);
-					
-					discardJson.setBillNumber( purchaseEntity.getBillNumber());
-					discardJson.setPurchaseDate(purchaseEntity.getPurchaseDateTime());
-					discardJson.setOrderStatus(purchaseEntity.getOrderStatus());
-					discardJson.setLastModifiedDate(purchaseEntity.getUpdatedDateTime());
-					discardJson.setPaymentStatus(purchaseEntity.getPaymentStatus());
+				DiscardJson discardJson =	getCancelledList(purchaseEntity);
+				if(discardJson != null){
 					discardDetailList.add(discardJson);
 					isAdded = true;
 				}
-				
 				
 			}
 			if (isAdded) {
@@ -264,6 +291,29 @@ public class PurchaseRestService {
 	}
 	
 	
+	private DiscardJson getCancelledList(PurchaseEntity purchaseEntity){
+		DiscardEntity discardEntity = purchaseDAOImpl.getDiscardEntity(purchaseEntity);
+		if (discardEntity != null) {
+			DiscardJson discardJson = new DiscardJson(discardEntity);
+			discardJson.setBillNumber( purchaseEntity.getBillNumber());
+			discardJson.setPurchaseDate(purchaseEntity.getPurchaseDateTime());
+			discardJson.setOrderStatus(purchaseEntity.getOrderStatus());
+			discardJson.setLastModifiedDate(purchaseEntity.getUpdatedDateTime());
+			discardJson.setPaymentStatus(purchaseEntity.getPaymentStatus());
+			return discardJson;
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns list of purchased data (Delivered and cancelled)
+	 * @param index
+	 * @param limit
+	 * @param fromDate
+	 * @param toDate
+	 * @param principal
+	 * @return
+	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> getHistoryList(Integer index, Integer limit, Long fromDate,
 			Long toDate, Principal principal) {
@@ -272,38 +322,59 @@ public class PurchaseRestService {
 			MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
 			// Get Purchase Detail List
 			List<PurchaseEntity> purchaseEntities = purchaseDAOImpl.getDeliveredList(merchantEntity, index, limit, fromDate, toDate);
-			List<DeliveredPurchaseData> deliveredPurchaseDatas = new ArrayList<>();
+			List<HistoryPurchaseData> historyPurchaseDatas = new ArrayList<>();
 			boolean isAdded = false;
 
 			// Convert Purchase Entity to Purchase Json
 			for (PurchaseEntity purchaseEntity : purchaseEntities) {
-				// Convert 
-				DeliveredPurchaseData deliveredPurchaseData = new DeliveredPurchaseData(purchaseEntity);
-				
-				AddressJson addressJson = getDeliveryDetails(purchaseEntity);
-				deliveredPurchaseData.setDeliveryAddressDetails(addressJson);
-				
-				AmountDetails amountDetails = getCalculatedAmounts(purchaseEntity);
-				deliveredPurchaseData.setAmountDetails(amountDetails);
-				
-				String purchaseData = purchaseEntity.getPurchaseData();
-				PurchaseItems purchaseItems = serviceUtil.fromJson(purchaseData, PurchaseItems.class);
-				deliveredPurchaseData.setPurchaseItem(purchaseItems.getPurchaseItems());
-				deliveredPurchaseDatas.add(deliveredPurchaseData);
+				HistoryPurchaseData historyPurchaseData = getPurchaseHistoryData(purchaseEntity);
+				historyPurchaseDatas.add(historyPurchaseData);
 				isAdded = true;
 			}
 			if (isAdded) {
-				return serviceUtil.getRestResponse(true, deliveredPurchaseDatas, 200);
+				return serviceUtil.getRestResponse(true, historyPurchaseDatas, 200);
 			}
-			return serviceUtil.getRestResponse(true, deliveredPurchaseDatas, 403);
+			return serviceUtil.getRestResponse(true, historyPurchaseDatas, 403);
 
 		} catch (Exception e) {
-			logger.error("Error in getCancelledList", e);
+			logger.error("Error in getHistoryList", e);
 		}
 		return serviceUtil.getRestResponse(false, "Internal Server Error.", 500);
 	}
 	
 	
+	private HistoryPurchaseData getPurchaseHistoryData(PurchaseEntity purchaseEntity){
+		// Convert Purchase to History
+		HistoryPurchaseData historyPurchaseData = new HistoryPurchaseData(purchaseEntity);
+		
+		// Get Address Json
+		AddressJson addressJson = getDeliveryDetails(purchaseEntity);
+		historyPurchaseData.setDeliveryAddress(addressJson);
+		
+		// Get Amount Json
+		AmountDetails amountDetails = getCalculatedAmounts(purchaseEntity);
+		historyPurchaseData.setAmountDetails(amountDetails);
+		
+		// Get Purchase Item
+		String purchaseData = purchaseEntity.getPurchaseData();
+		PurchaseItems purchaseItems = serviceUtil.fromJson(purchaseData, PurchaseItems.class);
+		historyPurchaseData.setPurchaseItem(purchaseItems.getPurchaseItems());
+		
+		// Get Discard Json
+		DiscardJson discardJson = getDiscardDetails(purchaseEntity);
+		historyPurchaseData.setDiscardDetails(discardJson);
+		return historyPurchaseData;
+	}
+	
+	/**
+	 * Returns list of Delivered Data.
+	 * @param index
+	 * @param limit
+	 * @param fromDate
+	 * @param toDate
+	 * @param principal
+	 * @return
+	 */
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> getDeliveredList(Integer index, Integer limit, Long fromDate,
 			Long toDate, Principal principal) {
@@ -343,6 +414,63 @@ public class PurchaseRestService {
 		return serviceUtil.getRestResponse(false, "Internal Server Error.", 500);
 	}
 	
+	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	public ResponseEntity<String> getPurchaseStatus(String purchaseGuidsJson, Principal principal) {
+		try {
+			
+			Type listType = new TypeToken<ArrayList<String>>() {
+			}.getType();
+			
+			List<String> purchaseGuids = serviceUtil.fromJson(purchaseGuidsJson, listType);
+			if(purchaseGuids.size() > 20){
+				return serviceUtil.getRestResponse(false, "Request not morethan 20.", 403);
+			}
+			
+			// Get Merchant Entity
+			MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
+			// Get Purchase Detail List
+			List<PurchaseEntity> purchaseEntities = purchaseDAOImpl.getPurhcaseList(merchantEntity, purchaseGuids);
+			boolean isAdded = false;
+			PurchaseStatus purchaseStatus = new PurchaseStatus();
+			// Convert Purchase Entity to Purchase Json
+			for (PurchaseEntity purchaseEntity : purchaseEntities) {
+				isAdded = true;
+				switch (purchaseEntity.getOrderStatus()) {
+				case PURCHASE:
+					CommonPurchaseData commonPurchaseData = new CommonPurchaseData(purchaseEntity);
+					purchaseStatus.getUnPaidData().add(commonPurchaseData);
+					break;
+				case FAILED_TO_DELIVER:
+				case OUT_FOR_DELIVERY:
+				case PACKING:
+				case READY_TO_COLLECT:
+				case READY_TO_SHIPPING:
+					PaiedPurchaseDetails paiedPurchaseDetails = getPaiedList(purchaseEntity);
+					purchaseStatus.getPaidData().add(paiedPurchaseDetails);
+					break;
+					
+				case CANCELLED:
+				case DELIVERED:
+					HistoryPurchaseData historyPurchaseData = getPurchaseHistoryData(purchaseEntity);
+					purchaseStatus.getHistoryData().add(historyPurchaseData);
+					break;
+
+				default:
+					break;
+				}
+			}
+			if (isAdded) {
+				return serviceUtil.getRestResponse(true, purchaseStatus, 200);
+			}
+			return serviceUtil.getRestResponse(true, purchaseStatus, 403);
+
+		} catch (Exception e) {
+			logger.error("Error in getPurchaseStatus", e);
+		}
+		return serviceUtil.getRestResponse(false, "Internal Server Error.", 500);
+	}
+	
 	/**
 	 * Get List of Purchase Details
 	 * 
@@ -354,7 +482,7 @@ public class PurchaseRestService {
 	 * @param principal
 	 * @return ResponseEntity
 	 */
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	/*@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> getPurchaseList(Integer index, Integer limit, String status, Long fromDate,
 			Long toDate, Principal principal) {
 		try {
@@ -379,7 +507,7 @@ public class PurchaseRestService {
 			logger.error("Error in getPurchaseList", e);
 		}
 		return serviceUtil.getRestResponse(false, "Internal Server Error.", 500);
-	}
+	}*/
 	
 	/**
 	 * Get Delivery Details
@@ -445,14 +573,7 @@ public class PurchaseRestService {
 	}
 	
 	
-	/**
-	 * Get Calculate Amount Details
-	 * @param purchaseEntity
-	 * @param purchaseDetails
-	 */
-	private void getCalculatedAmounts(PurchaseEntity purchaseEntity,PurchaseDetails purchaseDetails){
-		purchaseDetails.setAmountDetails(getCalculatedAmounts(purchaseEntity));
-	}
+	
 	
 	/**
 	 * Get Calculate Amount Details
@@ -473,16 +594,29 @@ public class PurchaseRestService {
 	 * @param purchaseEntity
 	 * @param purchaseDetails
 	 */
-/*	private void getDiscardDetails(PurchaseEntity purchaseEntity,PurchaseDetails purchaseDetails){
+	private void getDiscardDetails(PurchaseEntity purchaseEntity,PurchaseDetails purchaseDetails){
+		purchaseDetails.setDiscardDetails(getDiscardDetails(purchaseEntity));
+	}
+	
+	
+	
+	/**
+	 * Convert Discard Entity to Discard Json
+	 * @param purchaseEntity
+	 * @param purchaseDetails
+	 */
+	private DiscardJson getDiscardDetails(PurchaseEntity purchaseEntity){
 		if (purchaseEntity.getOrderStatus().ordinal() == OrderStatus.CANCELLED.ordinal()) {
 			DiscardEntity discardEntity = purchaseDAOImpl.getDiscardEntity(purchaseEntity);
 			if (discardEntity != null) {
 				DiscardJson discardJson = new DiscardJson(discardEntity);
-				purchaseDetails.setDiscardDetails(discardJson);
+				return discardJson;
 			}
 
 		}
-	}*/
+		return null;
+	}
+	
 	
 
 	/**
@@ -512,19 +646,13 @@ public class PurchaseRestService {
 			}
 			PurchaseDetails purchaseDetails = getPurchaseData(purchaseEntity);
 
-			String amountDetailsJson = purchaseEntity.getAmountDetails();
+			String amountDetailsJson = purchaseEntity.getCalculatedAmounts();
 			AmountDetails amountDetails = serviceUtil.fromJson(amountDetailsJson, AmountDetails.class);
 			purchaseDetails.setAmountDetails(amountDetails);
 
-			String unModifiedPurchase = purchaseEntity.getUnModifiedPurchaseData();
-			if (unModifiedPurchase != null) {
-				PurchaseItems purchaseItems = serviceUtil.fromJson(unModifiedPurchase, PurchaseItems.class);
-				purchaseDetails.setUnModifiedPurchaseItem(purchaseItems.getPurchaseItems());
-			}
-
-			UserEntity userEntity = purchaseEntity.getUserEntity();
-			UserJson userJson = new UserJson(userEntity);
-			purchaseDetails.setUserDetails(userJson);
+			
+			getUserDetails(purchaseEntity, purchaseDetails);
+			
 			return serviceUtil.getRestResponse(true, purchaseDetails, 200);
 		} catch (Exception e) {
 			logger.error("Error in getPurchaseData", e);
@@ -595,7 +723,7 @@ public class PurchaseRestService {
 				updateOrderOutForDelivery(purchaseEntity);
 				break;
 			case READY_TO_COLLECT:
-				purchaseEntity.setOrderStatus(OrderStatus.OUT_FOR_DELIVERY);
+				purchaseEntity.setOrderStatus(OrderStatus.READY_TO_COLLECT);
 				updateCounterDetails(orderStatusUpdate, purchaseEntity);
 				break;
 			case READY_TO_SHIPPING:

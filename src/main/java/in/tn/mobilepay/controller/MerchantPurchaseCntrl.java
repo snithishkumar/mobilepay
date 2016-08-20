@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import in.tn.mobilepay.services.PurchaseRestService;
@@ -28,12 +27,10 @@ public class MerchantPurchaseCntrl {
 		return purchaseRestService.updateOrderStatus(principal, requestData);
 	}
 
-	@RequestMapping(value = "/rest/merchant/getPurchaseList")
-	public ResponseEntity<String> getPurchaseList(@RequestParam(required = false) Integer index,
-			@RequestParam(required = false) Integer limit, @RequestParam(required = false) String status,
-			@RequestParam(required = false) Long fromDate, @RequestParam(required = false) Long toDate,
+	@RequestMapping(value = "/rest/merchant/getPurchaseListStatus")
+	public ResponseEntity<String> getPurchaseListStatus(@RequestBody String requestData,
 			Principal principal) {
-		return purchaseRestService.getPurchaseList(index, limit, status, fromDate, toDate, principal);
+		return purchaseRestService.getPurchaseStatus(requestData, principal);
 	}
 	
 	

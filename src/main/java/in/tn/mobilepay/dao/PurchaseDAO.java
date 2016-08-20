@@ -85,4 +85,6 @@ public interface PurchaseDAO {
 	List<PurchaseEntity> getDeliveredList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate);
 
 	List<PurchaseEntity> getHistoryList(MerchantEntity merchantEntity, Integer index, Integer limit, Long fromDate, Long toDate);
+	
+	 List<PurchaseEntity> getPurhcaseList(MerchantEntity merchantEntity,List<String> purchaseUUIDs);
 }

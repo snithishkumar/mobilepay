@@ -45,6 +45,7 @@ import in.tn.mobilepay.request.model.GetPurchaseDetailsList;
 import in.tn.mobilepay.request.model.OrderStatusUpdate;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsJson;
 import in.tn.mobilepay.request.model.PayedPurchaseDetailsList;
+import in.tn.mobilepay.request.model.TokenJson;
 import in.tn.mobilepay.response.model.CounterDetailsJson;
 import in.tn.mobilepay.response.model.LuggagesListJson;
 import in.tn.mobilepay.response.model.MerchantJson;
@@ -86,8 +87,9 @@ public class PurchaseServices {
 			//DiscardJsonList discardJsonList = serviceUtil.fromJson(requestData, DiscardJsonList.class);
 			//for(DiscardJson discardJson : discardJsonList.getDiscardJsons()){
 			DiscardJson discardJson = serviceUtil.fromJson(requestData, DiscardJson.class);
+			TokenJson tokenJson = serviceUtil.fromJson(requestData, TokenJson.class);
 				// Validate Merchant Authorize
-				MerchantEntity merchantEntity = validateToken(discardJson.getAccessToken(), discardJson.getServerToken());
+				MerchantEntity merchantEntity = validateToken(tokenJson.getAccessToken(), tokenJson.getServerToken());
 				//  Validate User Mobile
 				//UserEntity userEntity = validateMobile(discardJson.getUserMobile());
 				// Get Purchase Data
