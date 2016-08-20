@@ -1,6 +1,6 @@
 package in.tn.mobilepay.request.model;
 
-public class GetPurchaseList extends TokenJson{
+public class GetPurchaseList{
 	
 	private long serverTime;
 

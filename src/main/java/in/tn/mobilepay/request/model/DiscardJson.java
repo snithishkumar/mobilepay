@@ -7,8 +7,9 @@ import in.tn.mobilepay.entity.DiscardEntity;
 import in.tn.mobilepay.entity.TransactionalDetailsEntity;
 import in.tn.mobilepay.enumeration.DiscardBy;
 import in.tn.mobilepay.rest.json.CalculatedAmounts;
+import in.tn.mobilepay.rest.json.CommonPurchaseData;
 
-public class DiscardJson extends TokenJson {
+public class DiscardJson extends CommonPurchaseData{
 
 	private String userMobile;
 	private String purchaseGuid;
@@ -30,6 +31,7 @@ public class DiscardJson extends TokenJson {
 	public DiscardJson(DiscardEntity discardEntity) {
 		this.reason = discardEntity.getReason();
 		this.discardBy = discardEntity.getDiscardBy();
+		this.createdDateTime = discardEntity.getCreatedDateTime();
 
 	}
 

@@ -1,4 +1,4 @@
-package in.tn.mobilepay.request.model;
+/*package in.tn.mobilepay.request.model;
 
 import in.tn.mobilepay.enumeration.PaymentType;
 
@@ -53,3 +53,4 @@ public class CardJson extends TokenJson {
 	
 
 }
+*/
