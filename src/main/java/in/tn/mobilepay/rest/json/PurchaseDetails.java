@@ -23,7 +23,7 @@ public class PurchaseDetails {
 	
 	private String totalAmount;
 	private boolean isEditable;
-	private AddressJson addressDetails;
+	private AddressJson deliverAddress;
 	private DiscardJson discardDetails;
 	private long lastModifiedDate;
 
@@ -118,12 +118,12 @@ public class PurchaseDetails {
 		this.isEditable = isEditable;
 	}
 
-	public AddressJson getAddressDetails() {
-		return addressDetails;
+	public AddressJson getDeliveryAddress() {
+		return deliverAddress;
 	}
 
-	public void setAddressDetails(AddressJson addressDetails) {
-		this.addressDetails = addressDetails;
+	public void setDeliverAddress(AddressJson deliverAddress) {
+		this.deliverAddress = deliverAddress;
 	}
 
 	public DiscardJson getDiscardDetails() {
@@ -179,7 +179,7 @@ public class PurchaseDetails {
 		return "PurchaseDetails [purchaseUUID=" + purchaseUUID + ", billNumber=" + billNumber + ", purchaseDate="
 				+ purchaseDate + ", purchaseItem=" + purchaseItem + ", orderStatus=" + orderStatus
 				+ ", userDeliveryOptions=" + userDeliveryOptions + ", totalAmount=" + totalAmount + ", isEditable="
-				+ isEditable + ", addressDetails=" + addressDetails + ", discardDetails=" + discardDetails
+				+ isEditable + ", addressDetails=" + deliverAddress + ", discardDetails=" + discardDetails
 				+ ", lastModifiedDate=" + lastModifiedDate + ", amountDetails=" + amountDetails + ", userDetails="
 				+ userDetails + ", paymentStatus=" + paymentStatus + ", merchantDeliveryOptions="
 				+ merchantDeliveryOptions + "]";

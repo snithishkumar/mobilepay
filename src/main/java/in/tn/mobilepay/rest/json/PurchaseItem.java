@@ -1,26 +1,28 @@
 package in.tn.mobilepay.rest.json;
 
+import in.tn.mobilepay.exception.ValidationException;
+
 public class PurchaseItem {
-	private String itemNo;
+	private int itemNo;
 	private String name;
-	private String quantity;
-	private String amount;
-	private String totalAmount;
+	private int quantity;
+	private double amount;
+	private double totalAmount;
 	private float rating;
 
-	public String getItemNo() {
+	public int getItemNo() {
 		return itemNo;
 	}
 
-	public String getAmount() {
+	public double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(String amount) {
+	public void setAmount(double amount) {
 		this.amount = amount;
 	}
 
-	public void setItemNo(String itemNo) {
+	public void setItemNo(int itemNo) {
 		this.itemNo = itemNo;
 	}
 
@@ -32,19 +34,19 @@ public class PurchaseItem {
 		this.name = name;
 	}
 
-	public String getQuantity() {
+	public int getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(String quantity) {
+	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
 
-	public String getTotalAmount() {
+	public Double getTotalAmount() {
 		return totalAmount;
 	}
 
-	public void setTotalAmount(String totalAmount) {
+	public void setTotalAmount(double totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 
@@ -54,6 +56,19 @@ public class PurchaseItem {
 
 	public void setRating(float rating) {
 		this.rating = rating;
+	}
+	
+	public boolean validateData()throws ValidationException{
+	  if(name == null || name.trim().isEmpty()){
+		   throw new ValidationException(400, "Product Name is not found.");
+	  }
+	  if(quantity < 0){
+		  throw new ValidationException(400, "Invalid quantity.");
+	  }
+	  if(amount < 0){
+		  throw new ValidationException(400, "Invalid amount.");
+	  }
+	  return true;
 	}
 
 	@Override

@@ -3,17 +3,20 @@ package in.tn.mobilepay.rest.json;
 import java.util.List;
 
 import in.tn.mobilepay.entity.PurchaseEntity;
+import in.tn.mobilepay.enumeration.DeliveryOptions;
 import in.tn.mobilepay.response.model.AddressJson;
 
 public class PaiedPurchaseDetails extends CommonPurchaseData{
 	private List<PurchaseItem> purchaseItem;
 	private String totalAmount;
-	private AddressJson addressDetails;
+	private AddressJson deliveryAddress;
 	private AmountDetails amountDetails;
+	private DeliveryOptions userDeliveryOptions;
 	
 	public PaiedPurchaseDetails(PurchaseEntity purchaseEntity){
 		super(purchaseEntity);
 		this.totalAmount = String.valueOf(purchaseEntity.getTotalAmount());
+		this.userDeliveryOptions = purchaseEntity.getUserDeliveryOptions();
 	}
 	
 	public List<PurchaseItem> getPurchaseItem() {
@@ -28,11 +31,11 @@ public class PaiedPurchaseDetails extends CommonPurchaseData{
 	public void setTotalAmount(String totalAmount) {
 		this.totalAmount = totalAmount;
 	}
-	public AddressJson getAddressDetails() {
-		return addressDetails;
+	public AddressJson getDeliveryAddress() {
+		return deliveryAddress;
 	}
-	public void setAddressDetails(AddressJson addressDetails) {
-		this.addressDetails = addressDetails;
+	public void setDeliveryAddress(AddressJson deliveryAddress) {
+		this.deliveryAddress = deliveryAddress;
 	}
 	public AmountDetails getAmountDetails() {
 		return amountDetails;
@@ -43,7 +46,7 @@ public class PaiedPurchaseDetails extends CommonPurchaseData{
 	@Override
 	public String toString() {
 		return "PaiedPurchaseDetails [purchaseItem=" + purchaseItem + ", totalAmount=" + totalAmount
-				+ ", addressDetails=" + addressDetails + ", amountDetails=" + amountDetails + "]";
+				+ ", addressDetails=" + deliveryAddress + ", amountDetails=" + amountDetails + "]";
 	}
 	
 	

@@ -183,7 +183,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 	}
 
 	private void applyOrderStatusCriteria(Criteria criteria) {
-		criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAIED));
+		criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAID));
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED));
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED));
 	}
@@ -478,7 +478,7 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 		applyMerchantRestCriteria(merchantEntity, index, limit, fromDate, toDate, criteria);
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED));
 		criteria.add(Restrictions.ne(PurchaseEntity.ORDER_STATUS, OrderStatus.DELIVERED));
-		criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAIED));
+		criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAID));
 		return criteria.list();
 	}
 	
@@ -542,10 +542,10 @@ public class PurchaseDAOImpl extends BaseDAOImpl implements PurchaseDAO{
 		if (status != null && !status.trim().isEmpty()) {
 			switch (status.toLowerCase()) {
 			case "paid":
-				criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAIED));
+				criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.PAID));
 				break;
 			case "unpaid":
-				criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.NOT_PAIED));
+				criteria.add(Restrictions.eq(PurchaseEntity.PAYMENT_STATUS, PaymentStatus.NOT_PAID));
 				break;
 			case "discard":
 				criteria.add(Restrictions.eq(PurchaseEntity.ORDER_STATUS, OrderStatus.CANCELLED));

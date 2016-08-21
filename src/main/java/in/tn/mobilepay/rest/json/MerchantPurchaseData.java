@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.tn.mobilepay.enumeration.DeliveryOptions;
+import in.tn.mobilepay.exception.ValidationException;
 
 public class MerchantPurchaseData {
 	private String customerName;
 	private String customerMobileNo;
 	private DeliveryOptions deliveryOptions;
-	private Boolean isRemovable;
+	private boolean isRemovable;
 	private long purchaseDate;
-	private String totalAmount;
+	private double totalAmount;
 	private String billNumber;
 	private List<PurchaseItem> purchaseItems = new ArrayList<PurchaseItem>();
 	private AmountDetails amountDetails;
@@ -58,11 +59,11 @@ public class MerchantPurchaseData {
 		this.purchaseDate = purchaseDate;
 	}
 
-	public String getTotalAmount() {
+	public double getTotalAmount() {
 		return totalAmount;
 	}
 
-	public void setTotalAmount(String totalAmount) {
+	public void setTotalAmount(double totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 
@@ -89,6 +90,30 @@ public class MerchantPurchaseData {
 	public void setAmountDetails(AmountDetails amountDetails) {
 		this.amountDetails = amountDetails;
 	}
+	
+	
+	public  boolean validateData()throws ValidationException{
+		  if(deliveryOptions == null){
+			   throw new ValidationException(400, "Delivery Options is not found.");
+		  }
+		  if(billNumber == null || billNumber.trim().isEmpty()){
+			  throw new ValidationException(400, "BillNumber is not found.");
+		  }
+		  if(purchaseDate < 0){
+			  throw new ValidationException(400, "Purchase Date is not found.");
+		  }
+		  if(amountDetails == null){
+			  throw new ValidationException(400, "Amount Details is not found.");
+		  }
+		  if(purchaseItems == null || purchaseItems.size() == 0){
+			  throw new ValidationException(400, "Purchase Details is not found.");
+		  }
+		  for(PurchaseItem purchaseItem : purchaseItems){
+			  purchaseItem.validateData();
+		  }
+		  amountDetails.validateData();
+		  return true;
+		}
 
 	@Override
 	public String toString() {

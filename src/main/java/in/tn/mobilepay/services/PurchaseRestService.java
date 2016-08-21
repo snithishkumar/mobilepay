@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import in.tn.mobilepay.dao.DeliveryDAO;
@@ -83,7 +84,10 @@ public class PurchaseRestService {
 	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> createPurchase(String requestData, Principal principal) {
+		MerchantEntity merchantEntity = null;
 		try {
+			// Get Merchant Entity
+		    merchantEntity = serviceUtil.getMerchantEntity(principal);
 			// Json to Object
 			MerchantPurchaseDatas merchantPurchaseDatas = gson.fromJson(requestData, MerchantPurchaseDatas.class);
 			List<MerchantPurchaseData> purchaseDatas = merchantPurchaseDatas.getMerchantPurchaseDatas();
@@ -91,15 +95,19 @@ public class PurchaseRestService {
 			// Process each data
 			for (MerchantPurchaseData merchantPurchaseData : purchaseDatas) {
 				try {
+					//Validate Merchant Input
+					merchantPurchaseData.validateData();
+					
 					// Validate Customer mobile number
 					UserEntity userEntity = validateUserMobile(merchantPurchaseData.getCustomerMobileNo());
+					
+					
 					PurchaseEntity purchaseEntity = new PurchaseEntity();
 					// Copy MerchantPurchase Data to Purchase
 					copyMerchantPurchaseData(merchantPurchaseData, purchaseEntity);
 
 					purchaseEntity.setUserEntity(userEntity);
-					// Get Merchant Entity
-					MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
+					
 					purchaseEntity.setMerchantEntity(merchantEntity);
 
 					purchaseDAOImpl.createPurchaseObject(purchaseEntity);
@@ -113,18 +121,29 @@ public class PurchaseRestService {
 				} catch (ValidationException e) {
 					// Error Response
 					JsonObject response = new JsonObject();
-					response.addProperty("statusCode", 404);
+					response.addProperty("statusCode", e.getCode());
 					response.addProperty("billNumber", merchantPurchaseData.getBillNumber());
-					response.addProperty("message", "Invalid Customer Number.");
+					response.addProperty("message", e.getMessage());
 					responseData.add(response);
 				}
 
 			}
 			return serviceUtil.getRestResponse(true, responseData, 200);
-		} catch (Exception e) {
+		}catch(JsonSyntaxException e){
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("Error in Json, Request Data[");
+			stringBuilder.append(requestData);
+			stringBuilder.append("]");
+			if(merchantEntity != null){
+				stringBuilder.append("],Merchant Name:");
+				stringBuilder.append(merchantEntity.getMerchantName());
+			}
+			logger.error(stringBuilder.toString(), e);
+			return serviceUtil.getRestResponse(false, "OOPS.Invalid Json", 400);
+		}catch (Exception e) {
 			logger.error("Error in PurchaseRestService", e);
 		}
-		return serviceUtil.getRestResponse(false, "OOPS.", 500);
+		return serviceUtil.getRestResponse(false, "OOPS.Internal server Error", 500);
 	}
 
 	private void copyMerchantPurchaseData(MerchantPurchaseData merchantPurchaseData, PurchaseEntity purchaseEntity) {
@@ -137,6 +156,7 @@ public class PurchaseRestService {
 		purchaseEntity.setEditable(merchantPurchaseData.getIsRemovable());
 		List<PurchaseItem> purchaseItems = merchantPurchaseData.getPurchaseItems();
 		if (purchaseItems != null && purchaseItems.size() > 0) {
+			purchaseItems.sort((p1,p2) -> p1.getTotalAmount().compareTo(p2.getTotalAmount()));
 			purchaseEntity.setPurchaseData(gson.toJson(purchaseItems));
 		}
 		purchaseEntity.setPurchaseDateTime(merchantPurchaseData.getPurchaseDate());
@@ -144,8 +164,12 @@ public class PurchaseRestService {
 		purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 		purchaseEntity.setTotalAmount(Double.valueOf(merchantPurchaseData.getTotalAmount()));
 		purchaseEntity.setOrderStatus(OrderStatus.PURCHASE);
-		purchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAIED);
+		purchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAID);
 	}
+	
+	
+	
+	
 
 	/**
 	 * Validate given mobile Number is present or not
@@ -157,7 +181,7 @@ public class PurchaseRestService {
 	private UserEntity validateUserMobile(String mobileNumber) throws ValidationException {
 		UserEntity userEntity = userDAOImpl.getUserEntity(mobileNumber);
 		if (userEntity == null) {
-			throw new ValidationException(0, "");
+			throw new ValidationException(400, "Invalid Customer Number.");
 		}
 		return userEntity;
 	}
@@ -536,7 +560,7 @@ public class PurchaseRestService {
 	 * @param purchaseDetails
 	 */
 	private void getDeliveryDetails(PurchaseEntity purchaseEntity,PaiedPurchaseDetails purchaseDetails){
-		purchaseDetails.setAddressDetails(getDeliveryDetails(purchaseEntity));
+		purchaseDetails.setDeliveryAddress(getDeliveryDetails(purchaseEntity));
 	}
 	
 	
@@ -546,7 +570,7 @@ public class PurchaseRestService {
 	 * @param purchaseDetails
 	 */
 	private void getDeliveryDetails(PurchaseEntity purchaseEntity,PurchaseDetails purchaseDetails){
-		purchaseDetails.setAddressDetails(getDeliveryDetails(purchaseEntity));
+		purchaseDetails.setDeliverAddress(getDeliveryDetails(purchaseEntity));
 	}
 	
 	/**
@@ -700,7 +724,7 @@ public class PurchaseRestService {
 
 			switch (orderStatusUpdate.getOrderStatus()) {
 			case CANCELLED:
-				if(purchaseEntity.getPaymentStatus().getPaymentStatusType() == PaymentStatus.PAIED.getPaymentStatusType()){
+				if(purchaseEntity.getPaymentStatus().getPaymentStatusType() == PaymentStatus.PAID.getPaymentStatusType()){
 					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
 					result.addProperty("statusCode", 405);
 					result.addProperty("message", "Already paid by Customer.");
@@ -712,7 +736,7 @@ public class PurchaseRestService {
 
 				break;
 			case DELIVERED:
-				if(purchaseEntity.getPaymentStatus().getPaymentStatusType() == PaymentStatus.NOT_PAIED.getPaymentStatusType()){
+				if(purchaseEntity.getPaymentStatus().getPaymentStatusType() == PaymentStatus.NOT_PAID.getPaymentStatusType()){
 					result.addProperty("purchaseUUID", orderStatusUpdate.getPurchaseUUID());
 					result.addProperty("statusCode", 406);
 					result.addProperty("message", "Customer is not yet Paid. or Already Cancelled");

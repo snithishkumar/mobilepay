@@ -158,7 +158,7 @@ public class PurchaseServices {
 						}
 					}
 					purchaseEntity.setOrderStatus(payedPurchaseDetailsJson.getOrderStatus());
-					purchaseEntity.setPaymentStatus(PaymentStatus.PAIED);
+					purchaseEntity.setPaymentStatus(PaymentStatus.PAID);
 					purchaseEntity.setServerDateTime(ServiceUtil.getCurrentGmtTime());
 					purchaseEntity.setUpdatedDateTime(payedPurchaseDetailsJson.getPayemetTime());
 					purchaseEntity.setUnModifiedAmountDetails(purchaseEntity.getAmountDetails());
@@ -413,7 +413,7 @@ public class PurchaseServices {
 			dbPurchaseEntity.setPurchaseDateTime(Long.valueOf(purchaseJson.getPurchaseDateTime()));
 			dbPurchaseEntity.setMerchantEntity(merchantEntity);
 			dbPurchaseEntity.setUserEntity(userEntity);
-			dbPurchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAIED);
+			dbPurchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAID);
 			dbPurchaseEntity.setOrderStatus(OrderStatus.PURCHASE);
 			// Json obj to Entity
 			populatePurchaseData(dbPurchaseEntity, purchaseJson);
@@ -483,7 +483,7 @@ public class PurchaseServices {
 	
 	private void populatePurchaseData(PurchaseEntity purchaseEntity,in.tn.mobilepay.request.model.PurchaseJson purchaseJson){
 		purchaseEntity.loadValue(purchaseJson);
-		purchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAIED);
+		purchaseEntity.setPaymentStatus(PaymentStatus.NOT_PAID);
 		purchaseEntity.setPurchaseGuid(serviceUtil.uuid());
 		String purchaseData = serviceUtil.toJson(purchaseJson.getPurchaseDetails());
 		purchaseEntity.setPurchaseData(purchaseData);
