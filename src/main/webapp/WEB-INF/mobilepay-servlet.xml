@@ -17,14 +17,15 @@
 	<mvc:annotation-driven />
 	<tx:annotation-driven />
 
-	<bean id="dataSource" class="org.apache.tomcat.dbcp.dbcp.BasicDataSource">
+	<bean id="dataSource" class="org.apache.tomcat.dbcp.dbcp2.BasicDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url"
-			value="jdbc:mysql://localhost/mobilepay?allowMultiQueries=true" />
+			value="jdbc:mysql://localhost/mobilepay?useSSL=false" />
 		<property name="username" value="root" />
-		<property name="password" value="Dec302013@" />
+		<property name="password" value="admin" />
+		<!-- <property name="password" value="Dec302013@" /> -->
 		<property name="initialSize" value="20" />
-		<property name="maxActive" value="100" />
+		<property name="maxTotal" value="100" />
         <!-- Production Conf // http://www.codingpedia.org/ama/tomcat-jdbc-connection-pool-configuration-for-production-and-development/ -->
 		<property name="maxIdle" value="45"/>
 		<property name="minIdle" value="20" />
@@ -32,7 +33,7 @@
 		<property name="minEvictableIdleTimeMillis" value="55000" />
 		<property name="validationQuery" value="SELECT 1" />
 		<property name="testOnBorrow" value="true" />
-		<property name="removeAbandoned" value="true" />
+		<!-- <property name="removeAbandoned" value="true" /> allowMultiQueries=true; -->
 		<property name="removeAbandonedTimeout" value="55" />
 
 	</bean>

@@ -6,20 +6,14 @@ public class PurchaseItem {
 	private int itemNo;
 	private String name;
 	private int quantity;
-	private double amount;
-	private double totalAmount;
+	private double unitPrice;
+	private Double amount;
 	private float rating;
 
+	
+	
 	public int getItemNo() {
 		return itemNo;
-	}
-
-	public double getAmount() {
-		return amount;
-	}
-
-	public void setAmount(double amount) {
-		this.amount = amount;
 	}
 
 	public void setItemNo(int itemNo) {
@@ -42,12 +36,20 @@ public class PurchaseItem {
 		this.quantity = quantity;
 	}
 
-	public Double getTotalAmount() {
-		return totalAmount;
+	public double getUnitPrice() {
+		return unitPrice;
 	}
 
-	public void setTotalAmount(double totalAmount) {
-		this.totalAmount = totalAmount;
+	public void setUnitPrice(double unitPrice) {
+		this.unitPrice = unitPrice;
+	}
+
+	public Double getAmount() {
+		return amount;
+	}
+
+	public void setAmount(double amount) {
+		this.amount = amount;
 	}
 
 	public float getRating() {
@@ -57,7 +59,7 @@ public class PurchaseItem {
 	public void setRating(float rating) {
 		this.rating = rating;
 	}
-	
+
 	public boolean validateData()throws ValidationException{
 	  if(name == null || name.trim().isEmpty()){
 		   throw new ValidationException(400, "Product Name is not found.");
@@ -65,7 +67,7 @@ public class PurchaseItem {
 	  if(quantity < 0){
 		  throw new ValidationException(400, "Invalid quantity.");
 	  }
-	  if(amount < 0){
+	  if(unitPrice < 0){
 		  throw new ValidationException(400, "Invalid amount.");
 	  }
 	  return true;
@@ -73,8 +75,10 @@ public class PurchaseItem {
 
 	@Override
 	public String toString() {
-		return "PurchaseItem [itemNo=" + itemNo + ", name=" + name + ", quantity=" + quantity + ", totalAmount="
-				+ totalAmount + "]";
+		return "PurchaseItem [itemNo=" + itemNo + ", name=" + name + ", quantity=" + quantity + ", unitPrice="
+				+ unitPrice + ", amount=" + amount + ", rating=" + rating + "]";
 	}
+
+	
 
 }

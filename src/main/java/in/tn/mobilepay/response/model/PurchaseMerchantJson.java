@@ -58,6 +58,8 @@ public class PurchaseMerchantJson {
 		 if(calc != null){
 			 CalculatedAmounts calculatedAmounts = gson.fromJson(calc, CalculatedAmounts.class);
 			 this.totalAmount = String.valueOf(calculatedAmounts.getTotalAmount());
+		 }else{
+			 this.totalAmount = String.valueOf(purchaseEntity.getTotalAmount());
 		 }
 		 
 	}

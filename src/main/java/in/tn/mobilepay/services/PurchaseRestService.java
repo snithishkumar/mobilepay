@@ -156,7 +156,7 @@ public class PurchaseRestService {
 		purchaseEntity.setEditable(merchantPurchaseData.getIsRemovable());
 		List<PurchaseItem> purchaseItems = merchantPurchaseData.getPurchaseItems();
 		if (purchaseItems != null && purchaseItems.size() > 0) {
-			purchaseItems.sort((p1,p2) -> p1.getTotalAmount().compareTo(p2.getTotalAmount()));
+			purchaseItems.sort((p1,p2) -> p1.getAmount().compareTo(p2.getAmount()));
 			purchaseEntity.setPurchaseData(gson.toJson(purchaseItems));
 		}
 		purchaseEntity.setPurchaseDateTime(merchantPurchaseData.getPurchaseDate());
