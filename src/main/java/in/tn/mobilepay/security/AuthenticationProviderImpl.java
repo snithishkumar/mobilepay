@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import in.tn.mobilepay.dao.UserDAO;
+import in.tn.mobilepay.dao.impl.MerchantDAOImpl;
+import in.tn.mobilepay.entity.MerchantEntity;
 import in.tn.mobilepay.services.ServiceUtil;
 
 @Component("authenticationProvider")
@@ -23,6 +25,9 @@ public class AuthenticationProviderImpl  implements AuthenticationProvider {
 	
 	@Autowired
 	private UserDAO userDao;
+	
+	@Autowired
+	private MerchantDAOImpl merchantDao;
 	
 	@Autowired
 	private ServiceUtil serviceUtil;
@@ -40,8 +45,14 @@ public class AuthenticationProviderImpl  implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         Integer userId = userDao.getUserEnityByToken(name, password);
         logger.info("userEntity db:"+userId);
-        if (userId == null)
-		      throw new UsernameNotFoundException("Invalid User");
+        if (userId == null){
+        	MerchantEntity merchantEntity = merchantDao.getMerchant(name, password);
+        	if(merchantEntity == null){
+        		throw new UsernameNotFoundException("Invalid User");
+        	}
+        	userId = merchantEntity.getMerchantId();
+        }
+		      
 		 
        
         List<GrantedAuthority> grantedAuths = new ArrayList<>();

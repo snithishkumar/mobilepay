@@ -17,24 +17,24 @@ public class MerchantPurchaseCntrl {
 	@Autowired
 	private PurchaseRestService purchaseRestService;
 
-	@RequestMapping(value = "/rest/merchant/createPurchase")
+	@RequestMapping(value = "/mobilePayUser/rest/merchant/createPurchase")
 	public ResponseEntity<String> createPurchaseData(@RequestBody String requestData, Principal principal) {
 		return purchaseRestService.createPurchase(requestData, principal);
 	}
 
-	@RequestMapping(value = "/rest/merchant/updateOrderStatus")
+	@RequestMapping(value = "/mobilePayUser/rest/merchant/updateOrderStatus")
 	public ResponseEntity<String> updateOrderStatus(@RequestBody String requestData, Principal principal) {
 		return purchaseRestService.updateOrderStatus(principal, requestData);
 	}
 
-	@RequestMapping(value = "/rest/merchant/getPurchaseListStatus")
+	@RequestMapping(value = "/mobilePayUser/rest/merchant/getPurchaseListStatus")
 	public ResponseEntity<String> getPurchaseListStatus(@RequestBody String requestData,
 			Principal principal) {
 		return purchaseRestService.getPurchaseStatus(requestData, principal);
 	}
 	
 	
-	@RequestMapping(value = "/rest/merchant/{purchaseUUID}/getPurchaseData")
+	@RequestMapping(value = "/mobilePayUser/rest/merchant/{purchaseUUID}/getPurchaseData")
 	public ResponseEntity<String> getPurchaseData(@PathVariable("purchaseUUID") String purchaseUUID, Principal principal) {
 		return purchaseRestService.getPurchaseData(purchaseUUID, principal);
 	}

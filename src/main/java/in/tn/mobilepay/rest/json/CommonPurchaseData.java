@@ -25,6 +25,7 @@ private String purchaseUUID;
 		this.orderStatus = purchaseEntity.getOrderStatus();
 		this.lastModifiedDate = purchaseEntity.getUpdatedDateTime();
 		this.paymentStatus = purchaseEntity.getPaymentStatus();
+		this.purchaseUUID = purchaseEntity.getPurchaseGuid();
 	}
 	public String getPurchaseUUID() {
 		return purchaseUUID;

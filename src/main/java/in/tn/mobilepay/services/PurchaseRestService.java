@@ -43,6 +43,7 @@ import in.tn.mobilepay.response.model.AddressJson;
 import in.tn.mobilepay.response.model.NotificationJson;
 import in.tn.mobilepay.response.model.UserJson;
 import in.tn.mobilepay.rest.json.AmountDetails;
+import in.tn.mobilepay.rest.json.CalculatedAmounts;
 import in.tn.mobilepay.rest.json.CommonPurchaseData;
 import in.tn.mobilepay.rest.json.DeliveredPurchaseData;
 import in.tn.mobilepay.rest.json.HistoryPurchaseData;
@@ -89,8 +90,12 @@ public class PurchaseRestService {
 			// Get Merchant Entity
 		    merchantEntity = serviceUtil.getMerchantEntity(principal);
 			// Json to Object
-			MerchantPurchaseDatas merchantPurchaseDatas = gson.fromJson(requestData, MerchantPurchaseDatas.class);
-			List<MerchantPurchaseData> purchaseDatas = merchantPurchaseDatas.getMerchantPurchaseDatas();
+		//	MerchantPurchaseDatas merchantPurchaseDatas = gson.fromJson(requestData, MerchantPurchaseDatas.class);
+			
+			Type listType = new TypeToken<ArrayList<MerchantPurchaseData>>() {
+			}.getType();
+			
+			List<MerchantPurchaseData> purchaseDatas = gson.fromJson(requestData, listType);
 			JsonArray responseData = new JsonArray();
 			// Process each data
 			for (MerchantPurchaseData merchantPurchaseData : purchaseDatas) {
@@ -111,6 +116,17 @@ public class PurchaseRestService {
 					purchaseEntity.setMerchantEntity(merchantEntity);
 
 					purchaseDAOImpl.createPurchaseObject(purchaseEntity);
+					
+					//Send Push Notification
+					CloudMessageEntity cloudMessageEntity = userDAOImpl.getCloudMessageEntity(userEntity);
+					if(cloudMessageEntity != null){
+						NotificationJson notificationJson = new NotificationJson();
+						notificationJson.setNotificationType(NotificationType.PURCHASE);
+						notificationJson.setMessage("You have Purchased in"+ merchantEntity.getMerchantName()+".Total Cost : "+purchaseEntity.getTotalAmount()+"."); // TODO
+						notificationJson.setPurchaseGuid(purchaseEntity.getPurchaseGuid());
+						serviceUtil.sendAndroidNotification(notificationJson, cloudMessageEntity.getCloudId());
+					}
+					
 					// Response
 					JsonObject response = new JsonObject();
 					response.addProperty("statusCode", 200);
@@ -265,6 +281,15 @@ public class PurchaseRestService {
 	private PaiedPurchaseDetails getPaiedList(PurchaseEntity purchaseEntity){
 		PaiedPurchaseDetails paiedPurchaseDetails = new PaiedPurchaseDetails(purchaseEntity);
 		
+		
+		// Get Purchase Item
+				String purchaseData = purchaseEntity.getPurchaseData();
+				Type listType = new TypeToken<ArrayList<PurchaseItem>>() {
+				}.getType();
+				
+				List<PurchaseItem> purchaseItems  = serviceUtil.fromJson(purchaseData,listType);
+				paiedPurchaseDetails.setPurchaseItem(purchaseItems);
+		
 		// User Amount Details
 		getCalculatedAmounts(purchaseEntity, paiedPurchaseDetails);
 		
@@ -377,13 +402,16 @@ public class PurchaseRestService {
 		historyPurchaseData.setDeliveryAddress(addressJson);
 		
 		// Get Amount Json
-		AmountDetails amountDetails = getCalculatedAmounts(purchaseEntity);
+		CalculatedAmounts amountDetails = getCalculatedAmounts(purchaseEntity);
 		historyPurchaseData.setAmountDetails(amountDetails);
 		
 		// Get Purchase Item
 		String purchaseData = purchaseEntity.getPurchaseData();
-		PurchaseItems purchaseItems = serviceUtil.fromJson(purchaseData, PurchaseItems.class);
-		historyPurchaseData.setPurchaseItem(purchaseItems.getPurchaseItems());
+		Type listType = new TypeToken<ArrayList<PurchaseItem>>() {
+		}.getType();
+		
+		List<PurchaseItem> purchaseItems  = serviceUtil.fromJson(purchaseData,listType);
+		historyPurchaseData.setPurchaseItem(purchaseItems);
 		
 		// Get Discard Json
 		DiscardJson discardJson = getDiscardDetails(purchaseEntity);
@@ -419,7 +447,7 @@ public class PurchaseRestService {
 				AddressJson addressJson = getDeliveryDetails(purchaseEntity);
 				deliveredPurchaseData.setDeliveryAddressDetails(addressJson);
 				
-				AmountDetails amountDetails = getCalculatedAmounts(purchaseEntity);
+				CalculatedAmounts amountDetails = getCalculatedAmounts(purchaseEntity);
 				deliveredPurchaseData.setAmountDetails(amountDetails);
 				
 				String purchaseData = purchaseEntity.getPurchaseData();
@@ -605,11 +633,11 @@ public class PurchaseRestService {
 	 * @param purchaseEntity
 	 * @param purchaseDetails
 	 */
-	private AmountDetails getCalculatedAmounts(PurchaseEntity purchaseEntity){
+	private CalculatedAmounts getCalculatedAmounts(PurchaseEntity purchaseEntity){
 		String calculatedAmount = purchaseEntity.getCalculatedAmounts();
 		if(calculatedAmount != null){
-			AmountDetails amountDetails = serviceUtil.fromJson(calculatedAmount, AmountDetails.class);
-			return amountDetails;
+			CalculatedAmounts calculatedAmounts = serviceUtil.fromJson(calculatedAmount, CalculatedAmounts.class);
+			return calculatedAmounts;
 		}
 		return null;
 	}
