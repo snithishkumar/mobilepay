@@ -512,22 +512,7 @@ public class PurchaseServices {
 			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
 			for (PurchaseEntity purchaseEntity : purchaseList) {
 				
-				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
-				// Get Home Delivery Conditions
-				if(purchaseEntity.getMerchantDeliveryOptions().ordinal() == DeliveryOptions.HOME.ordinal() || purchaseEntity.getMerchantDeliveryOptions().ordinal() == DeliveryOptions.BOTH.ordinal()){
-					HomeDeliveryOptionsEntity homeDeliveryOptionsEntity =	merchantDAO.geHomeDeliveryOptionsEntity(purchaseEntity.getMerchantEntity());
-					homeDeliveryOptionsEntity.setMerchantEntity(null);
-					purchaseJson.setHomeDeliveryOptions(homeDeliveryOptionsEntity);
-				}
-				if(purchaseEntity.getCalculatedAmounts() != null){
-					CalculatedAmounts calculatedAmounts = serviceUtil.fromJson(purchaseEntity.getCalculatedAmounts(), CalculatedAmounts.class);
-					purchaseJson.setCalculatedAmounts(calculatedAmounts);
-				}
-				
-				UserJson userJson = new UserJson(userEntity);
-				purchaseJson.setUsers(userJson);
-				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
-				purchaseJson.setMerchants(merchantJson);
+				PurchaseJson purchaseJson = getPurchaseJson(purchaseEntity, userEntity);
 				
 				if(purchaseEntity.getOrderStatus().ordinal() == OrderStatus.CANCELLED.ordinal()){
 					DiscardEntity discardEntity = purchaseDAOImpl.getDiscardEntity(purchaseEntity);
@@ -545,6 +530,27 @@ public class PurchaseServices {
 			logger.error("Error in getPurchaseList", e);
 		}
 		return serviceUtil.getErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Failure");
+	}
+	
+	
+	private PurchaseJson getPurchaseJson(PurchaseEntity purchaseEntity,UserEntity userEntity)throws Exception{
+		PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
+		// Get Home Delivery Conditions
+		if(purchaseEntity.getMerchantDeliveryOptions().ordinal() == DeliveryOptions.HOME.ordinal() || purchaseEntity.getMerchantDeliveryOptions().ordinal() == DeliveryOptions.BOTH.ordinal()){
+			HomeDeliveryOptionsEntity homeDeliveryOptionsEntity =	merchantDAO.geHomeDeliveryOptionsEntity(purchaseEntity.getMerchantEntity());
+			homeDeliveryOptionsEntity.setMerchantEntity(null);
+			purchaseJson.setHomeDeliveryOptions(homeDeliveryOptionsEntity);
+		}
+		if(purchaseEntity.getCalculatedAmounts() != null){
+			CalculatedAmounts calculatedAmounts = serviceUtil.fromJson(purchaseEntity.getCalculatedAmounts(), CalculatedAmounts.class);
+			purchaseJson.setCalculatedAmounts(calculatedAmounts);
+		}
+		
+		UserJson userJson = new UserJson(userEntity);
+		purchaseJson.setUsers(userJson);
+		MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
+		purchaseJson.setMerchants(merchantJson);
+		return purchaseJson;
 	}
 	
 	
@@ -630,18 +636,7 @@ public class PurchaseServices {
 			List<PurchaseJson> purchaseJsons = new ArrayList<PurchaseJson>();
 			luggagesListJson.setPurchaseJsons(purchaseJsons);
 			for (PurchaseEntity purchaseEntity : purchaseList) {
-				PurchaseJson purchaseJson = new PurchaseJson(purchaseEntity);
-				if(purchaseEntity.getOrderStatus().toString().equals(OrderStatus.READY_TO_COLLECT.toString())){
-					CounterDetailsEntity counterDetailsEntity = deliveryDAO.geCounterDetailsEntity(purchaseEntity.getPurchaseId());
-					if(counterDetailsEntity != null){
-						CounterDetailsJson counterDetailsJson = new CounterDetailsJson(counterDetailsEntity);
-						purchaseJson.setCounterDetails(counterDetailsJson);
-					}
-				}
-				UserJson userJson = new UserJson(userEntity);
-				purchaseJson.setUsers(userJson);
-				MerchantJson merchantJson = new MerchantJson(purchaseEntity.getMerchantEntity());
-				purchaseJson.setMerchants(merchantJson);
+				PurchaseJson purchaseJson = getPurchaseJson(purchaseEntity, userEntity);
 				purchaseJsons.add(purchaseJson);
 			}
 			String responseJson = serviceUtil.toJson(luggagesListJson);

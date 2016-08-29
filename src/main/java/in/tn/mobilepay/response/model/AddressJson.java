@@ -10,11 +10,11 @@ public class AddressJson {
     private String name;
     private String addressUUID;
     private String mobile;
-    private String street;
+   // private String street;
     private String address;
-    private String area;
-    private String city;
-    private long postalCode;
+  //  private String area;
+  //  private String city;
+  //  private long postalCode;
     private long lastModifiedTime;
     
     public AddressJson(){
@@ -37,11 +37,11 @@ public class AddressJson {
     	this.name = addressEntity.getName();
     	this.addressUUID = addressEntity.getAddressUUID();
     	this.mobile = addressEntity.getMobileNumber();
-    	this.street = " ";
+    	//this.street = " ";
     	this.address = addressEntity.getAddress();
-    	this.area = " ";
-    	this.city = " ";
-    	this.postalCode = 0;
+    	//this.area = " ";
+    	//this.city = " ";
+    	//this.postalCode = 0;
     	this.lastModifiedTime = addressEntity.getLastModifiedTime();
     }
 
@@ -69,39 +69,7 @@ public class AddressJson {
         this.address = address;
     }
 
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public long getPostalCode() {
-        return postalCode;
-    }
-
-    public void setPostalCode(long postalCode) {
-        this.postalCode = postalCode;
-    }
-
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getArea() {
-        return area;
-    }
-
-    public void setArea(String area) {
-        this.area = area;
-    }
-
+   
     public long getLastModifiedTime() {
         return lastModifiedTime;
     }
@@ -118,14 +86,11 @@ public class AddressJson {
         this.addressUUID = addressUUID;
     }
 
-    @Override
-    public String toString() {
-        return "AddressJson{" +
-                "name='" + name + '\'' +
-                ", mobile='" + mobile + '\'' +
-                ", address='" + address + '\'' +
-                ", city='" + city + '\'' +
-                ", postalCode=" + postalCode +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "AddressJson [name=" + name + ", addressUUID=" + addressUUID + ", mobile=" + mobile + ", address="
+				+ address + ", lastModifiedTime=" + lastModifiedTime + "]";
+	}
+
+    
 }

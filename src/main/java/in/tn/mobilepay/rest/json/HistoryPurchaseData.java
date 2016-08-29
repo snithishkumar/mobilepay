@@ -14,7 +14,7 @@ public class HistoryPurchaseData extends CommonPurchaseData{
 	private double totalAmount;
 	private AddressJson deliveryAddress;
 	private DiscardJson discardDetails;
-	private CalculatedAmounts amountDetails;
+	private CalculatedAmounts calculatedAmounts;
 	
 	public HistoryPurchaseData(PurchaseEntity purchaseEntity){
 		super(purchaseEntity);
@@ -55,19 +55,22 @@ public class HistoryPurchaseData extends CommonPurchaseData{
 	public void setDiscardDetails(DiscardJson discardDetails) {
 		this.discardDetails = discardDetails;
 	}
-	public CalculatedAmounts getAmountDetails() {
-		return amountDetails;
+
+	public CalculatedAmounts getCalculatedAmounts() {
+		return calculatedAmounts;
 	}
-	public void setAmountDetails(CalculatedAmounts amountDetails) {
-		this.amountDetails = amountDetails;
+
+	public void setCalculatedAmounts(CalculatedAmounts calculatedAmounts) {
+		this.calculatedAmounts = calculatedAmounts;
 	}
 
 	@Override
 	public String toString() {
 		return "HistoryPurchaseData [purchaseItem=" + purchaseItem + ", userDeliveryOptions=" + userDeliveryOptions
 				+ ", totalAmount=" + totalAmount + ", deliveryAddress=" + deliveryAddress + ", discardDetails="
-				+ discardDetails + ", amountDetails=" + amountDetails + "]";
+				+ discardDetails + ", calculatedAmounts=" + calculatedAmounts + "]";
 	}
+	
 	
 	
 

@@ -10,7 +10,7 @@ public class PaiedPurchaseDetails extends CommonPurchaseData{
 	private List<PurchaseItem> purchaseItem;
 	private double totalAmount;
 	private AddressJson deliveryAddress;
-	private CalculatedAmounts amountDetails;
+	private CalculatedAmounts calculatedAmounts;
 	private DeliveryOptions userDeliveryOptions;
 	
 	public PaiedPurchaseDetails(PurchaseEntity purchaseEntity){
@@ -37,16 +37,28 @@ public class PaiedPurchaseDetails extends CommonPurchaseData{
 	public void setDeliveryAddress(AddressJson deliveryAddress) {
 		this.deliveryAddress = deliveryAddress;
 	}
-	public CalculatedAmounts getAmountDetails() {
-		return amountDetails;
+
+	public CalculatedAmounts getCalculatedAmounts() {
+		return calculatedAmounts;
 	}
-	public void setAmountDetails(CalculatedAmounts amountDetails) {
-		this.amountDetails = amountDetails;
+
+	public void setCalculatedAmounts(CalculatedAmounts calculatedAmounts) {
+		this.calculatedAmounts = calculatedAmounts;
 	}
+
+	public DeliveryOptions getUserDeliveryOptions() {
+		return userDeliveryOptions;
+	}
+
+	public void setUserDeliveryOptions(DeliveryOptions userDeliveryOptions) {
+		this.userDeliveryOptions = userDeliveryOptions;
+	}
+
 	@Override
 	public String toString() {
 		return "PaiedPurchaseDetails [purchaseItem=" + purchaseItem + ", totalAmount=" + totalAmount
-				+ ", addressDetails=" + deliveryAddress + ", amountDetails=" + amountDetails + "]";
+				+ ", deliveryAddress=" + deliveryAddress + ", calculatedAmounts=" + calculatedAmounts
+				+ ", userDeliveryOptions=" + userDeliveryOptions + "]";
 	}
 	
 	

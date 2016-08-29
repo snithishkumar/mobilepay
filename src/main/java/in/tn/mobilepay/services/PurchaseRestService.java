@@ -403,7 +403,7 @@ public class PurchaseRestService {
 		
 		// Get Amount Json
 		CalculatedAmounts amountDetails = getCalculatedAmounts(purchaseEntity);
-		historyPurchaseData.setAmountDetails(amountDetails);
+		historyPurchaseData.setCalculatedAmounts(amountDetails);
 		
 		// Get Purchase Item
 		String purchaseData = purchaseEntity.getPurchaseData();
@@ -622,7 +622,7 @@ public class PurchaseRestService {
 	 * @param purchaseDetails
 	 */
 	private void getCalculatedAmounts(PurchaseEntity purchaseEntity,PaiedPurchaseDetails purchaseDetails){
-		purchaseDetails.setAmountDetails(getCalculatedAmounts(purchaseEntity));
+		purchaseDetails.setCalculatedAmounts(getCalculatedAmounts(purchaseEntity));
 	}
 	
 	
@@ -679,12 +679,23 @@ public class PurchaseRestService {
 	 * @return
 	 */
 	private PurchaseDetails getPurchaseData(PurchaseEntity purchaseEntity) {
-		PurchaseDetails purchaseDetails = new PurchaseDetails(purchaseEntity,serviceUtil);
+		
+		PurchaseDetails purchaseDetails = new PurchaseDetails(purchaseEntity);
+		
+		// Get Purchase Item
+		String purchaseData = purchaseEntity.getPurchaseData();
+		Type listType = new TypeToken<ArrayList<PurchaseItem>>() {
+		}.getType();
+		
+		List<PurchaseItem> purchaseItems  = serviceUtil.fromJson(purchaseData,listType);
+		purchaseDetails.setPurchaseItem(purchaseItems);
 		
 		getDiscardDetails(purchaseEntity, purchaseDetails);
 		
 		getDeliveryDetails(purchaseEntity, purchaseDetails);
-
+		
+		CalculatedAmounts calculatedAmounts = getCalculatedAmounts(purchaseEntity);
+		purchaseDetails.setCalculatedAmounts(calculatedAmounts);
 		
 		return purchaseDetails;
 	}
@@ -699,7 +710,7 @@ public class PurchaseRestService {
 			}
 			PurchaseDetails purchaseDetails = getPurchaseData(purchaseEntity);
 
-			String amountDetailsJson = purchaseEntity.getCalculatedAmounts();
+			String amountDetailsJson = purchaseEntity.getAmountDetails();
 			AmountDetails amountDetails = serviceUtil.fromJson(amountDetailsJson, AmountDetails.class);
 			purchaseDetails.setAmountDetails(amountDetails);
 
@@ -716,10 +727,13 @@ public class PurchaseRestService {
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ResponseEntity<String> updateOrderStatus(Principal principal, String orderStatusJson) {
 		try {
-			OrderStatusUpdateList orderStatusUpdateList = serviceUtil.fromJson(orderStatusJson,
-					OrderStatusUpdateList.class);
+			
+			Type listType = new TypeToken<ArrayList<OrderStatusUpdate>>() {
+			}.getType();
+			
+			List<OrderStatusUpdate> orderStatusUpdates = serviceUtil.fromJson(orderStatusJson,
+					listType);
 			MerchantEntity merchantEntity = serviceUtil.getMerchantEntity(principal);
-			List<OrderStatusUpdate> orderStatusUpdates = orderStatusUpdateList.getOrderStatusUpdates();
 			JsonArray results = new JsonArray();
 			for (OrderStatusUpdate orderStatusUpdate : orderStatusUpdates) {
 				JsonObject result = updateOrderStatus(orderStatusUpdate, merchantEntity);
