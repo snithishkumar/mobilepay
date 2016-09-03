@@ -34,6 +34,7 @@ public class PurchaseItem {
 
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+		
 	}
 
 	public double getUnitPrice() {
@@ -59,14 +60,20 @@ public class PurchaseItem {
 	public void setRating(float rating) {
 		this.rating = rating;
 	}
+	
+	private void calcAmount(){
+		if(quantity < 1){
+			this.quantity = 1;
+		}
+		this.amount = quantity * unitPrice;
+	}
 
 	public boolean validateData()throws ValidationException{
+		calcAmount();
 	  if(name == null || name.trim().isEmpty()){
 		   throw new ValidationException(400, "Product Name is not found.");
 	  }
-	  if(quantity < 0){
-		  throw new ValidationException(400, "Invalid quantity.");
-	  }
+	 
 	  if(unitPrice < 0){
 		  throw new ValidationException(400, "Invalid amount.");
 	  }

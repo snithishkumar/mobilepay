@@ -99,7 +99,7 @@ public class MerchantPurchaseData {
 		  if(billNumber == null || billNumber.trim().isEmpty()){
 			  throw new ValidationException(400, "BillNumber is not found.");
 		  }
-		  if(purchaseDate < 0){
+		  if(purchaseDate < 1){
 			  throw new ValidationException(400, "Purchase Date is not found.");
 		  }
 		  if(amountDetails == null){
