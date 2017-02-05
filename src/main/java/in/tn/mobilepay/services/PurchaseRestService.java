@@ -97,9 +97,12 @@ public class PurchaseRestService {
 			
 			List<MerchantPurchaseData> purchaseDatas = gson.fromJson(requestData, listType);
 			JsonArray responseData = new JsonArray();
+			boolean flag = false;
 			// Process each data
 			for (MerchantPurchaseData merchantPurchaseData : purchaseDatas) {
 				try {
+					
+					flag = true;
 					//Validate Merchant Input
 					merchantPurchaseData.validateData();
 					
@@ -144,8 +147,24 @@ public class PurchaseRestService {
 				}
 
 			}
-			return serviceUtil.getRestResponse(true, responseData, 200);
+			if(flag){
+				return serviceUtil.getRestResponse(true, responseData, 200);
+			}else{
+				return serviceUtil.getRestResponse(false, "OOPS.No data found", 400);
+			}
+			
 		}catch(JsonSyntaxException e){
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("Error in Json, Request Data[");
+			stringBuilder.append(requestData);
+			stringBuilder.append("]");
+			if(merchantEntity != null){
+				stringBuilder.append("],Merchant Name:");
+				stringBuilder.append(merchantEntity.getMerchantName());
+			}
+			logger.error(stringBuilder.toString(), e);
+			return serviceUtil.getRestResponse(false, "OOPS.Invalid Json", 400);
+		}catch(NumberFormatException e){
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.append("Error in Json, Request Data[");
 			stringBuilder.append(requestData);

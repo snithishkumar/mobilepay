@@ -3,7 +3,8 @@ package in.tn.mobilepay.request.model;
 public class PurchaseDetailsJson {
 
 	private int itemNo;
-	private String description;
+
+	private String name;
 	private int quantity;
 	private String amount;
 	private String unitPrice;
@@ -17,12 +18,14 @@ public class PurchaseDetailsJson {
 		this.itemNo = itemNo;
 	}
 
-	public String getDescription() {
-		return description;
+	
+
+	public String getName() {
+		return name;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public int getQuantity() {
@@ -59,8 +62,9 @@ public class PurchaseDetailsJson {
 
 	@Override
 	public String toString() {
-		return "PurchaseDetailsJson [itemNo=" + itemNo + ", description=" + description + ", quantity=" + quantity
-				+ ", amount=" + amount + ", unitPrice=" + unitPrice + ", rating=" + rating + "]";
+		return "PurchaseDetailsJson [itemNo=" + itemNo + ", name=" + name + ", quantity=" + quantity + ", amount="
+				+ amount + ", unitPrice=" + unitPrice + ", rating=" + rating + "]";
 	}
+
 
 }

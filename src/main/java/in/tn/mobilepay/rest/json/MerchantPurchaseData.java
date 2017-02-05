@@ -93,9 +93,7 @@ public class MerchantPurchaseData {
 	
 	
 	public  boolean validateData()throws ValidationException{
-		  if(deliveryOptions == null){
-			   throw new ValidationException(400, "Delivery Options is not found.");
-		  }
+		 
 		  if(billNumber == null || billNumber.trim().isEmpty()){
 			  throw new ValidationException(400, "BillNumber is not found.");
 		  }
@@ -107,6 +105,9 @@ public class MerchantPurchaseData {
 		  }
 		  if(purchaseItems == null || purchaseItems.size() == 0){
 			  throw new ValidationException(400, "Purchase Details is not found.");
+		  }
+		  if(deliveryOptions == null){
+			   throw new ValidationException(400, "Delivery Options is not found.");
 		  }
 		  for(PurchaseItem purchaseItem : purchaseItems){
 			  purchaseItem.validateData();
